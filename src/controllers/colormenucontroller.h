@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QColor>
-#include "menuviewmodel.h"
+#include "models/menuviewmodel.h"
 
 enum class ColorStyle {
     Green = 0,

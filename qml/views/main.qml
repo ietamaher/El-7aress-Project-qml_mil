@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import "qrc:/qml/components"
 import "qrc:/qml/views"
+import "../components"
 
 ApplicationWindow {
     id: appWindow

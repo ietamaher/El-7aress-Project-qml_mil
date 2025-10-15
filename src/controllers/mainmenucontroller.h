@@ -2,7 +2,7 @@
 #define MAINMENUCONTROLLER_H
 
 #include <QObject>
-#include "menuviewmodel.h"
+#include "models/menuviewmodel.h"
 
 class MainMenuController : public QObject
 {

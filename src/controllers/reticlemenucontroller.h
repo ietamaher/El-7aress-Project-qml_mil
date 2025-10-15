@@ -2,7 +2,7 @@
 #define RETICLEMENUCONTROLLER_H
 
 #include <QObject>
-#include "menuviewmodel.h"
+#include "models/menuviewmodel.h"
 
 // Forward declaration - adjust to match your actual enum location
 enum class ReticleType {
