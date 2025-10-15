@@ -1,16 +1,16 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "videoimageprovider.h"
-#include "gstvideosource.h"
-#include "osdviewmodel.h"
+#include "video/videoimageprovider.h"
+#include "video/gstvideosource.h"
+#include "models/osdviewmodel.h"
 #include <QTimer>
-#include "applicationcontroller.h"
-#include "menuviewmodel.h"
-#include "mainmenucontroller.h"
-#include "reticlemenucontroller.h"
-#include "colormenucontroller.h"
-#include "servicemanager.h"
+#include "controllers/applicationcontroller.h"
+#include "models/menuviewmodel.h"
+#include "controllers/mainmenucontroller.h"
+#include "controllers/reticlemenucontroller.h"
+#include "controllers/colormenucontroller.h"
+#include "services/servicemanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     engine.addImageProvider("video", &videoProvider);
 
     // --- Load QML UI ---
-    engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/qml/views/main.qml")));
     videoSource.startPipeline();
 
     // --- Test button simulation (optional) ---

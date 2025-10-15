@@ -1,6 +1,6 @@
-#include "reticlemenucontroller.h"
-#include "servicemanager.h"
-#include "osdviewmodel.h"
+#include "controllers/reticlemenucontroller.h"
+#include "services/servicemanager.h"
+#include "models/osdviewmodel.h"
 #include <QDebug>
 
 ReticleMenuController::ReticleMenuController(QObject *parent)

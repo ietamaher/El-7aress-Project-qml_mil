@@ -1,8 +1,8 @@
-#include "applicationcontroller.h"
-#include "mainmenucontroller.h"
-#include "reticlemenucontroller.h"
-#include "colormenucontroller.h"
-#include "servicemanager.h"
+#include "controllers/applicationcontroller.h"
+#include "controllers/mainmenucontroller.h"
+#include "controllers/reticlemenucontroller.h"
+#include "controllers/colormenucontroller.h"
+#include "services/servicemanager.h"
 #include <QDebug>
 
 ApplicationController::ApplicationController(QObject *parent)

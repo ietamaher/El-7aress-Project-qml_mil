@@ -1,6 +1,6 @@
-#include "mainmenucontroller.h"
-#include "servicemanager.h"
-#include "menuviewmodel.h"
+#include "controllers/mainmenucontroller.h"
+#include "services/servicemanager.h"
+#include "models/menuviewmodel.h"
 #include <QDebug>
 
 MainMenuController::MainMenuController(QObject *parent)
