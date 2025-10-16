@@ -79,6 +79,15 @@ ApplicationWindow {
         z: 100
     }
 
+    ZoneDefinitionOverlay {
+        id: zoneDefinitionOverlay
+        anchors.fill: parent
+        z: 100  // Ensure it's on top of other overlays
+
+        // ViewModels are accessible via context properties
+        // Already bound in ZoneDefinitionOverlay.qml
+    }
+
     // Physical Button Handlers - ONLY 3 BUTTONS
     Row {
         anchors.bottom: parent.bottom

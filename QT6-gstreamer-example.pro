@@ -86,13 +86,6 @@ HEADERS += \
     src/utils/reticleaimpointcalculator.h \
     src/utils/colorutils.h
 
-DISTFILES += \
-    qml/common/NavigableList.qml \
-    qml/common/ParameterField.qml \
-    qml/components/AreaZoneParameterPanel.qml \
-    qml/components/SectorScanParameterPanel.qml \
-    qml/components/TRPParameterPanel.qml \
-    qml/components/ZoneDefinitionOverlay.qml \
-    qml/components/ZoneMapCanvas.qml
+
 
 

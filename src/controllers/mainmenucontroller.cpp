@@ -79,44 +79,53 @@ void MainMenuController::handleMenuOptionSelected(const QString& option)
     // Route to appropriate handler based on selection
     if (option == "Personalize Reticle") {
         emit personalizeReticleRequested();
+        emit menuFinished(); // ✅ Emit after each action
     }
     else if (option == "Personalize Colors") {
         emit personalizeColorsRequested();
+        emit menuFinished();
     }
     else if (option == "Adjust Brightness") {
         emit adjustBrightnessRequested();
+        emit menuFinished();
     }
     else if (option == "Zeroing") {
         emit zeroingRequested();
+        // ❌ DON'T emit menuFinished() - zeroing is a procedure
     }
     else if (option == "Clear Active Zero") {
         emit clearZeroRequested();
+        emit menuFinished();
     }
     else if (option == "Windage") {
         emit windageRequested();
+        // ❌ DON'T emit menuFinished() - windage is a procedure
     }
     else if (option == "Clear Active Windage") {
         emit clearWindageRequested();
+        emit menuFinished();
     }
     else if (option == "Zone Definitions") {
         emit zoneDefinitionsRequested();
+        // ❌ DON'T emit menuFinished() - zone definition is a procedure
     }
     else if (option == "System Status") {
         emit systemStatusRequested();
+        emit menuFinished();
     }
     else if (option == "Radar Target List") {
         emit radarTargetListRequested();
+        emit menuFinished();
     }
     else if (option == "Help/About") {
         emit helpAboutRequested();
+        emit menuFinished();
     }
     else if (option == "Return ...") {
         qDebug() << "MainMenuController: Return option selected - closing menu";
-        // Just hide and emit finished - ApplicationController handles the rest
+        emit menuFinished();
     }
     else {
         qWarning() << "MainMenuController: Unknown option:" << option;
     }
-
-    emit menuFinished();
 }

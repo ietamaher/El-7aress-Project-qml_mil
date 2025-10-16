@@ -16,6 +16,12 @@
 #include "models/windageviewmodel.h"
 #include "models/domain/systemstatemodel.h"
 #include "services/servicemanager.h"
+#include "controllers/zonedefinitioncontroller.h"
+#include "models/zonedefinitionviewmodel.h"
+#include "models/zonemapviewmodel.h"
+#include "models/areazoneparameterviewmodel.h"
+#include "models/sectorscanparameterviewmodel.h"
+#include "models/trpparameterviewmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -38,12 +44,21 @@ int main(int argc, char *argv[])
     ZeroingViewModel* zeroingViewModel = new ZeroingViewModel();
     WindageViewModel* windageViewModel = new WindageViewModel();
 
+    // Create Zone Definition ViewModels ***
+    ZoneDefinitionViewModel* zoneDefinitionViewModel = new ZoneDefinitionViewModel();
+    ZoneMapViewModel* zoneMapViewModel = new ZoneMapViewModel();
+    AreaZoneParameterViewModel* areaZoneParameterViewModel = new AreaZoneParameterViewModel();
+    SectorScanParameterViewModel* sectorScanParameterViewModel = new SectorScanParameterViewModel();
+    TRPParameterViewModel* trpParameterViewModel = new TRPParameterViewModel();
+
     // Create controllers
     MainMenuController* mainMenuController = new MainMenuController();
     ReticleMenuController* reticleMenuController = new ReticleMenuController();
     ColorMenuController* colorMenuController = new ColorMenuController();
     ZeroingController* zeroingController = new ZeroingController();
     WindageController* windageController = new WindageController();
+    ZoneDefinitionController* zoneDefinitionController = new ZoneDefinitionController();
+
     ApplicationController* appController = new ApplicationController();
 
     // === PHASE 2: REGISTER SERVICES ===
@@ -57,11 +72,20 @@ int main(int argc, char *argv[])
     services->registerService("ZeroingViewModel", zeroingViewModel);
     services->registerService("WindageViewModel", windageViewModel);
 
+    // Register Zone Definition ViewModels ***
+    services->registerService("ZoneDefinitionViewModel", zoneDefinitionViewModel);
+    services->registerService("ZoneMapViewModel", zoneMapViewModel);
+    services->registerService("AreaZoneParameterViewModel", areaZoneParameterViewModel);
+    services->registerService("SectorScanParameterViewModel", sectorScanParameterViewModel);
+    services->registerService("TRPParameterViewModel", trpParameterViewModel);
+
     services->registerService(MainMenuController::staticMetaObject.className(), mainMenuController);
     services->registerService(ReticleMenuController::staticMetaObject.className(), reticleMenuController);
     services->registerService(ColorMenuController::staticMetaObject.className(), colorMenuController);
     services->registerService(ZeroingController::staticMetaObject.className(), zeroingController);
     services->registerService(WindageController::staticMetaObject.className(), windageController);
+    services->registerService(ZoneDefinitionController::staticMetaObject.className(), zoneDefinitionController);
+
     services->registerService(ApplicationController::staticMetaObject.className(), appController);
 
     // === PHASE 3: INITIALIZE SERVICES ===
@@ -70,6 +94,7 @@ int main(int argc, char *argv[])
     colorMenuController->initialize();
     zeroingController->initialize();
     windageController->initialize();
+    zoneDefinitionController->initialize();
     appController->initialize();
 
     // === PHASE 4: EXPOSE VIEWMODELS TO QML ===
@@ -79,6 +104,15 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("colorMenuViewModel", colorMenuViewModel);
     engine.rootContext()->setContextProperty("zeroingViewModel", zeroingViewModel);
     engine.rootContext()->setContextProperty("windageViewModel", windageViewModel);
+
+    // Expose Zone Definition ViewModels ***
+    engine.rootContext()->setContextProperty("zoneDefinitionViewModel", zoneDefinitionViewModel);
+    engine.rootContext()->setContextProperty("zoneMapViewModel", zoneMapViewModel);
+    engine.rootContext()->setContextProperty("areaZoneParameterViewModel", areaZoneParameterViewModel);
+    engine.rootContext()->setContextProperty("sectorScanParameterViewModel", sectorScanParameterViewModel);
+    engine.rootContext()->setContextProperty("trpParameterViewModel", trpParameterViewModel);
+
+
     engine.rootContext()->setContextProperty("appController", appController);
 
     // --- Video Feed Backend ---

@@ -4,6 +4,11 @@
         <file>../qml/views/MainMenu.qml</file>                
         <file>../qml/components/OsdOverlay.qml</file>
         <file>../qml/components/WindageOverlay.qml</file>
-        <file>../qml/components/ZeroingOverlay.qml</file>
+        <file>../qml/components/ZeroingOverlay.qml</file>        
+	<file>../qml/components/AreaZoneParameterPanel.qml</file>
+	<file>../qml/components/SectorScanParameterPanel.qml</file>
+	<file>../qml/components/TRPParameterPanel.qml</file>
+	<file>../qml/components/ZoneDefinitionOverlay.qml</file>
+	<file>../qml/components/ZoneMapCanvas.qml</file>
     </qresource>
 </RCC>

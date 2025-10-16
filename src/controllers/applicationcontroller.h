@@ -8,6 +8,7 @@ class ReticleMenuController;
 class ColorMenuController;
 class ZeroingController;
 class WindageController;
+class ZoneDefinitionController;
 
 class ApplicationController : public QObject
 {
@@ -44,6 +45,7 @@ private slots:
     void handleWindageFinished();
     void handleReturnToMainMenu();
     void handleMainMenuFinished();
+    void handleZoneDefinitionFinished();
 
 private:
     enum class MenuState {
@@ -78,6 +80,7 @@ private:
     ColorMenuController* m_colorMenuController;
     ZeroingController* m_zeroingController;
     WindageController* m_windageController;
+    ZoneDefinitionController* m_zoneDefinitionController;
 };
 
 #endif // APPLICATIONCONTROLLER_H
