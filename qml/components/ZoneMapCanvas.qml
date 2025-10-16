@@ -1,6 +1,4 @@
-// ZoneMapCanvas.qml
 import QtQuick
-import QtQuick.Shapes
 
 Canvas {
     id: canvas
@@ -18,6 +16,8 @@ Canvas {
         function onSectorScansChanged() { canvas.requestPaint() }
         function onTrpsChanged() { canvas.requestPaint() }
         function onWipZoneChanged() { canvas.requestPaint() }
+        function onHasWipZoneChanged() { canvas.requestPaint() }
+        function onHighlightedZoneIdChanged() { canvas.requestPaint() }
     }
 
     onPaint: {
@@ -62,9 +62,11 @@ Canvas {
         }
 
         // Elevation grid lines (every 10°)
-        var elRange = 90 - (-20)  // EL_MAX - EL_MIN
-        for (var el = -20; el <= 90; el += 10) {
-            var y = height - ((el - (-20)) / elRange * height)
+        var elMin = -20
+        var elMax = 90
+        var elRange = elMax - elMin
+        for (var el = elMin; el <= elMax; el += 10) {
+            var y = height - ((el - elMin) / elRange * height)
             ctx.beginPath()
             ctx.moveTo(0, y)
             ctx.lineTo(width, y)
@@ -83,9 +85,11 @@ Canvas {
         }
 
         // Elevation labels
-        var elRange = 90 - (-20)
-        for (var el = -20; el <= 90; el += 20) {
-            var y = height - ((el - (-20)) / elRange * height)
+        var elMin = -20
+        var elMax = 90
+        var elRange = elMax - elMin
+        for (var el = elMin; el <= elMax; el += 20) {
+            var y = height - ((el - elMin) / elRange * height)
             ctx.fillText(el + "°", 5, y + 5)
         }
 
@@ -134,13 +138,30 @@ Canvas {
             var color = getZoneColor(zone.type)
             var isHighlighted = (zone.id === viewModel.highlightedZoneId)
 
-            drawZoneRect(ctx, zone, color, isHighlighted)
+            drawZoneRect(ctx, zone, color, isHighlighted, false)
         }
     }
 
-    function drawZoneRect(ctx, zone, color, isHighlighted) {
-        var topLeft = viewModel.azElToPixel(zone.startAzimuth, zone.maxElevation, width, height)
-        var bottomRight = viewModel.azElToPixel(zone.endAzimuth, zone.minElevation, width, height)
+    function drawZoneRect(ctx, zone, color, isHighlighted, isWip) {
+        var startAz = viewModel.normalizeAzimuth(zone.startAzimuth)
+        var endAz = viewModel.normalizeAzimuth(zone.endAzimuth)
+        var wrapsAround = (startAz > endAz)
+
+        if (!wrapsAround) {
+            drawSingleZoneRect(ctx, startAz, endAz, zone.minElevation, zone.maxElevation,
+                             color, isHighlighted, isWip, zone.isOverridable, zone.id)
+        } else {
+            // Draw two parts for wrap-around
+            drawSingleZoneRect(ctx, startAz, 360, zone.minElevation, zone.maxElevation,
+                             color, isHighlighted, isWip, zone.isOverridable, zone.id)
+            drawSingleZoneRect(ctx, 0, endAz, zone.minElevation, zone.maxElevation,
+                             color, isHighlighted, isWip, zone.isOverridable, zone.id)
+        }
+    }
+
+    function drawSingleZoneRect(ctx, startAz, endAz, minEl, maxEl, color, isHighlighted, isWip, isOverridable, zoneId) {
+        var topLeft = viewModel.azElToPixel(startAz, maxEl, width, height)
+        var bottomRight = viewModel.azElToPixel(endAz, minEl, width, height)
 
         var rectWidth = bottomRight.x - topLeft.x
         var rectHeight = bottomRight.y - topLeft.y
@@ -150,16 +171,18 @@ Canvas {
         ctx.fillRect(topLeft.x, topLeft.y, rectWidth, rectHeight)
 
         // Border
-        ctx.strokeStyle = color
+        ctx.strokeStyle = isHighlighted ? Qt.lighter(color, 1.5) : color
         ctx.lineWidth = isHighlighted ? 3 : 2
-        ctx.setLineDash(zone.isOverridable ? [5, 5] : [])
+        ctx.setLineDash(isWip ? [5, 5] : (isOverridable ? [5, 3] : []))
         ctx.strokeRect(topLeft.x, topLeft.y, rectWidth, rectHeight)
         ctx.setLineDash([])
 
-        // ID label
-        ctx.fillStyle = "white"
-        ctx.font = "10px sans-serif"
-        ctx.fillText("ID:" + zone.id, topLeft.x + 5, topLeft.y + 15)
+        // ID label (only if not WIP and has space)
+        if (!isWip && rectWidth > 30 && rectHeight > 15) {
+            ctx.fillStyle = "white"
+            ctx.font = "10px sans-serif"
+            ctx.fillText("ID:" + zoneId, topLeft.x + 5, topLeft.y + 15)
+        }
     }
 
     function drawSectorScans(ctx, scans) {
@@ -170,19 +193,65 @@ Canvas {
             var p1 = viewModel.azElToPixel(scan.az1, scan.el1, width, height)
             var p2 = viewModel.azElToPixel(scan.az2, scan.el2, width, height)
 
+            // Check if line crosses 0/360° boundary
+            var az1 = viewModel.normalizeAzimuth(scan.az1)
+            var az2 = viewModel.normalizeAzimuth(scan.az2)
+            var crossesZero = (az1 > az2) && ((az1 - az2) > 180.0)
+
             ctx.strokeStyle = "#4A90E2"
             ctx.lineWidth = 2
-            ctx.beginPath()
-            ctx.moveTo(p1.x, p1.y)
-            ctx.lineTo(p2.x, p2.y)
-            ctx.stroke()
 
-            // Endpoints
-            ctx.fillStyle = "#4A90E2"
-            ctx.beginPath()
-            ctx.arc(p1.x, p1.y, 3, 0, 2 * Math.PI)
-            ctx.arc(p2.x, p2.y, 3, 0, 2 * Math.PI)
-            ctx.fill()
+            if (crossesZero) {
+                // Calculate interpolated elevation at 0° and 360°
+                var totalAzSpan = (360.0 - az1) + az2
+                var elAtZero = scan.el1 + (scan.el2 - scan.el1) * (360.0 - az1) / totalAzSpan
+
+                var pZero = viewModel.azElToPixel(0.0, elAtZero, width, height)
+                var p360 = viewModel.azElToPixel(359.9, elAtZero, width, height)
+
+                // Draw two segments
+                ctx.beginPath()
+                ctx.moveTo(p1.x, p1.y)
+                ctx.lineTo(p360.x, p360.y)
+                ctx.stroke()
+
+                ctx.beginPath()
+                ctx.moveTo(pZero.x, pZero.y)
+                ctx.lineTo(p2.x, p2.y)
+                ctx.stroke()
+
+                // Markers at main endpoints
+                ctx.fillStyle = "#4A90E2"
+                ctx.beginPath()
+                ctx.arc(p1.x, p1.y, 3, 0, 2 * Math.PI)
+                ctx.arc(p2.x, p2.y, 3, 0, 2 * Math.PI)
+                ctx.fill()
+
+                // ID label
+                var midPoint = {x: (p1.x + p360.x) / 2, y: (p1.y + p360.y) / 2}
+                ctx.fillStyle = "white"
+                ctx.font = "10px sans-serif"
+                ctx.fillText("ID:" + scan.id, midPoint.x + 5, midPoint.y - 5)
+            } else {
+                // Normal case: single line
+                ctx.beginPath()
+                ctx.moveTo(p1.x, p1.y)
+                ctx.lineTo(p2.x, p2.y)
+                ctx.stroke()
+
+                // Endpoints
+                ctx.fillStyle = "#4A90E2"
+                ctx.beginPath()
+                ctx.arc(p1.x, p1.y, 3, 0, 2 * Math.PI)
+                ctx.arc(p2.x, p2.y, 3, 0, 2 * Math.PI)
+                ctx.fill()
+
+                // ID label
+                var midPoint = {x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2}
+                ctx.fillStyle = "white"
+                ctx.font = "10px sans-serif"
+                ctx.fillText("ID:" + scan.id, midPoint.x + 5, midPoint.y - 5)
+            }
         }
     }
 
@@ -218,16 +287,7 @@ Canvas {
         ctx.setLineDash([5, 5])
 
         if (type === 1) {  // AreaZone
-            var topLeft = viewModel.azElToPixel(wip.startAzimuth, wip.maxElevation, width, height)
-            var bottomRight = viewModel.azElToPixel(wip.endAzimuth, wip.minElevation, width, height)
-
-            var rectWidth = bottomRight.x - topLeft.x
-            var rectHeight = bottomRight.y - topLeft.y
-
-            ctx.fillStyle = "#00FF9933"
-            ctx.fillRect(topLeft.x, topLeft.y, rectWidth, rectHeight)
-            ctx.strokeRect(topLeft.x, topLeft.y, rectWidth, rectHeight)
-
+            drawZoneRect(ctx, wip, "#00FF99", false, true)
         } else if (type === 2) {  // SectorScan
             var p1 = viewModel.azElToPixel(wip.az1, wip.el1, width, height)
             var p2 = viewModel.azElToPixel(wip.az2, wip.el2, width, height)
@@ -242,7 +302,6 @@ Canvas {
             ctx.arc(p1.x, p1.y, 4, 0, 2 * Math.PI)
             ctx.arc(p2.x, p2.y, 4, 0, 2 * Math.PI)
             ctx.fill()
-
         } else if (type === 3) {  // TRP
             var pos = viewModel.azElToPixel(wip.azimuth, wip.elevation, width, height)
 

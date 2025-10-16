@@ -1,101 +1,152 @@
-#ifndef ZONEMAPVIEWMODEL_H
-#define ZONEMAPVIEWMODEL_H
+#include "zonemapviewmodel.h"
+#include "models/domain/systemstatemodel.h"
+#include <QtMath>
 
-#include <QObject>
-#include <QVariantList>
-#include <QVariantMap>
-#include <QPointF>
-
-class SystemStateModel;
-
-/**
- * @brief ViewModel for ZoneMapCanvas - provides zone data for rendering
- */
-class ZoneMapViewModel : public QObject
+ZoneMapViewModel::ZoneMapViewModel(QObject *parent)
+    : QObject(parent)
 {
-    Q_OBJECT
+}
 
-    // Gimbal position
-    Q_PROPERTY(float gimbalAz READ gimbalAz NOTIFY gimbalAzChanged)
-    Q_PROPERTY(float gimbalEl READ gimbalEl NOTIFY gimbalElChanged)
+void ZoneMapViewModel::setGimbalPosition(float az, float el) {
+    bool changed = false;
+    float normalizedAz = normalizeAzimuth(az);
 
-    // Zone data for rendering (as QVariantList for QML)
-    Q_PROPERTY(QVariantList areaZones READ areaZones NOTIFY areaZonesChanged)
-    Q_PROPERTY(QVariantList sectorScans READ sectorScans NOTIFY sectorScansChanged)
-    Q_PROPERTY(QVariantList trps READ trps NOTIFY trpsChanged)
+    if (!qFuzzyCompare(m_gimbalAz, normalizedAz)) {
+        m_gimbalAz = normalizedAz;
+        changed = true;
+        emit gimbalAzChanged();
+    }
+    if (!qFuzzyCompare(m_gimbalEl, el)) {
+        m_gimbalEl = el;
+        changed = true;
+        emit gimbalElChanged();
+    }
+}
 
-    // WIP zone
-    Q_PROPERTY(bool hasWipZone READ hasWipZone NOTIFY hasWipZoneChanged)
-    Q_PROPERTY(QVariantMap wipZone READ wipZone NOTIFY wipZoneChanged)
-    Q_PROPERTY(int wipZoneType READ wipZoneType NOTIFY wipZoneTypeChanged)
-    Q_PROPERTY(bool isDefiningStart READ isDefiningStart NOTIFY isDefiningStartChanged)
-    Q_PROPERTY(bool isDefiningEnd READ isDefiningEnd NOTIFY isDefiningEndChanged)
+void ZoneMapViewModel::updateZones(SystemStateModel* model) {
+    if (!model) return;
 
-    // Highlighted zone
-    Q_PROPERTY(int highlightedZoneId READ highlightedZoneId NOTIFY highlightedZoneIdChanged)
+    QVariantList newAreaZones = convertAreaZonesToVariant(model);
+    QVariantList newSectorScans = convertSectorScansToVariant(model);
+    QVariantList newTRPs = convertTRPsToVariant(model);
 
-public:
-    explicit ZoneMapViewModel(QObject *parent = nullptr);
+    if (m_areaZones != newAreaZones) {
+        m_areaZones = newAreaZones;
+        emit areaZonesChanged();
+    }
+    if (m_sectorScans != newSectorScans) {
+        m_sectorScans = newSectorScans;
+        emit sectorScansChanged();
+    }
+    if (m_trps != newTRPs) {
+        m_trps = newTRPs;
+        emit trpsChanged();
+    }
+}
 
-    // Getters
-    float gimbalAz() const { return m_gimbalAz; }
-    float gimbalEl() const { return m_gimbalEl; }
-    QVariantList areaZones() const { return m_areaZones; }
-    QVariantList sectorScans() const { return m_sectorScans; }
-    QVariantList trps() const { return m_trps; }
-    bool hasWipZone() const { return m_hasWipZone; }
-    QVariantMap wipZone() const { return m_wipZone; }
-    int wipZoneType() const { return m_wipZoneType; }
-    bool isDefiningStart() const { return m_isDefiningStart; }
-    bool isDefiningEnd() const { return m_isDefiningEnd; }
-    int highlightedZoneId() const { return m_highlightedZoneId; }
+void ZoneMapViewModel::setWipZone(const QVariantMap& zone, int type, bool definingStart, bool definingEnd) {
+    m_wipZone = zone;
+    m_wipZoneType = type;
+    m_isDefiningStart = definingStart;
+    m_isDefiningEnd = definingEnd;
+    m_hasWipZone = true;
 
-public slots:
-    void setGimbalPosition(float az, float el);
-    void updateZones(SystemStateModel* model);
-    void setWipZone(const QVariantMap& zone, int type, bool definingStart, bool definingEnd);
-    void clearWipZone();
-    void setHighlightedZone(int id);
+    emit wipZoneChanged();
+    emit wipZoneTypeChanged();
+    emit isDefiningStartChanged();
+    emit isDefiningEndChanged();
+    emit hasWipZoneChanged();
+}
 
-    // Utility functions for QML Canvas
-    Q_INVOKABLE QPointF azElToPixel(float az, float el, float width, float height) const;
-    Q_INVOKABLE float normalizeAzimuth(float az) const;
+void ZoneMapViewModel::clearWipZone() {
+    if (m_hasWipZone) {
+        m_hasWipZone = false;
+        m_wipZone.clear();
+        m_wipZoneType = 0;
+        m_isDefiningStart = false;
+        m_isDefiningEnd = false;
+        emit hasWipZoneChanged();
+    }
+}
 
-signals:
-    void gimbalAzChanged();
-    void gimbalElChanged();
-    void areaZonesChanged();
-    void sectorScansChanged();
-    void trpsChanged();
-    void hasWipZoneChanged();
-    void wipZoneChanged();
-    void wipZoneTypeChanged();
-    void isDefiningStartChanged();
-    void isDefiningEndChanged();
-    void highlightedZoneIdChanged();
+void ZoneMapViewModel::setHighlightedZone(int id) {
+    if (m_highlightedZoneId != id) {
+        m_highlightedZoneId = id;
+        emit highlightedZoneIdChanged();
+    }
+}
 
-private:
-    QVariantList convertAreaZonesToVariant(SystemStateModel* model);
-    QVariantList convertSectorScansToVariant(SystemStateModel* model);
-    QVariantList convertTRPsToVariant(SystemStateModel* model);
+QPointF ZoneMapViewModel::azElToPixel(float az, float el, float width, float height) const {
+    float normalizedAz = normalizeAzimuth(az);
 
-    float m_gimbalAz = 0.0f;
-    float m_gimbalEl = 0.0f;
-    QVariantList m_areaZones;
-    QVariantList m_sectorScans;
-    QVariantList m_trps;
-    bool m_hasWipZone = false;
-    QVariantMap m_wipZone;
-    int m_wipZoneType = 0; // 0=None, 1=AreaZone, 2=SectorScan, 3=TRP
-    bool m_isDefiningStart = false;
-    bool m_isDefiningEnd = false;
-    int m_highlightedZoneId = -1;
+    float azRange = AZ_MAX - AZ_MIN;
+    float elRange = EL_MAX - EL_MIN;
 
-    // Display constants
-    static constexpr float AZ_MIN = 0.0f;
-    static constexpr float AZ_MAX = 360.0f;
-    static constexpr float EL_MIN = -20.0f;
-    static constexpr float EL_MAX = 90.0f;
-};
+    float x = (normalizedAz - AZ_MIN) / azRange * width;
+    float y = height - ((el - EL_MIN) / elRange * height);
 
-#endif // ZONEMAPVIEWMODEL_H
+    return QPointF(x, y);
+}
+
+float ZoneMapViewModel::normalizeAzimuth(float az) const {
+    float normalized = fmod(az, 360.0f);
+    if (normalized < 0) {
+        normalized += 360.0f;
+    }
+    return normalized;
+}
+
+QVariantList ZoneMapViewModel::convertAreaZonesToVariant(SystemStateModel* model) {
+    QVariantList result;
+    const auto& zones = model->getAreaZones();
+
+    for (const auto& zone : zones) {
+        QVariantMap zoneMap;
+        zoneMap["id"] = zone.id;
+        zoneMap["type"] = static_cast<int>(zone.type);
+        zoneMap["isEnabled"] = zone.isEnabled;
+        zoneMap["isOverridable"] = zone.isOverridable;
+        zoneMap["startAzimuth"] = zone.startAzimuth;
+        zoneMap["endAzimuth"] = zone.endAzimuth;
+        zoneMap["minElevation"] = zone.minElevation;
+        zoneMap["maxElevation"] = zone.maxElevation;
+        result.append(zoneMap);
+    }
+
+    return result;
+}
+
+QVariantList ZoneMapViewModel::convertSectorScansToVariant(SystemStateModel* model) {
+    QVariantList result;
+    const auto& zones = model->getSectorScanZones();
+
+    for (const auto& zone : zones) {
+        QVariantMap zoneMap;
+        zoneMap["id"] = zone.id;
+        zoneMap["isEnabled"] = zone.isEnabled;
+        zoneMap["az1"] = zone.az1;
+        zoneMap["el1"] = zone.el1;
+        zoneMap["az2"] = zone.az2;
+        zoneMap["el2"] = zone.el2;
+        result.append(zoneMap);
+    }
+
+    return result;
+}
+
+QVariantList ZoneMapViewModel::convertTRPsToVariant(SystemStateModel* model) {
+    QVariantList result;
+    const auto& zones = model->getTargetReferencePoints();
+
+    for (const auto& zone : zones) {
+        QVariantMap zoneMap;
+        zoneMap["id"] = zone.id;
+        zoneMap["azimuth"] = zone.azimuth;
+        zoneMap["elevation"] = zone.elevation;
+        zoneMap["locationPage"] = zone.locationPage;
+        zoneMap["trpInPage"] = zone.trpInPage;
+        result.append(zoneMap);
+    }
+
+    return result;
+}

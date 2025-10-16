@@ -1,215 +1,227 @@
-// ZoneDefinitionOverlay.qml
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Effects
+import QtQuick.Layouts
 
 Rectangle {
     id: root
 
-    width: 600
-    height: 550
-    radius: 5
-    color: Qt.rgba(0, 0, 0, 0.85)
-    border.color: "#4ECDC4"
-    border.width: 2
+    // Get ViewModels from context
+    property var viewModel: zoneDefinitionViewModel
+    property var mapViewModel: zoneMapViewModel
 
-    visible: zoneDefViewModel ? zoneDefViewModel.visible : false
+    visible: viewModel ? viewModel.visible : false
+    color: Qt.rgba(0, 0, 0, 0.59) // Semi-transparent background
+    anchors.fill: parent
 
-    property color accentColor: "#4ECDC4"
+    // Main content container
+    Rectangle {
+        id: contentContainer
+        anchors.centerIn: parent
+        width: Math.min(parent.width - 20, 800)
+        height: Math.min(parent.height - 20, 700)
+        color: Qt.rgba(0, 0, 0, 0.9)
+        border.color: Qt.rgba(70, 226, 165, 1.0)
+        border.width: 2
+        radius: 5
 
-    // Drop shadow
-    layer.enabled: true
-    layer.effect: MultiEffect {
-        shadowEnabled: true
-        shadowColor: "#80000000"
-        shadowBlur: 0.4
-        shadowVerticalOffset: 8
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 10
+
+            // Title
+            Text {
+                Layout.fillWidth: true
+                text: viewModel ? viewModel.title : ""
+                font.pixelSize: 18
+                font.bold: true
+                color: Qt.rgba(70, 226, 165, 1.0)
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            // Instruction text
+            Text {
+                Layout.fillWidth: true
+                text: viewModel ? viewModel.instruction : ""
+                font.pixelSize: 12
+                color: Qt.rgba(70, 226, 165, 1.0)
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
+            // Gimbal position display
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 25
+                spacing: 20
+
+                Text {
+                    text: "WS Pos:"
+                    font.pixelSize: 11
+                    color: Qt.rgba(70, 226, 165, 1.0)
+                }
+
+                Text {
+                    text: viewModel ? "Az: " + viewModel.gimbalAz.toFixed(1) + "°" : "Az: ---°"
+                    font.pixelSize: 11
+                    color: Qt.rgba(70, 226, 165, 1.0)
+                }
+
+                Item { Layout.fillWidth: true }
+
+                Text {
+                    text: viewModel ? "El: " + viewModel.gimbalEl.toFixed(1) + "°" : "El: ---°"
+                    font.pixelSize: 11
+                    color: Qt.rgba(70, 226, 165, 1.0)
+                }
+            }
+
+            // Main content area (menu OR map)
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                // Main Menu List
+                ListView {
+                    id: mainMenuList
+                    anchors.fill: parent
+                    visible: viewModel ? viewModel.showMainMenu : false
+                    model: viewModel ? viewModel.menuOptions : []
+                    currentIndex: viewModel ? viewModel.currentIndex : 0
+                    clip: true
+
+                    delegate: Rectangle {
+                        width: mainMenuList.width
+                        height: 35
+                        color: index === mainMenuList.currentIndex ?
+                               Qt.rgba(70, 226, 165, 1.0) : "transparent"
+                        border.color: Qt.rgba(70, 226, 165, 1.0)
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData
+                            font.pixelSize: 13
+                            font.family: "Archivo Narrow"
+                            font.weight: Font.DemiBold
+                            color: index === mainMenuList.currentIndex ?
+                                   "black" : Qt.rgba(70, 226, 165, 1.0)
+                        }
+                    }
+                }
+
+                // Zone Selection List
+                ListView {
+                    id: zoneSelectionList
+                    anchors.fill: parent
+                    visible: viewModel ? viewModel.showZoneSelectionList : false
+                    model: viewModel ? viewModel.menuOptions : []
+                    currentIndex: viewModel ? viewModel.currentIndex : 0
+                    clip: true
+
+                    delegate: Rectangle {
+                        width: zoneSelectionList.width
+                        height: 35
+                        color: index === zoneSelectionList.currentIndex ?
+                               Qt.rgba(70, 226, 165, 1.0) : "transparent"
+                        border.color: Qt.rgba(70, 226, 165, 1.0)
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData
+                            font.pixelSize: 12
+                            font.family: "Archivo Narrow"
+                            font.weight: Font.DemiBold
+                            color: index === zoneSelectionList.currentIndex ?
+                                   "black" : Qt.rgba(70, 226, 165, 1.0)
+                        }
+                    }
+                }
+
+                // Confirm Dialog
+                ListView {
+                    id: confirmList
+                    anchors.centerIn: parent
+                    width: parent.width * 0.5
+                    height: 80
+                    visible: viewModel ? viewModel.showConfirmDialog : false
+                    model: viewModel ? viewModel.menuOptions : []
+                    currentIndex: viewModel ? viewModel.currentIndex : 0
+                    clip: true
+                    spacing: 10
+                    orientation: ListView.Horizontal
+
+                    delegate: Rectangle {
+                        width: 120
+                        height: 50
+                        color: index === confirmList.currentIndex ?
+                               Qt.rgba(70, 226, 165, 1.0) : "transparent"
+                        border.color: Qt.rgba(70, 226, 165, 1.0)
+                        border.width: 2
+                        radius: 3
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData
+                            font.pixelSize: 14
+                            font.bold: true
+                            color: index === confirmList.currentIndex ?
+                                   "black" : Qt.rgba(70, 226, 165, 1.0)
+                        }
+                    }
+                }
+            }
+
+            // Zone Map
+            ZoneMapCanvas {
+                id: zoneMap
+                Layout.fillWidth: true
+                Layout.preferredHeight: 250
+                visible: viewModel ? viewModel.showMap : true
+                viewModel: mapViewModel
+            }
+
+            // Parameter Panel Container
+            Loader {
+                id: parameterPanelLoader
+                Layout.fillWidth: true
+                Layout.preferredHeight: 200
+                visible: viewModel ? viewModel.showParameterPanel : false
+
+                sourceComponent: {
+                    if (!viewModel || !viewModel.showParameterPanel) return null
+
+                    switch (viewModel.activePanelType) {
+                        case 1: return areaZonePanelComponent
+                        case 2: return sectorScanPanelComponent
+                        case 3: return trpPanelComponent
+                        default: return null
+                    }
+                }
+            }
+        }
     }
 
-    Column {
-        anchors.fill: parent
-        anchors.margins: 20
-        spacing: 15
-
-        // Title
-        Text {
-            text: zoneDefViewModel ? zoneDefViewModel.title : "Zone Definition"
-            font.pixelSize: 22
-            font.bold: true
-            color: accentColor
-            horizontalAlignment: Text.AlignHCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        // Instructions
-        Text {
-            width: parent.width
-            text: zoneDefViewModel ? zoneDefViewModel.instruction : ""
-            font.pixelSize: 14
-            color: "#CCCCCC"
-            wrapMode: Text.WordWrap
-            horizontalAlignment: Text.AlignHCenter
-        }
-
-        // Gimbal Position Display
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 30
-            visible: zoneDefViewModel ? zoneDefViewModel.showMap : false
-
-            Text {
-                text: "WS Pos:"
-                font.pixelSize: 12
-                color: "#AAAAAA"
-            }
-            Text {
-                text: zoneDefViewModel ?
-                      "Az: " + zoneDefViewModel.gimbalAz.toFixed(1) + "°" : "Az: ---"
-                font.pixelSize: 12
-                font.bold: true
-                color: accentColor
-            }
-            Text {
-                text: zoneDefViewModel ?
-                      "El: " + zoneDefViewModel.gimbalEl.toFixed(1) + "°" : "El: ---"
-                font.pixelSize: 12
-                font.bold: true
-                color: accentColor
-            }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: "#505050"
-            opacity: 0.6
-        }
-
-        // Main Menu List
-        ListView {
-            id: mainMenuList
-            width: parent.width
-            height: 250
-            spacing: 6
-            clip: true
-            visible: zoneDefViewModel ? zoneDefViewModel.showMainMenu : false
-
-            model: zoneDefViewModel ? zoneDefViewModel.menuOptions : []
-            currentIndex: zoneDefViewModel ? zoneDefViewModel.currentIndex : 0
-
-            delegate: ItemDelegate {
-                width: mainMenuList.width
-                height: 40
-                text: modelData
-
-                background: Rectangle {
-                    radius: 3
-                    color: ListView.isCurrentItem ? accentColor : Qt.rgba(1, 1, 1, 0.08)
-                    border.color: ListView.isCurrentItem ? "#FFFFFF" : "transparent"
-                    border.width: ListView.isCurrentItem ? 2 : 0
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                }
-
-                contentItem: Text {
-                    text: modelData
-                    color: ListView.isCurrentItem ? "black" : "white"
-                    font.pixelSize: 16
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
-                }
-
-                highlighted: ListView.isCurrentItem
-            }
-
-            ScrollBar.vertical: ScrollBar {
-                policy: ScrollBar.AsNeeded
-                active: true
-            }
-        }
-
-        // Zone Selection List (for modify/delete)
-        ListView {
-            id: zoneSelectionList
-            width: parent.width
-            height: 250
-            spacing: 6
-            clip: true
-            visible: zoneDefViewModel ? zoneDefViewModel.showZoneSelectionList : false
-
-            model: zoneDefViewModel ? zoneDefViewModel.menuOptions : []
-            currentIndex: zoneDefViewModel ? zoneDefViewModel.currentIndex : 0
-
-            delegate: ItemDelegate {
-                width: zoneSelectionList.width
-                height: 40
-                text: modelData
-
-                background: Rectangle {
-                    radius: 3
-                    color: ListView.isCurrentItem ? accentColor : Qt.rgba(1, 1, 1, 0.08)
-                    border.color: ListView.isCurrentItem ? "#FFFFFF" : "transparent"
-                    border.width: ListView.isCurrentItem ? 2 : 0
-                }
-
-                contentItem: Text {
-                    text: modelData
-                    color: ListView.isCurrentItem ? "black" : "white"
-                    font.pixelSize: 14
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                highlighted: ListView.isCurrentItem
-            }
-        }
-
-        // Zone Map Canvas
-        ZoneMapCanvas {
-            id: zoneMap
-            width: parent.width
-            height: 200
-            visible: zoneDefViewModel ? zoneDefViewModel.showMap : false
-            viewModel: zoneMapViewModel
-        }
-
-        // Parameter Panel Stack
-        Loader {
-            id: parameterPanelLoader
-            width: parent.width
-            height: 180
-            visible: zoneDefViewModel ? zoneDefViewModel.showParameterPanel : false
-
-            sourceComponent: {
-                if (!zoneDefViewModel) return null
-
-                switch (zoneDefViewModel.activePanelType) {
-                    case 1: return areaZonePanelComponent  // AreaZone
-                    case 2: return sectorScanPanelComponent // SectorScan
-                    case 3: return trpPanelComponent        // TRP
-                    default: return null
-                }
-            }
-        }
-    }
-
-    // Panel Components
+    // Parameter Panel Components
     Component {
         id: areaZonePanelComponent
         AreaZoneParameterPanel {
-            viewModel: areaZoneParamViewModel
+            viewModel: areaZoneParameterViewModel
         }
     }
 
     Component {
         id: sectorScanPanelComponent
         SectorScanParameterPanel {
-            viewModel: sectorScanParamViewModel
+            viewModel: sectorScanParameterViewModel
         }
     }
 
     Component {
         id: trpPanelComponent
         TRPParameterPanel {
-            viewModel: trpParamViewModel
+            viewModel: trpParameterViewModel
         }
     }
 }
