@@ -1,123 +1,264 @@
 import QtQuick
-import QtQuick.Shapes // Required for complex paths and shapes
+import QtQuick.Shapes
 
-// OsdOverlay.qml
 Item {
     id: osdRoot
+    anchors.fill: parent
 
-    // 1. OSD Data Model Reference (The link to C++)
-    property var osdViewModel: null // Public property to receive the C++ model
+    property var viewModel: osdViewModel // Context property from C++
     property color accentColor: viewModel ? viewModel.accentColor : "#46E2A5"
 
-    // --- Configuration Constants (matching OsdRenderer's internal constants) ---
-    readonly property real trackingCornerLength: 15.0
-    readonly property real reticleLineWidth: 2.0
-    readonly property real screenCenterX: width / 2.0
-    readonly property real screenCenterY: height / 2.0
+    // Constants
+    readonly property real azIndicatorRadius: 50
+    readonly property real elScaleHeight: 120
 
-    // --- Text Statuses ---
-    Text {
+    // ========================================================================
+    // TEXT OVERLAYS (Top-Left Corner)
+    // ========================================================================
+    Column {
         anchors.left: parent.left
         anchors.top: parent.top
-        anchors.margins: 25
-        text: osdViewModel ? osdViewModel.modeText : "" // Bind to C++ property
-        color: osdRoot.accentColor
-        font.pointSize: 16
-    }
+        anchors.margins: 10
+        spacing: 5
 
-    // --- Tracking Box (Dynamic element based on QRectF data) ---
-    // This replaces C++ logic in OsdRenderer::updateTrackingCorners and drawDetectionBox.
-    Item {
-        id: trackingBoxItem
-        visible: osdViewModel ? osdViewModel.trackingBox.width > 0 : false
-
-        // Bind position/size from C++ QRectF property (or directly from trackingRect's members)
-        x: osdViewModel ? osdViewModel.trackingBox.x : 0
-        y: osdViewModel ? osdViewModel.trackingBox.y : 0
-        width: osdViewModel ? osdViewModel.trackingBox.width : 0
-        height: osdViewModel ? osdViewModel.trackingBox.height : 0
-
-        // Create the four corners (using Repeater for efficiency)
-        Repeater {
-            model: 4 // Four corners
-            delegate: Rectangle {
-                // Define individual corner position based on index (i)
-                width: 2 // Line thickness
-                height: trackingCornerLength
-
-                // Top-left corner (index 0)
-                // Top-right corner (index 1)
-                // Bottom-left corner (index 2)
-                // Bottom-right corner (index 3)
-                // ... logic to position corners based on index (model.index) ...
-                // Example: Top-left corner
-                // x: model.index == 0 ? 0 : (model.index == 1 ? parent.width - width : ...)
-                // ... for simplicity here, we'll draw a full box ...
-
-                // QML Best Practice: Use a Shape for complex, non-rectangular drawings like corners.
-            }
+        // Mode
+        Text {
+            text: viewModel ? viewModel.modeText : "MODE: IDLE"
+            font.pixelSize: 16
+            font.bold: true
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
         }
 
-        // --- Simpler demonstration of Tracking Box (Full Box instead of corners) ---
-        // Let's create a simpler, full-box version first.
+        // Motion Mode
+        Text {
+            text: viewModel ? viewModel.motionText : "MOTION: MAN"
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+
+        // System Status
+        Text {
+            text: viewModel ? viewModel.statusText : "SYS: --- SAF NRD"
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+
+        // Rate
+        Text {
+            text: viewModel ? viewModel.rateText : "RATE: SINGLE SHOT"
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+
+        // LRF Distance
+        Text {
+            text: viewModel ? viewModel.lrfText : "LRF: --- m"
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+
+        // Zeroing Status
+        Text {
+            visible: viewModel ? viewModel.zeroingVisible : false
+            text: viewModel ? viewModel.zeroingText : ""
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+
+        // Windage Status
+        Text {
+            visible: viewModel ? viewModel.windageVisible : false
+            text: viewModel ? viewModel.windageText : ""
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+
+        // Lead Angle Status
+        Text {
+            visible: viewModel ? viewModel.leadAngleVisible : false
+            text: viewModel ? viewModel.leadAngleText : ""
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: viewModel && viewModel.leadAngleText.includes("LAG") ? "yellow" :
+                   (viewModel && viewModel.leadAngleText.includes("ZOOM") ? "#C81428" : osdRoot.accentColor)
+        }
+
+        // Scan Name
+        Text {
+            visible: viewModel ? viewModel.scanNameVisible : false
+            text: viewModel ? viewModel.scanNameText : ""
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+    }
+
+    // ========================================================================
+    // TOP-RIGHT CORNER (Speed)
+    // ========================================================================
+    Text {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: 10
+        text: viewModel ? viewModel.speedText : "SPD: 0.0%"
+        font.pixelSize: 16
+        font.bold: true
+        font.family: "Archivo Narrow"
+        color: osdRoot.accentColor
+    }
+
+    // ========================================================================
+    // BOTTOM-LEFT CORNER (Stab, Camera, FOV)
+    // ========================================================================
+    Row {
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.margins: 10
+        spacing: 20
+
+        Text {
+            text: viewModel ? viewModel.stabText : "STAB: OFF"
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+
+        Text {
+            text: viewModel ? viewModel.cameraText : "CAM: DAY"
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+
+        Text {
+            text: viewModel ? viewModel.fovText : "FOV: 45.0°"
+            font.pixelSize: 14
+            font.family: "Archivo Narrow"
+            color: osdRoot.accentColor
+        }
+    }
+
+    // ========================================================================
+    // CENTER WARNING (Zone Warnings)
+    // ========================================================================
+    Text {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: 50
+        visible: viewModel ? viewModel.zoneWarningVisible : false
+        text: viewModel ? viewModel.zoneWarningText : ""
+        font.pixelSize: 24
+        font.bold: true
+        font.family: "Archivo Narrow"
+        color: "#C81428" // Red for warnings
+
+        // Background for better visibility
         Rectangle {
             anchors.fill: parent
-            color: "transparent"
-            border.color: osdRoot.accentColor
-            border.width: 2
+            anchors.margins: -5
+            color: "black"
+            opacity: 0.7
+            radius: 3
+            z: -1
         }
     }
 
-    // --- Reticle Group (Dynamic position based on zeroing/lead offset) ---
-    // This replaces C++ logic in OsdRenderer::applyReticlePosition.
-    Item {
-        id: reticleGroup
-        // Position relative to screen center + C++ offset calculation
-        x: screenCenterX + (osdViewModel ? osdViewModel.reticleOffsetPx.x : 0)
-        y: screenCenterY + (osdViewModel ? osdViewModel.reticleOffsetPx.y : 0)
+    // ========================================================================
+    // AZIMUTH INDICATOR (Top-Right)
+    // ========================================================================
+    AzimuthIndicator {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: 75
+        width: azIndicatorRadius * 2
+        height: azIndicatorRadius * 2
 
-        // The reticle itself (e.g., a simple crosshair)
-        // This replaces C++ logic in OsdRenderer::createStandardCrosshairReticle.
-        Rectangle {
-            width: 50; height: reticleLineWidth
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: osdRoot.accentColor
-        }
-        Rectangle {
-            width: reticleLineWidth; height: 50
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: osdRoot.accentColor
-        }
+        azimuth: viewModel ? viewModel.azimuth : 0
+        color: osdRoot.accentColor
     }
 
-    // --- Azimuth Indicator (Dynamic rotation based on C++ data) ---
-    // This replaces C++ logic in OsdRenderer::updateAzimuthIndicator.
-    Item {
-        id: azimuthIndicatorRoot
-        x: osdRoot.width - 75 // Position from right edge (matching C++ constant)
-        y: 75
+    // ========================================================================
+    // ELEVATION SCALE (Right Side)
+    // ========================================================================
+    ElevationScale {
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.rightMargin: 55
+        height: elScaleHeight
 
-        // The Azimuth Needle itself (rotates based on C++ property)
+        elevation: viewModel ? viewModel.elevation : 0
+        color: osdRoot.accentColor
+    }
+
+    // ========================================================================
+    // TRACKING BOX
+    // ========================================================================
+    TrackingBox {
+        visible: viewModel ? viewModel.trackingBoxVisible : false
+        x: viewModel ? viewModel.trackingBox.x : 0
+        y: viewModel ? viewModel.trackingBox.y : 0
+        width: viewModel ? viewModel.trackingBox.width : 0
+        height: viewModel ? viewModel.trackingBox.height : 0
+
+        boxColor: viewModel ? viewModel.trackingBoxColor : "yellow"
+        dashed: viewModel ? viewModel.trackingBoxDashed : false
+    }
+
+    // ========================================================================
+    // ACQUISITION BOX
+    // ========================================================================
+    Rectangle {
+        visible: viewModel ? viewModel.acquisitionBoxVisible : false
+        x: viewModel ? viewModel.acquisitionBox.x : 0
+        y: viewModel ? viewModel.acquisitionBox.y : 0
+        width: viewModel ? viewModel.acquisitionBox.width : 0
+        height: viewModel ? viewModel.acquisitionBox.height : 0
+
+        color: "transparent"
+        border.color: "yellow"
+        border.width: 2
+    }
+
+    // ========================================================================
+    // RETICLE (Center with offset)
+    // ========================================================================
+    ReticleRenderer {
+        id: reticle
+        anchors.centerIn: parent
+        x: parent.width / 2 + (viewModel ? viewModel.reticleOffsetX : 0)
+        y: parent.height / 2 + (viewModel ? viewModel.reticleOffsetY : 0)
+
+        reticleType: viewModel ? viewModel.reticleType : 1 // 1 = BoxCrosshair
+        color: osdRoot.accentColor
+        currentFov: viewModel ? viewModel.currentFov : 45.0
+    }
+
+    // ========================================================================
+    // FIXED LOB MARKER (Screen Center - Always visible)
+    // ========================================================================
+    Item {
+        anchors.centerIn: parent
+        width: 10
+        height: 10
+
+        // Simple cross marker
         Rectangle {
-            id: needle
+            width: 10
+            height: 2
             anchors.centerIn: parent
-            width: 2 // Line thickness
-            height: 50 // Needle length
             color: osdRoot.accentColor
-            transformOrigin: Item.Center // Rotate around center point
-            // Bind QML rotation to C++ azimuth property.
-            rotation: osdViewModel ? osdViewModel.azimuth : 0
         }
-        // Azimuth Text (bind to C++ property, format in QML)
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: needle.bottom
-            anchors.topMargin: 10
-            text: osdViewModel ? osdViewModel.azimuth.toFixed(1) + "°" : ""
+        Rectangle {
+            width: 2
+            height: 10
+            anchors.centerIn: parent
             color: osdRoot.accentColor
-            font.pointSize: 12
         }
     }
 }

@@ -17,6 +17,7 @@ PKGCONFIG += gstreamer-gl-1.0
 SOURCES += \
         src/controllers/applicationcontroller.cpp \
         src/controllers/colormenucontroller.cpp \
+        src/controllers/osdcontroller.cpp \
         src/controllers/windagecontroller.cpp \
         src/controllers/zeroingcontroller.cpp \
         src/controllers/zonedefinitioncontroller.cpp \
@@ -62,6 +63,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     src/controllers/applicationcontroller.h \
     src/controllers/colormenucontroller.h \
+    src/controllers/osdcontroller.h \
     src/controllers/windagecontroller.h \
     src/controllers/zeroingcontroller.h \
     src/controllers/zonedefinitioncontroller.h \
@@ -85,7 +87,6 @@ HEADERS += \
     src/video/videoimageprovider.h \
     src/utils/reticleaimpointcalculator.h \
     src/utils/colorutils.h
-
 
 
 

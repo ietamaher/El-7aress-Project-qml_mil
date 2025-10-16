@@ -10,5 +10,9 @@
 	<file>../qml/components/TRPParameterPanel.qml</file>
 	<file>../qml/components/ZoneDefinitionOverlay.qml</file>
 	<file>../qml/components/ZoneMapCanvas.qml</file>
+	<file>../qml/components/AzimuthIndicator.qml</file>
+        <file>../qml/components/ElevationScale.qml</file>
+        <file>../qml/components/TrackingBox.qml</file>
+        <file>../qml/components/ReticleRenderer.qml</file>
     </qresource>
 </RCC>

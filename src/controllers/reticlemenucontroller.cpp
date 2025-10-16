@@ -132,7 +132,7 @@ void ReticleMenuController::handleCurrentItemChanged(int index)
         ReticleType previewType = stringToReticleType(optionText);
 
         // Update OSD with preview
-        // m_osdViewModel->setReticleType(previewType);
+        m_stateModel->setReticleStyle(previewType);
 
         qDebug() << "ReticleMenuController: Previewing" << optionText;
     }
@@ -146,13 +146,13 @@ void ReticleMenuController::handleMenuOptionSelected(const QString& option)
 
     if (option == "Return ...") {
         // Restore original
-        // m_osdViewModel->setReticleType(m_originalReticleType);
+        m_stateModel->setReticleStyle(m_originalReticleType);
         emit returnToMainMenu();
     } else {
         // Apply the selected reticle permanently
         ReticleType selectedType = stringToReticleType(option);
-        // m_osdViewModel->setReticleType(selectedType);
-        // m_osdViewModel->saveReticleType(); // Persist to settings
+        m_stateModel->setReticleStyle(selectedType);
+        //m_osdViewModel->saveReticleType(); // Persist to settings
 
         qDebug() << "ReticleMenuController: Applied" << option;
         emit returnToMainMenu();

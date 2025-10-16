@@ -9,7 +9,7 @@ ApplicationWindow {
     width: 1024
     height: 768
     visible: true
-    title: "V2 QML OSD Application"
+    title: "RCWS System"
 
     // --- Video Feed Background ---
     Image {
@@ -30,13 +30,13 @@ ApplicationWindow {
         }
     }
 
-    // --- OSD Layer (New QML Component) ---
-    // This is where all your OSD elements will be drawn.
+    // *** OSD Overlay (On top of video) ***
     OsdOverlay {
+        id: osdOverlay
         anchors.fill: parent
-        // Pass the C++ model to the overlay component
-        osdViewModel: osdViewModelInstance
+        z: 10 // Above video
     }
+
 
     // === MAIN MENU ===
     MainMenu {
@@ -82,7 +82,7 @@ ApplicationWindow {
     ZoneDefinitionOverlay {
         id: zoneDefinitionOverlay
         anchors.fill: parent
-        z: 100  // Ensure it's on top of other overlays
+        z: 100   // Above OSD
 
         // ViewModels are accessible via context properties
         // Already bound in ZoneDefinitionOverlay.qml

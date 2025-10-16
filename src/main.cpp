@@ -6,17 +6,18 @@
 #include "models/osdviewmodel.h"
 #include <QTimer>
 #include "controllers/applicationcontroller.h"
+#include "controllers/osdcontroller.h"
 #include "controllers/mainmenucontroller.h"
 #include "controllers/reticlemenucontroller.h"
 #include "controllers/colormenucontroller.h"
 #include "controllers/zeroingcontroller.h"
 #include "controllers/windagecontroller.h"
+#include "controllers/zonedefinitioncontroller.h"
 #include "models/menuviewmodel.h"
 #include "models/zeroingviewmodel.h"
 #include "models/windageviewmodel.h"
 #include "models/domain/systemstatemodel.h"
 #include "services/servicemanager.h"
-#include "controllers/zonedefinitioncontroller.h"
 #include "models/zonedefinitionviewmodel.h"
 #include "models/zonemapviewmodel.h"
 #include "models/areazoneparameterviewmodel.h"
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
     ServiceManager* services = ServiceManager::instance();
 
     // === PHASE 1: CREATE ALL SERVICES ===
-    OsdViewModel* osdViewModel = new OsdViewModel(1024, 768);
+    OsdViewModel* osdViewModel = new OsdViewModel();
     SystemStateModel* stateModel = new SystemStateModel(); // Your existing state model
 
     // Create separate MenuViewModel instances for each menu
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
     TRPParameterViewModel* trpParameterViewModel = new TRPParameterViewModel();
 
     // Create controllers
+    OsdController* osdController = new OsdController();
     MainMenuController* mainMenuController = new MainMenuController();
     ReticleMenuController* reticleMenuController = new ReticleMenuController();
     ColorMenuController* colorMenuController = new ColorMenuController();
@@ -79,6 +81,7 @@ int main(int argc, char *argv[])
     services->registerService("SectorScanParameterViewModel", sectorScanParameterViewModel);
     services->registerService("TRPParameterViewModel", trpParameterViewModel);
 
+    services->registerService(OsdController::staticMetaObject.className(), osdController);
     services->registerService(MainMenuController::staticMetaObject.className(), mainMenuController);
     services->registerService(ReticleMenuController::staticMetaObject.className(), reticleMenuController);
     services->registerService(ColorMenuController::staticMetaObject.className(), colorMenuController);
@@ -89,6 +92,7 @@ int main(int argc, char *argv[])
     services->registerService(ApplicationController::staticMetaObject.className(), appController);
 
     // === PHASE 3: INITIALIZE SERVICES ===
+    osdController->initialize();
     mainMenuController->initialize();
     reticleMenuController->initialize();
     colorMenuController->initialize();
@@ -98,7 +102,7 @@ int main(int argc, char *argv[])
     appController->initialize();
 
     // === PHASE 4: EXPOSE VIEWMODELS TO QML ===
-    engine.rootContext()->setContextProperty("osdViewModelInstance", osdViewModel);
+    engine.rootContext()->setContextProperty("osdViewModel", osdViewModel);
     engine.rootContext()->setContextProperty("mainMenuViewModel", mainMenuViewModel);
     engine.rootContext()->setContextProperty("reticleMenuViewModel", reticleMenuViewModel);
     engine.rootContext()->setContextProperty("colorMenuViewModel", colorMenuViewModel);
