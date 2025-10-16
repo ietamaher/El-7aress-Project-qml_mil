@@ -2,6 +2,7 @@
 #define WINDAGEVIEWMODEL_H
 
 #include <QObject>
+#include <QColor>
 
 class WindageViewModel : public QObject
 {
@@ -12,6 +13,8 @@ class WindageViewModel : public QObject
     Q_PROPERTY(bool showWindSpeed READ showWindSpeed NOTIFY showWindSpeedChanged)
     Q_PROPERTY(float windSpeed READ windSpeed NOTIFY windSpeedChanged)
     Q_PROPERTY(QString windSpeedLabel READ windSpeedLabel NOTIFY windSpeedLabelChanged)
+    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY accentColorChanged)
+
 
 public:
     explicit WindageViewModel(QObject *parent = nullptr);
@@ -22,6 +25,7 @@ public:
     bool showWindSpeed() const { return m_showWindSpeed; }
     float windSpeed() const { return m_windSpeed; }
     QString windSpeedLabel() const { return m_windSpeedLabel; }
+    QColor accentColor() const { return m_accentColor; }
 
 public slots:
     void setVisible(bool visible);
@@ -30,6 +34,7 @@ public slots:
     void setShowWindSpeed(bool show);
     void setWindSpeed(float speed);
     void setWindSpeedLabel(const QString& label);
+    void setAccentColor(const QColor& color);
 
 signals:
     void visibleChanged();
@@ -38,6 +43,7 @@ signals:
     void showWindSpeedChanged();
     void windSpeedChanged();
     void windSpeedLabelChanged();
+    void accentColorChanged();
 
 private:
     bool m_visible;
@@ -46,6 +52,7 @@ private:
     bool m_showWindSpeed;
     float m_windSpeed;
     QString m_windSpeedLabel;
+    QColor m_accentColor = QColor(70, 226, 165); // Default green
 };
 
 #endif // WINDAGEVIEWMODEL_H

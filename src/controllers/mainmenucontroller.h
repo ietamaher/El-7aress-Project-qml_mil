@@ -39,7 +39,7 @@ signals:
 
 private slots:
     void handleMenuOptionSelected(const QString& option);
-
+    void onColorStyleChanged(const QColor& color);
 private:
     MenuViewModel* m_viewModel;
 

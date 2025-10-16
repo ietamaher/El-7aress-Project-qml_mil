@@ -150,3 +150,10 @@ QVariantList ZoneMapViewModel::convertTRPsToVariant(SystemStateModel* model) {
 
     return result;
 }
+
+void ZoneMapViewModel::setAccentColor(const QColor& color) {
+    if (m_accentColor != color) {
+        m_accentColor = color;
+        emit accentColorChanged();
+    }
+}

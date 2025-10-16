@@ -10,12 +10,13 @@ Rectangle {
     height: 380
     radius: 5
     color: Qt.rgba(0, 0, 0, 0.85)
-    border.color: "#4ECDC4"
+ 
     border.width: 2
 
     visible: windageViewModel ? windageViewModel.visible : false
 
-    property color accentColor: "#4ECDC4"
+   property color accentColor: windageViewModel ? windageViewModel.accentColor : "#46E2A5"
+    border.color: accentColor 
 
     // Subtle drop shadow
     layer.enabled: true

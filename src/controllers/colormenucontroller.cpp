@@ -1,6 +1,7 @@
 #include "controllers/colormenucontroller.h"
 #include "services/servicemanager.h"
 #include "models/osdviewmodel.h"
+#include "models/domain/systemstatemodel.h"
 #include <QDebug>
 
 ColorMenuController::ColorMenuController(QObject *parent)
@@ -16,12 +17,26 @@ void ColorMenuController::initialize()
     // Get the COLOR menu's ViewModel specifically by name
     m_viewModel = ServiceManager::instance()->get<MenuViewModel>(QString("ColorMenuViewModel"));
     m_osdViewModel = ServiceManager::instance()->get<OsdViewModel>();
+    m_stateModel = ServiceManager::instance()->get<SystemStateModel>();
+
+    qDebug() << "ColorMenuController::initialize()";
+    qDebug() << "  m_viewModel:" << m_viewModel;
+    qDebug() << "  m_osdViewModel:" << m_osdViewModel;
+    qDebug() << "  m_stateModel:" << m_stateModel;  // ✅ CHECK THIS
 
     Q_ASSERT(m_viewModel);
     Q_ASSERT(m_osdViewModel);
+    Q_ASSERT(m_stateModel);
 
     connect(m_viewModel, &MenuViewModel::optionSelected,
             this, &ColorMenuController::handleMenuOptionSelected);
+
+    connect(m_stateModel, &SystemStateModel::colorStyleChanged,
+            this, &ColorMenuController::onColorStyleChanged);
+
+    // Set initial color
+    const auto& data = m_stateModel->data();
+    m_viewModel->setAccentColor(data.colorStyle);
 }
 
 QStringList ColorMenuController::buildColorOptions() const
@@ -72,17 +87,29 @@ QColor ColorMenuController::colorStyleToQColor(ColorStyle style) const
 
 void ColorMenuController::show()
 {
-    // Save current color
-    // m_originalColorStyle = m_osdViewModel->getCurrentColorStyle();
+    // ✅ Save current color for potential restore
+    const auto& data = m_stateModel->data();
+
+    // Convert QColor to ColorStyle enum
+    QColor currentColor = data.colorStyle;
+    if (currentColor == QColor("#00FF99") || currentColor == QColor(70, 226, 165)) {
+        m_originalColorStyle = ColorStyle::Green;
+    } else if (currentColor == QColor("#FF0000") || currentColor == QColor(255, 0, 0)) {
+        m_originalColorStyle = ColorStyle::Red;
+    } else if (currentColor == Qt::white) {
+        m_originalColorStyle = ColorStyle::White;
+    } else {
+        m_originalColorStyle = ColorStyle::Green;  // Default
+    }
 
     QStringList options = buildColorOptions();
     m_viewModel->showMenu("Personalize Colors", "Select OSD Color", options);
 
-    // Set current selection
-    // int currentIndex = static_cast<int>(m_originalColorStyle);
-    // if (currentIndex >= 0 && currentIndex < options.size()) {
-    //     m_viewModel->setCurrentIndex(currentIndex);
-    // }
+    // Set current selection to match current color
+    int currentIndex = static_cast<int>(m_originalColorStyle);
+    if (currentIndex >= 0 && currentIndex < options.size()) {
+        m_viewModel->setCurrentIndex(currentIndex);
+    }
 }
 
 void ColorMenuController::hide()
@@ -95,6 +122,8 @@ void ColorMenuController::onUpButtonPressed()
     m_viewModel->moveSelectionUp();
 
     int currentIndex = m_viewModel->currentIndex();
+    qDebug() << "ColorMenuController::onUpButtonPressed() - Index:" << currentIndex;  // ✅ ADD
+
     handleCurrentItemChanged(currentIndex);
 }
 
@@ -103,6 +132,8 @@ void ColorMenuController::onDownButtonPressed()
     m_viewModel->moveSelectionDown();
 
     int currentIndex = m_viewModel->currentIndex();
+    qDebug() << "ColorMenuController::onDownButtonPressed() - Index:" << currentIndex;  // ✅ ADD
+
     handleCurrentItemChanged(currentIndex);
 }
 
@@ -124,16 +155,18 @@ void ColorMenuController::onBackButtonPressed()
 
 void ColorMenuController::handleCurrentItemChanged(int index)
 {
+    qDebug() << "ColorMenuController::handleCurrentItemChanged() called with index:" << index;  // ✅ ADD
+
     QStringList options = buildColorOptions();
     if (index >= 0 && index < options.size() - 1) {
         QString optionText = options.at(index);
         ColorStyle previewStyle = stringToColorStyle(optionText);
         QColor previewColor = colorStyleToQColor(previewStyle);
 
-        // Update OSD with preview
-        // m_osdViewModel->setOsdColor(previewColor);
+        qDebug() << "Applying preview color:" << optionText << previewColor;  // ✅ ADD
+        m_stateModel->setColorStyle(previewColor);
 
-        qDebug() << "ColorMenuController: Previewing" << optionText;
+        qDebug() << "ColorMenuController: Previewing" << optionText << previewColor;
     }
 }
 
@@ -144,21 +177,32 @@ void ColorMenuController::handleMenuOptionSelected(const QString& option)
     hide();
 
     if (option == "Return ...") {
-        // Restore original
-        // QColor originalColor = colorStyleToQColor(m_originalColorStyle);
-        // m_osdViewModel->setOsdColor(originalColor);
+        // Restore original color if cancelled
+        QColor originalColor = colorStyleToQColor(m_originalColorStyle);
+        m_stateModel->setColorStyle(originalColor);  // ✅ Restore
         emit returnToMainMenu();
     } else {
         // Apply selected color permanently
         ColorStyle selectedStyle = stringToColorStyle(option);
         QColor selectedColor = colorStyleToQColor(selectedStyle);
 
-        // m_osdViewModel->setOsdColor(selectedColor);
-        // m_osdViewModel->saveColorStyle(); // Persist
+        // ✅ UPDATE: Apply via SystemStateModel (propagates to ALL)
+        m_stateModel->setColorStyle(selectedColor);
+
+        // ✅ OPTIONAL: Persist to file if you have a save method
+        // m_stateModel->saveSettings();  // Implement if needed
 
         qDebug() << "ColorMenuController: Applied" << option << selectedColor;
         emit returnToMainMenu();
     }
 
     emit menuFinished();
+}
+
+void ColorMenuController::onColorStyleChanged(const QColor& color)
+{
+    qDebug() << "ColorMenuController: Color changed to" << color;
+    if (m_viewModel) {
+        m_viewModel->setAccentColor(color);
+    }
 }

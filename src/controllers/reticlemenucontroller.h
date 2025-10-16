@@ -16,6 +16,7 @@
 };*/
 
 class OsdViewModel; // Your OSD model
+class SystemStateModel;
 
 class ReticleMenuController : public QObject
 {
@@ -39,10 +40,12 @@ signals:
 private slots:
     void handleMenuOptionSelected(const QString& option);
     void handleCurrentItemChanged(int index);
+    void onColorStyleChanged(const QColor& color);
 
 private:
     MenuViewModel* m_viewModel;
     OsdViewModel* m_osdViewModel; // To update reticle preview
+    SystemStateModel* m_stateModel;
 
     QStringList buildReticleOptions() const;
     QString reticleTypeToString(ReticleType type) const;

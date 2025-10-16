@@ -26,6 +26,9 @@ signals:
     void windageFinished();
     void returnToMainMenu();
 
+private slots:
+    void onColorStyleChanged(const QColor& color);
+        
 private:
     enum class WindageState {
         Idle,

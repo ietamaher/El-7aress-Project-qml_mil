@@ -10,12 +10,13 @@ Rectangle {
     height: 400
     radius: 5
     color: Qt.rgba(0, 0, 0, 0.85)
-    border.color: "#FF6B35"
+    
     border.width: 2
 
     visible: zeroingViewModel ? zeroingViewModel.visible : false
 
-    property color accentColor: "#FF6B35"
+    property color accentColor: zeroingViewModel ? zeroingViewModel.accentColor : "#46E2A5"
+    border.color: accentColor
 
     // Subtle drop shadow
     layer.enabled: true
@@ -79,7 +80,7 @@ Rectangle {
             height: 60
             color: Qt.rgba(0, 1, 0.6, 0.1)
             radius: 3
-            border.color: "#00FF99"
+            border.color: accentColor
             border.width: 1
             visible: zeroingViewModel ? zeroingViewModel.showOffsets : false
 

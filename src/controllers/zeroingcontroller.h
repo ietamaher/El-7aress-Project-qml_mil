@@ -26,6 +26,9 @@ signals:
     void zeroingFinished();
     void returnToMainMenu();
 
+private slots:
+    void onColorStyleChanged(const QColor& color);
+    
 private:
     enum class ZeroingState {
         Idle,
@@ -39,6 +42,7 @@ private:
     ZeroingViewModel* m_viewModel;
     SystemStateModel* m_stateModel;
     ZeroingState m_currentState;
+
 };
 
 #endif // ZEROINGCONTROLLER_H

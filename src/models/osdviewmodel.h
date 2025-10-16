@@ -53,8 +53,8 @@ class OsdViewModel : public QObject
     // Reticle Position Offset (Calculated based on zeroing and lead angles, in pixels).
     Q_PROPERTY(QPointF reticleOffsetPx READ reticleOffsetPx NOTIFY reticleOffsetPxChanged)
 
-    // OSD Color (Used to change the color style of all QML elements).
-    Q_PROPERTY(QColor osdColor READ osdColor WRITE setOsdColor NOTIFY osdColorChanged)
+    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY accentColorChanged)
+
 
 public:
     explicit OsdViewModel(int screenWidth, int screenHeight, QObject *parent = nullptr);
@@ -65,10 +65,10 @@ public:
     QRectF trackingBox() const { return m_trackingBox; }
     OsdEnums::ReticleType reticleType() const { return m_reticleType; }
     QPointF reticleOffsetPx() const { return m_reticleOffsetPx; }
-    QColor osdColor() const { return m_osdColor; }
+    //QColor osdColor() const { return m_osdColor; }
+    QColor accentColor() const { return m_accentColor; }
 
     // --- Public Setters (called from C++ logic or simulated data) ---
-    void setOsdColor(const QColor &osdColor);
     int screenWidth() const { return m_screenWidth; }
     int screenHeight() const { return m_screenHeight; }
 
@@ -87,6 +87,7 @@ public slots:
      * @param fov current horizontal field of view in degrees.
      */
     void updateReticleOffset(float offsetAzDegrees, float offsetElDegrees, float fov);
+    void setAccentColor(const QColor& color);
 
 signals:
     // Signals to notify QML that a property has changed.
@@ -95,7 +96,7 @@ signals:
     void trackingBoxChanged();
     void reticleTypeChanged();
     void reticleOffsetPxChanged();
-    void osdColorChanged();
+    void accentColorChanged();
 
 private:
     // --- Internal State Variables ---
@@ -104,7 +105,7 @@ private:
     QRectF m_trackingBox = QRectF(0, 0, 0, 0);
     OsdEnums::ReticleType m_reticleType = OsdEnums::ReticleType::StandardCrosshair;
     QPointF m_reticleOffsetPx = QPointF(0, 0);
-    QColor m_osdColor = QColor(70, 226, 165); // Default green color
+    QColor m_accentColor = QColor(70, 226, 165); // Default green color
 
     // --- Constants from OsdRenderer for calculations ---
     int m_screenWidth;

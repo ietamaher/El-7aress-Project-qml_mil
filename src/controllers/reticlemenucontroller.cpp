@@ -1,6 +1,7 @@
 #include "controllers/reticlemenucontroller.h"
 #include "services/servicemanager.h"
 #include "models/osdviewmodel.h"
+#include "models/domain/systemstatemodel.h"
 #include <QDebug>
 
 ReticleMenuController::ReticleMenuController(QObject *parent)
@@ -22,6 +23,17 @@ void ReticleMenuController::initialize()
 
     connect(m_viewModel, &MenuViewModel::optionSelected,
             this, &ReticleMenuController::handleMenuOptionSelected);
+
+    m_stateModel = ServiceManager::instance()->get<SystemStateModel>();
+    if (m_stateModel) {
+        // Connect to color changes
+        connect(m_stateModel, &SystemStateModel::colorStyleChanged,
+                this, &ReticleMenuController::onColorStyleChanged);
+
+        // Set initial color
+        const auto& data = m_stateModel->data();
+        m_viewModel->setAccentColor(data.colorStyle);
+    }
 }
 
 QStringList ReticleMenuController::buildReticleOptions() const
@@ -147,4 +159,12 @@ void ReticleMenuController::handleMenuOptionSelected(const QString& option)
     }
 
     emit menuFinished();
+}
+
+void ReticleMenuController::onColorStyleChanged(const QColor& color)
+{
+    qDebug() << "ReticleMenuController: Color changed to" << color;
+    if (m_viewModel) {
+        m_viewModel->setAccentColor(color);
+    }
 }

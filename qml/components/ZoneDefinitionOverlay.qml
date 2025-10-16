@@ -8,6 +8,7 @@ Rectangle {
     // Get ViewModels from context
     property var viewModel: zoneDefinitionViewModel
     property var mapViewModel: zoneMapViewModel
+    property color accentColor: viewModel ? viewModel.accentColor : Qt.rgba(70, 226, 165, 1.0)
 
     visible: viewModel ? viewModel.visible : false
     color: Qt.rgba(0, 0, 0, 0.59) // Semi-transparent background
@@ -20,9 +21,11 @@ Rectangle {
         width: Math.min(parent.width - 20, 800)
         height: Math.min(parent.height - 20, 700)
         color: Qt.rgba(0, 0, 0, 0.9)
-        border.color: Qt.rgba(70, 226, 165, 1.0)
+        border.color: accentColor
         border.width: 2
         radius: 5
+
+
 
         ColumnLayout {
             anchors.fill: parent
@@ -35,7 +38,7 @@ Rectangle {
                 text: viewModel ? viewModel.title : ""
                 font.pixelSize: 18
                 font.bold: true
-                color: Qt.rgba(70, 226, 165, 1.0)
+                color: accentColor
                 horizontalAlignment: Text.AlignHCenter
             }
 
@@ -44,7 +47,7 @@ Rectangle {
                 Layout.fillWidth: true
                 text: viewModel ? viewModel.instruction : ""
                 font.pixelSize: 12
-                color: Qt.rgba(70, 226, 165, 1.0)
+                color: accentColor
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
             }
@@ -58,13 +61,13 @@ Rectangle {
                 Text {
                     text: "WS Pos:"
                     font.pixelSize: 11
-                    color: Qt.rgba(70, 226, 165, 1.0)
+                    color: accentColor
                 }
 
                 Text {
                     text: viewModel ? "Az: " + viewModel.gimbalAz.toFixed(1) + "°" : "Az: ---°"
                     font.pixelSize: 11
-                    color: Qt.rgba(70, 226, 165, 1.0)
+                    color: accentColor
                 }
 
                 Item { Layout.fillWidth: true }
@@ -72,7 +75,7 @@ Rectangle {
                 Text {
                     text: viewModel ? "El: " + viewModel.gimbalEl.toFixed(1) + "°" : "El: ---°"
                     font.pixelSize: 11
-                    color: Qt.rgba(70, 226, 165, 1.0)
+                    color: accentColor
                 }
             }
 
@@ -94,8 +97,8 @@ Rectangle {
                         width: mainMenuList.width
                         height: 35
                         color: index === mainMenuList.currentIndex ?
-                               Qt.rgba(70, 226, 165, 1.0) : "transparent"
-                        border.color: Qt.rgba(70, 226, 165, 1.0)
+                               accentColor : "transparent"
+                        border.color: accentColor
                         border.width: 1
 
                         Text {
@@ -105,7 +108,7 @@ Rectangle {
                             font.family: "Archivo Narrow"
                             font.weight: Font.DemiBold
                             color: index === mainMenuList.currentIndex ?
-                                   "black" : Qt.rgba(70, 226, 165, 1.0)
+                                   "black" : accentColor
                         }
                     }
                 }
@@ -123,8 +126,8 @@ Rectangle {
                         width: zoneSelectionList.width
                         height: 35
                         color: index === zoneSelectionList.currentIndex ?
-                               Qt.rgba(70, 226, 165, 1.0) : "transparent"
-                        border.color: Qt.rgba(70, 226, 165, 1.0)
+                               accentColor : "transparent"
+                        border.color: accentColor
                         border.width: 1
 
                         Text {
@@ -134,7 +137,7 @@ Rectangle {
                             font.family: "Archivo Narrow"
                             font.weight: Font.DemiBold
                             color: index === zoneSelectionList.currentIndex ?
-                                   "black" : Qt.rgba(70, 226, 165, 1.0)
+                                   "black" : accentColor
                         }
                     }
                 }
@@ -156,8 +159,8 @@ Rectangle {
                         width: 120
                         height: 50
                         color: index === confirmList.currentIndex ?
-                               Qt.rgba(70, 226, 165, 1.0) : "transparent"
-                        border.color: Qt.rgba(70, 226, 165, 1.0)
+                               accentColor : "transparent"
+                        border.color: accentColor
                         border.width: 2
                         radius: 3
 
@@ -167,7 +170,7 @@ Rectangle {
                             font.pixelSize: 14
                             font.bold: true
                             color: index === confirmList.currentIndex ?
-                                   "black" : Qt.rgba(70, 226, 165, 1.0)
+                                   "black" : accentColor
                         }
                     }
                 }

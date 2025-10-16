@@ -5,16 +5,9 @@
 #include <QColor>
 #include "models/menuviewmodel.h"
 #include "models/domain/systemstatedata.h"
-/*enum class ColorStyle {
-    Green = 0,
-    Red,
-    White,
-    Yellow,
-    Cyan,
-    COUNT
-};*/
 
 class OsdViewModel;
+class SystemStateModel;
 
 class ColorMenuController : public QObject
 {
@@ -38,10 +31,12 @@ signals:
 private slots:
     void handleMenuOptionSelected(const QString& option);
     void handleCurrentItemChanged(int index);
+    void onColorStyleChanged(const QColor& color);
 
 private:
     MenuViewModel* m_viewModel;
     OsdViewModel* m_osdViewModel;
+    SystemStateModel* m_stateModel;
 
     QStringList buildColorOptions() const;
     QString colorStyleToString(ColorStyle style) const;

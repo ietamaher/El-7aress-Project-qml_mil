@@ -2,6 +2,7 @@
 #define ZEROINGVIEWMODEL_H
 
 #include <QObject>
+#include <QColor>
 
 class ZeroingViewModel : public QObject
 {
@@ -33,6 +34,7 @@ public slots:
     void setShowOffsets(bool show);
     void setAzimuthOffset(float offset);
     void setElevationOffset(float offset);
+    void setAccentColor(const QColor& color);
 
 signals:
     void visibleChanged();
@@ -42,6 +44,7 @@ signals:
     void showOffsetsChanged();
     void azimuthOffsetChanged();
     void elevationOffsetChanged();
+    void accentColorChanged();
 
 private:
     bool m_visible;
@@ -51,6 +54,7 @@ private:
     bool m_showOffsets;
     float m_azimuthOffset;
     float m_elevationOffset;
+    QColor m_accentColor = QColor(70, 226, 165); // Default green
 };
 
 #endif // ZEROINGVIEWMODEL_H

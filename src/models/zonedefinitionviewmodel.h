@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QColor>
 
 /**
  * @brief Main ViewModel for Zone Definition overlay
@@ -34,6 +35,8 @@ class ZoneDefinitionViewModel : public QObject
     // Gimbal position display
     Q_PROPERTY(float gimbalAz READ gimbalAz NOTIFY gimbalAzChanged)
     Q_PROPERTY(float gimbalEl READ gimbalEl NOTIFY gimbalElChanged)
+    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY accentColorChanged)
+
 
 public:
     enum PanelType {
@@ -60,7 +63,7 @@ public:
     int currentIndex() const { return m_currentIndex; }
     float gimbalAz() const { return m_gimbalAz; }
     float gimbalEl() const { return m_gimbalEl; }
-
+    QColor accentColor() const { return m_accentColor; }
 public slots:
     // Setters
     void setVisible(bool visible);
@@ -75,7 +78,7 @@ public slots:
     void setMenuOptions(const QStringList& options);
     void setCurrentIndex(int index);
     void setGimbalPosition(float az, float el);
-
+    void setAccentColor(const QColor& color);
 signals:
     void visibleChanged();
     void showMainMenuChanged();
@@ -90,6 +93,7 @@ signals:
     void currentIndexChanged();
     void gimbalAzChanged();
     void gimbalElChanged();
+    void accentColorChanged();
 
 private:
     bool m_visible = false;
@@ -105,6 +109,7 @@ private:
     int m_currentIndex = 0;
     float m_gimbalAz = 0.0f;
     float m_gimbalEl = 0.0f;
+    QColor m_accentColor = QColor(70, 226, 165); // Default green
 };
 
 #endif // ZONEDEFINITIONVIEWMODEL_H

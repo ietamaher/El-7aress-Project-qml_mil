@@ -36,6 +36,12 @@ void WindageController::initialize()
                     updateUI();
                 }
             });
+    connect(m_stateModel, &SystemStateModel::colorStyleChanged,
+            this, &WindageController::onColorStyleChanged);
+    
+    // Set initial color
+    const auto& data = m_stateModel->data();
+    m_viewModel->setAccentColor(data.colorStyle);
 }
 
 void WindageController::show()
@@ -167,4 +173,10 @@ void WindageController::onDownButtonPressed()
         if (m_currentWindSpeedEdit < 0) m_currentWindSpeedEdit = 0;
         updateUI();
     }
+}
+
+void WindageController::onColorStyleChanged(const QColor& color)
+{
+    qDebug() << "WindageController: Color changed to" << color;
+    m_viewModel->setAccentColor(color);
 }

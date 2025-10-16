@@ -14,11 +14,10 @@ OsdViewModel::OsdViewModel(int screenWidth, int screenHeight, QObject *parent)
     qmlRegisterUncreatableType<OsdEnums>("com.yourcompany.osd", 1, 0, "OsdEnums", "OsdEnums namespace for enum access only.");
 }
 
-void OsdViewModel::setOsdColor(const QColor &osdColor)
-{
-    if (m_osdColor != osdColor) {
-        m_osdColor = osdColor;
-        emit osdColorChanged();
+void OsdViewModel::setAccentColor(const QColor& color) {
+    if (m_accentColor != color) {
+        m_accentColor = color;
+        emit accentColorChanged();
     }
 }
 

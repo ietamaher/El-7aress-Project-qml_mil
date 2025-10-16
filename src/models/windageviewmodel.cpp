@@ -62,3 +62,10 @@ void WindageViewModel::setWindSpeedLabel(const QString& label)
         emit windSpeedLabelChanged();
     }
 }
+
+void WindageViewModel::setAccentColor(const QColor& color) {
+    if (m_accentColor != color) {
+        m_accentColor = color;
+        emit accentColorChanged();
+    }
+}

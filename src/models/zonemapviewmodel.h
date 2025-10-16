@@ -5,6 +5,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QPointF>
+#include <QColor>
 
 class SystemStateModel;
 
@@ -33,6 +34,8 @@ class ZoneMapViewModel : public QObject
 
     // Highlighted zone
     Q_PROPERTY(int highlightedZoneId READ highlightedZoneId NOTIFY highlightedZoneIdChanged)
+    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY accentColorChanged)
+
 
 public:
     explicit ZoneMapViewModel(QObject *parent = nullptr);
@@ -49,6 +52,7 @@ public:
     bool isDefiningStart() const { return m_isDefiningStart; }
     bool isDefiningEnd() const { return m_isDefiningEnd; }
     int highlightedZoneId() const { return m_highlightedZoneId; }
+    QColor accentColor() const { return m_accentColor; }
 
 public slots:
     void setGimbalPosition(float az, float el);
@@ -56,6 +60,7 @@ public slots:
     void setWipZone(const QVariantMap& zone, int type, bool definingStart, bool definingEnd);
     void clearWipZone();
     void setHighlightedZone(int id);
+    void setAccentColor(const QColor& color);
 
     // Utility functions for QML Canvas
     Q_INVOKABLE QPointF azElToPixel(float az, float el, float width, float height) const;
@@ -73,6 +78,7 @@ signals:
     void isDefiningStartChanged();
     void isDefiningEndChanged();
     void highlightedZoneIdChanged();
+    void accentColorChanged();
 
 private:
     QVariantList convertAreaZonesToVariant(SystemStateModel* model);
@@ -96,6 +102,8 @@ private:
     static constexpr float AZ_MAX = 360.0f;
     static constexpr float EL_MIN = -20.0f;
     static constexpr float EL_MAX = 90.0f;
+
+    QColor m_accentColor = QColor(70, 226, 165); // Default green
 };
 
 #endif // ZONEMAPVIEWMODEL_H

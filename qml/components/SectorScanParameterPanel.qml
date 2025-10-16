@@ -6,7 +6,8 @@ Rectangle {
     id: root
 
     property var viewModel: null
-    property color accentColor: Qt.rgba(70, 226, 165, 1.0)
+    property color accentColor: zoneDefinitionViewModel ? zoneDefinitionViewModel.accentColor : Qt.rgba(70, 226, 165, 1.0)
+
 
     color: Qt.rgba(0, 0.16, 0.12, 0.8)
     radius: 5

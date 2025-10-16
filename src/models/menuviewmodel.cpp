@@ -112,3 +112,10 @@ int MenuViewModel::findNextSelectable(int start, int direction)
 
     return -1;
 }
+
+void MenuViewModel::setAccentColor(const QColor& color) {
+    if (m_accentColor != color) {
+        m_accentColor = color;
+        emit accentColorChanged();
+    }
+}

@@ -15,7 +15,8 @@ Rectangle {
     visible: viewModel ? viewModel.visible : false
 
     property var viewModel: null
-    property color accentColor: "#00FF99"
+    property color accentColor: viewModel ? viewModel.accentColor : "#46E2A5"
+
 
     // Subtle drop shadow using new Effects API
     layer.enabled: true

@@ -68,14 +68,15 @@ void SystemStateModel::updateData(const SystemStateData &newState) {
 // --- UI Related Setters Implementation (Keep existing logic, ensure signals are emitted) ---
 void SystemStateModel::setColorStyle(const QColor &style)
 {
+    qDebug() << "SystemStateModel::setColorStyle() called with:" << style;  // ✅ ADD
 
     SystemStateData newData = m_currentStateData;
     newData.colorStyle = style;
     newData.osdColorStyle = ColorUtils::fromQColor(style);
 
+    emit colorStyleChanged(style);  // ✅ Is this being emitted?
+    qDebug() << "SystemStateModel: colorStyleChanged signal emitted";  // ✅ ADD
 
-    // 2) Emit a dedicated signal
-    emit colorStyleChanged(style);
     updateData(newData);
 }
 

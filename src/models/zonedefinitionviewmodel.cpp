@@ -95,3 +95,10 @@ void ZoneDefinitionViewModel::setGimbalPosition(float az, float el) {
         emit gimbalElChanged();
     }
 }
+
+void ZoneDefinitionViewModel::setAccentColor(const QColor& color) {
+    if (m_accentColor != color) {
+        m_accentColor = color;
+        emit accentColorChanged();
+    }
+}

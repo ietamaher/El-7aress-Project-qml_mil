@@ -1,6 +1,7 @@
 #include "controllers/mainmenucontroller.h"
 #include "services/servicemanager.h"
 #include "models/menuviewmodel.h"
+#include "models/domain/systemstatemodel.h"
 #include <QDebug>
 
 MainMenuController::MainMenuController(QObject *parent)
@@ -16,6 +17,15 @@ void MainMenuController::initialize()
 
     connect(m_viewModel, &MenuViewModel::optionSelected,
             this, &MainMenuController::handleMenuOptionSelected);
+    SystemStateModel* stateModel = ServiceManager::instance()->get<SystemStateModel>();
+    if (stateModel) {
+        connect(stateModel, &SystemStateModel::colorStyleChanged,
+                this, &MainMenuController::onColorStyleChanged);
+        
+        // Set initial color
+        const auto& data = stateModel->data();
+        m_viewModel->setAccentColor(data.colorStyle);
+    }
 }
 
 QStringList MainMenuController::buildMainMenuOptions() const
@@ -128,4 +138,10 @@ void MainMenuController::handleMenuOptionSelected(const QString& option)
     else {
         qWarning() << "MainMenuController: Unknown option:" << option;
     }
+}
+
+void MainMenuController::onColorStyleChanged(const QColor& color)
+{
+    qDebug() << "MainMenuController: Color changed to" << color;
+    m_viewModel->setAccentColor(color);
 }

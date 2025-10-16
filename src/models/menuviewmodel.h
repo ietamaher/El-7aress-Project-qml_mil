@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QStringListModel>
+#include <QColor>
 
 class MenuViewModel : public QObject
 {
@@ -12,6 +13,7 @@ class MenuViewModel : public QObject
     Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
     Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
     Q_PROPERTY(QStringListModel* optionsModel READ optionsModel CONSTANT)
+    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY accentColorChanged)
 
 public:
     explicit MenuViewModel(QObject *parent = nullptr);
@@ -21,6 +23,7 @@ public:
     QString description() const { return m_description; }
     int currentIndex() const { return m_currentIndex; }
     QStringListModel* optionsModel() { return &m_optionsModel; }
+    QColor accentColor() const { return m_accentColor; }
 
 public slots:
     void showMenu(const QString& title, const QString& description, const QStringList& options);
@@ -29,6 +32,7 @@ public slots:
     void moveSelectionDown();
     void selectCurrentItem();
     void setCurrentIndex(int index); // NEW: Set selection programmatically
+    void setAccentColor(const QColor& color);
 
 signals:
     void visibleChanged();
@@ -36,6 +40,7 @@ signals:
     void descriptionChanged();
     void currentIndexChanged();
     void optionSelected(const QString& option);
+    void accentColorChanged();
 
 private:
     bool m_visible = false;
@@ -46,6 +51,7 @@ private:
 
     int findNextSelectable(int start, int direction);
     bool isSelectable(int index) const;
+    QColor m_accentColor = QColor(70, 226, 165); // Default green
 };
 
 #endif // MENUVIEWMODEL_H

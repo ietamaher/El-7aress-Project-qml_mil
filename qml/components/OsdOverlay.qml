@@ -7,7 +7,7 @@ Item {
 
     // 1. OSD Data Model Reference (The link to C++)
     property var osdViewModel: null // Public property to receive the C++ model
-    property color osdColor: "green"
+    property color accentColor: viewModel ? viewModel.accentColor : "#46E2A5"
 
     // --- Configuration Constants (matching OsdRenderer's internal constants) ---
     readonly property real trackingCornerLength: 15.0
@@ -21,7 +21,7 @@ Item {
         anchors.top: parent.top
         anchors.margins: 25
         text: osdViewModel ? osdViewModel.modeText : "" // Bind to C++ property
-        color: osdRoot.osdColor
+        color: osdRoot.accentColor
         font.pointSize: 16
     }
 
@@ -63,7 +63,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             color: "transparent"
-            border.color: osdRoot.osdColor
+            border.color: osdRoot.accentColor
             border.width: 2
         }
     }
@@ -82,13 +82,13 @@ Item {
             width: 50; height: reticleLineWidth
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
-            color: osdRoot.osdColor
+            color: osdRoot.accentColor
         }
         Rectangle {
             width: reticleLineWidth; height: 50
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
-            color: osdRoot.osdColor
+            color: osdRoot.accentColor
         }
     }
 
@@ -105,7 +105,7 @@ Item {
             anchors.centerIn: parent
             width: 2 // Line thickness
             height: 50 // Needle length
-            color: osdRoot.osdColor
+            color: osdRoot.accentColor
             transformOrigin: Item.Center // Rotate around center point
             // Bind QML rotation to C++ azimuth property.
             rotation: osdViewModel ? osdViewModel.azimuth : 0
@@ -116,7 +116,7 @@ Item {
             anchors.top: needle.bottom
             anchors.topMargin: 10
             text: osdViewModel ? osdViewModel.azimuth.toFixed(1) + "°" : ""
-            color: osdRoot.osdColor
+            color: osdRoot.accentColor
             font.pointSize: 12
         }
     }

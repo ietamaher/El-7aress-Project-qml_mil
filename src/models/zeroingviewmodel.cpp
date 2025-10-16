@@ -64,3 +64,11 @@ void ZeroingViewModel::setElevationOffset(float offset)
         emit elevationOffsetChanged();
     }
 }
+
+void ZeroingViewModel::setAccentColor(const QColor& color) {
+    if (m_accentColor != color) {
+        m_accentColor = color;
+        emit accentColorChanged();
+    }
+}
+ 

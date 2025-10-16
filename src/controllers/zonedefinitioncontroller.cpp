@@ -55,7 +55,10 @@ void ZoneDefinitionController::initialize()
             this, &ZoneDefinitionController::onZonesChanged);
     connect(m_stateModel, &SystemStateModel::colorStyleChanged,
             this, &ZoneDefinitionController::onColorStyleChanged);
-
+    connect(m_stateModel, &SystemStateModel::colorStyleChanged,
+            this, &ZoneDefinitionController::onColorStyleChanged);
+    const auto& data = m_stateModel->data();
+    m_viewModel->setAccentColor(data.colorStyle);      
     qDebug() << "ZoneDefinitionController initialized";
 }
 
@@ -287,11 +290,10 @@ void ZoneDefinitionController::onZonesChanged()
     }
 }
 
-void ZoneDefinitionController::onColorStyleChanged(const QColor& style)
+void ZoneDefinitionController::onColorStyleChanged(const QColor& color)
 {
-    // QML will handle color theme automatically via bindings
-    // This is just for logging
-    qDebug() << "ZoneDefinitionController: Color style changed to" << style;
+    qDebug() << "ZoneDefinitionController: Color changed to" << color;
+    m_viewModel->setAccentColor(color);
 }
 
 // ============================================================================
@@ -1534,3 +1536,4 @@ void ZoneDefinitionController::updateMapWipZone()
 
     m_mapViewModel->setWipZone(wipData, wipType, isDefiningStart, isDefiningEnd);
 }
+

@@ -32,6 +32,12 @@ void ZeroingController::initialize()
                     emit zeroingFinished();
                 }
             });
+    connect(m_stateModel, &SystemStateModel::colorStyleChanged,
+            this, &ZeroingController::onColorStyleChanged);
+    
+    // Set initial color
+    const auto& data = m_stateModel->data();
+    m_viewModel->setAccentColor(data.colorStyle);
 }
 
 void ZeroingController::show()
@@ -153,4 +159,10 @@ void ZeroingController::onUpButtonPressed()
 void ZeroingController::onDownButtonPressed()
 {
     // TODO: Implement fine-tuning if needed
+}
+
+void ZeroingController::onColorStyleChanged(const QColor& color)
+{
+    qDebug() << "ZeroingController: Color changed to" << color;
+    m_viewModel->setAccentColor(color);
 }
