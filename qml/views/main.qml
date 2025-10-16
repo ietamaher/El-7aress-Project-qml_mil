@@ -38,50 +38,83 @@ ApplicationWindow {
         osdViewModel: osdViewModelInstance
     }
 
+    // === MAIN MENU ===
     MainMenu {
-        // This is where your errors were. These properties now exist in Menu.qml
+        id: mainMenu
+        anchors.centerIn: parent
         viewModel: mainMenuViewModel
-        //osdColor: osdViewModelInstance.osdColor
-        id: menu
-
-        x: 50
-        y: 150
+        osdViewModel: osdViewModelInstance
+        z: 100
     }
+
+    // === RETICLE MENU ===
+    MainMenu {
+        id: reticleMenu
+        anchors.centerIn: parent
+        viewModel: reticleMenuViewModel
+        osdViewModel: osdViewModelInstance
+        z: 100
+    }
+
+    // === COLOR MENU ===
+    MainMenu {
+        id: colorMenu
+        anchors.centerIn: parent
+        viewModel: colorMenuViewModel
+        osdViewModel: osdViewModelInstance
+        z: 100
+    }
+
+    // === ZEROING OVERLAY ===
+    ZeroingOverlay {
+        id: zeroingOverlay
+        anchors.centerIn: parent
+        z: 100
+    }
+
+    // === WINDAGE OVERLAY ===
+    WindageOverlay {
+        id: windageOverlay
+        anchors.centerIn: parent
+        z: 100
+    }
+
+    // Physical Button Handlers - ONLY 3 BUTTONS
     Row {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
+        anchors.bottomMargin: 20
         spacing: 15
+        z: 200
 
         Button {
             text: "UP"
+            width: 80
+            height: 40
             onClicked: {
-                // Call the C++ slot on the appController instance we exposed
                 console.log("[UI] UP button clicked")
                 appController.onUpButtonPressed()
             }
         }
 
         Button {
-            text: "DOWN"
+            text: "MENU/VAL"
+            width: 100
+            height: 40
+            highlighted: true  // Make it stand out as the primary button
             onClicked: {
-                console.log("[UI] DOWN button clicked")
-                appController.onDownButtonPressed()
+                console.log("[UI] MENU/VAL button clicked")
+                appController.onMenuValButtonPressed()
             }
         }
 
         Button {
-            text: "MENU / SELECT"
+            text: "DOWN"
+            width: 80
+            height: 40
             onClicked: {
-                console.log("[UI] MENU button clicked")
-                appController.onMenuButtonPressed()
-            }
-        }
-        Button {
-            text: "SELECT"
-            onClicked: {
-                console.log("[UI] MENU button clicked")
-                appController.onSelectButtonPressed()
+                console.log("[UI] DOWN button clicked")
+                appController.onDownButtonPressed()
             }
         }
     }

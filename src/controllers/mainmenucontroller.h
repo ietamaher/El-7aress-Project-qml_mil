@@ -16,11 +16,10 @@ public slots:
     void show();
     void hide();
 
-    // Input handling
+    // Input handling - Only 3 buttons now
     void onUpButtonPressed();
     void onDownButtonPressed();
-    void onSelectButtonPressed();
-    void onBackButtonPressed(); // Add back button handling
+    void onSelectButtonPressed();  // Called by MENU/VAL when in main menu
 
 signals:
     // Events for the root controller to listen to
@@ -34,7 +33,7 @@ signals:
     void zoneDefinitionsRequested();
     void systemStatusRequested();
     void helpAboutRequested();
-    void radarTargetListRequested(); // If you have radar functionality
+    void radarTargetListRequested();
 
     void menuFinished();
 

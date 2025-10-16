@@ -1,4 +1,4 @@
-QT += quick
+QT += quick serialbus serialport dbus
 
 #LIBS += -L/usr/lib/x86_64-linux-gnu/gstreamer-1.0 -lgstxvimagesink
 INCLUDEPATH += "/usr/include/gstreamer-1.0"
@@ -17,6 +17,11 @@ PKGCONFIG += gstreamer-gl-1.0
 SOURCES += \
         src/controllers/applicationcontroller.cpp \
         src/controllers/colormenucontroller.cpp \
+        src/controllers/windagecontroller.cpp \
+        src/controllers/zeroingcontroller.cpp \
+        src/models/windageviewmodel.cpp \
+        src/models/zeroingviewmodel.cpp \
+        src/models/domain/systemstatemodel.cpp \
         src/video/gstvideosource.cpp \
         src/main.cpp \
         src/controllers/mainmenucontroller.cpp \
@@ -24,7 +29,10 @@ SOURCES += \
         src/models/osdviewmodel.cpp \
         src/controllers/reticlemenucontroller.cpp \
         src/services/servicemanager.cpp \
-        src/video/videoimageprovider.cpp
+        src/video/videoimageprovider.cpp \
+        src/utils/reticleaimpointcalculator.cpp \
+        src/utils/colorutils.cpp
+
 
 RESOURCES += resources/resources.qrc
 
@@ -47,10 +55,21 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     src/controllers/applicationcontroller.h \
     src/controllers/colormenucontroller.h \
+    src/controllers/windagecontroller.h \
+    src/controllers/zeroingcontroller.h \
+    src/models/systemstatedata.h \
+    src/models/windageviewmodel.h \
+    src/models/zeroingviewmodel.h \
+    src/models/domain/systemstatemodel.h \
+    src/models/domain/systemstatedata.h \
     src/video/gstvideosource.h \
     src/controllers/mainmenucontroller.h \
     src/models/menuviewmodel.h \
     src/models/osdviewmodel.h \
     src/controllers/reticlemenucontroller.h \
     src/services/servicemanager.h \
-    src/video/videoimageprovider.h
+    src/video/videoimageprovider.h \
+    src/utils/reticleaimpointcalculator.h \
+    src/utils/colorutils.h
+
+

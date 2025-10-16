@@ -1,7 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>../qml/views/main.qml</file>
+        <file>../qml/views/MainMenu.qml</file>                
         <file>../qml/components/OsdOverlay.qml</file>
-        <file>../qml/views/MainMenu.qml</file>
+        <file>../qml/components/WindageOverlay.qml</file>
+        <file>../qml/components/ZeroingOverlay.qml</file>
     </qresource>
 </RCC>

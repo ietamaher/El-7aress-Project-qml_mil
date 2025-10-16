@@ -3,16 +3,17 @@
 
 #include <QObject>
 #include "models/menuviewmodel.h"
+#include "models/domain/systemstatedata.h"
 
 // Forward declaration - adjust to match your actual enum location
-enum class ReticleType {
+/*enum class ReticleType {
     Basic = 0,
     BoxCrosshair,
     StandardCrosshair,
     PrecisionCrosshair,
     MilDot,
     COUNT
-};
+};*/
 
 class OsdViewModel; // Your OSD model
 

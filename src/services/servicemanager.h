@@ -2,39 +2,33 @@
 #define SERVICEMANAGER_H
 
 #include <QObject>
-#include <QHash>
+#include <QMap>
 #include <QString>
-#include <QDebug>
 
-// Forward declarations of all our services
-class OsdViewModel;
-class MenuViewModel;
-class MainMenuController;
-class ApplicationController;
-
-class ServiceManager : public QObject
+class ServiceManager
 {
-    Q_OBJECT
-private:
-    explicit ServiceManager(QObject *parent = nullptr);
-    static ServiceManager* s_instance;
-    QHash<QString, QObject*> m_services;
-
 public:
     static ServiceManager* instance();
 
-    // Register a service with the manager
+    // Register a service with automatic type name
     void registerService(const QString& name, QObject* service);
 
-    // Get a service by its type
-    template <typename T>
-    T* get() const {
-        T* service = qobject_cast<T*>(m_services.value(T::staticMetaObject.className()));
-        if (!service) {
-            qWarning() << "ServiceManager: Service not found for type" << T::staticMetaObject.className();
-        }
-        return service;
+    // Get service by type (original method)
+    template<typename T>
+    T* get() {
+        return static_cast<T*>(m_services.value(T::staticMetaObject.className()));
     }
+
+    // NEW: Get service by custom name
+    template<typename T>
+    T* get(const QString& name) {
+        return static_cast<T*>(m_services.value(name));
+    }
+
+private:
+    ServiceManager() = default;
+    static ServiceManager* s_instance;
+    QMap<QString, QObject*> m_services;
 };
 
 #endif // SERVICEMANAGER_H

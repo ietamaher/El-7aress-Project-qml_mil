@@ -4,15 +4,15 @@
 #include <QObject>
 #include <QColor>
 #include "models/menuviewmodel.h"
-
-enum class ColorStyle {
+#include "models/domain/systemstatedata.h"
+/*enum class ColorStyle {
     Green = 0,
     Red,
     White,
     Yellow,
     Cyan,
     COUNT
-};
+};*/
 
 class OsdViewModel;
 

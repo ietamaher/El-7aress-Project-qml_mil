@@ -11,7 +11,7 @@ MainMenuController::MainMenuController(QObject *parent)
 
 void MainMenuController::initialize()
 {
-    m_viewModel = ServiceManager::instance()->get<MenuViewModel>();
+    m_viewModel = ServiceManager::instance()->get<MenuViewModel>(QString("MainMenuViewModel"));
     Q_ASSERT(m_viewModel);
 
     connect(m_viewModel, &MenuViewModel::optionSelected,
@@ -33,10 +33,11 @@ QStringList MainMenuController::buildMainMenuOptions() const
             << "--- SYSTEM ---"
             << "Zone Definitions"
             << "System Status"
-            << "Radar Target List" // Optional
+            << "Radar Target List"
             << "--- INFO ---"
-            << "Help/About"
-            << "Return ...";
+            << "Help/About";
+
+    // NO "Return ..." option since pressing MENU/VAL again will close the menu
 
     return options;
 }
@@ -44,7 +45,7 @@ QStringList MainMenuController::buildMainMenuOptions() const
 void MainMenuController::show()
 {
     QStringList menuOptions = buildMainMenuOptions();
-    m_viewModel->showMenu("Main Menu", "Navigate Through Options", menuOptions);
+    m_viewModel->showMenu("Main Menu", "Navigate with UP/DOWN, Select with MENU/VAL", menuOptions);
 }
 
 void MainMenuController::hide()
@@ -64,14 +65,8 @@ void MainMenuController::onDownButtonPressed()
 
 void MainMenuController::onSelectButtonPressed()
 {
+    // This is called when MENU/VAL is pressed while in the main menu
     m_viewModel->selectCurrentItem();
-}
-
-void MainMenuController::onBackButtonPressed()
-{
-    // Back button closes the menu
-    hide();
-    emit menuFinished();
 }
 
 void MainMenuController::handleMenuOptionSelected(const QString& option)
@@ -113,9 +108,6 @@ void MainMenuController::handleMenuOptionSelected(const QString& option)
     }
     else if (option == "Help/About") {
         emit helpAboutRequested();
-    }
-    else if (option == "Return ...") {
-        // Just close menu
     }
     else {
         qWarning() << "MainMenuController: Unknown option:" << option;

@@ -13,7 +13,8 @@ ReticleMenuController::ReticleMenuController(QObject *parent)
 
 void ReticleMenuController::initialize()
 {
-    m_viewModel = ServiceManager::instance()->get<MenuViewModel>();
+    // Get the RETICLE menu's ViewModel specifically by name
+    m_viewModel = ServiceManager::instance()->get<MenuViewModel>(QString("ReticleMenuViewModel"));
     m_osdViewModel = ServiceManager::instance()->get<OsdViewModel>();
 
     Q_ASSERT(m_viewModel);

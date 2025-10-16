@@ -2,7 +2,7 @@
 
 This document outlines the reorganization of the repository into a structured Qt6/QML project.
 
-## New Project Structure
+## Project Structure
 
 The project has been reorganized into the following directory structure:
 
@@ -45,6 +45,88 @@ The project has been reorganized into the following directory structure:
         └── videoimageprovider.h
 ```
 
+## New Project Structure
+
+
+```
+    QT6-gstreamer-example/
+    ├── qml/
+    │   ├── components/          # Reusable UI components
+    │   │   ├── MenuOverlay.qml
+    │   │   ├── ZeroingOverlay.qml
+    │   │   └── OSDOverlay.qml
+    │   └── views/
+    │       └── main.qml
+    │
+    ├── src/
+    │   ├── controllers/         # Application Flow Controllers
+    │   │   ├── ApplicationController       # Root coordinator
+    │   │   ├── MainMenuController
+    │   │   ├── GimbalController           # Controls gimbal movement
+    │   │   ├── TrackingController         # Manages target tracking
+    │   │   ├── JoystickController         # Joystick input handler
+    │   │   ├── ZeroingController
+    │   │   ├── WindageController
+    │   │   └── FireControlController      # Fire control logic
+    │   │
+    │   ├── models/              # Data Models & ViewModels
+    │   │   ├── viewmodels/      # UI ViewModels
+    │   │   │   ├── MenuViewModel
+    │   │   │   ├── OsdViewModel
+    │   │   │   ├── ZeroingViewModel
+    │   │   │   └── WindageViewModel
+    │   │   │
+    │   │   └── domain/          # Domain/Business Models
+    │   │       ├── SystemState.h           # Core system state (read-only for most)
+    │   │       ├── GimbalState.h           # Gimbal position, status
+    │   │       ├── BallisticsState.h       # Zeroing, windage, lead angle
+    │   │       ├── TrackingState.h         # Tracking lock, target info
+    │   │       ├── ZoneDefinitions.h       # Area zones, TRPs, etc.
+    │   │       └── WeaponState.h           # Fire control, safety
+    │   │
+    │   ├── services/            # Singleton Business Logic Services
+    │   │   ├── ServiceManager              # DI container
+    │   │   ├── StateCoordinator            # Central state management
+    │   │   ├── ZoneManager                 # Manage zones (no-fire, TRP, etc.)
+    │   │   ├── BallisticsService           # Zeroing, windage, lead angle
+    │   │   ├── TrackingService             # Target tracking logic
+    │   │   ├── SafetyService               # Fire control safety checks
+    │   │   └── ConfigurationService        # Save/load settings
+    │   │
+    │   ├── hardware/            # Hardware Interface Layer
+    │   │   ├── interfaces/      # Abstract interfaces
+    │   │   │   ├── IServoDriver.h
+    │   │   │   ├── ISensor.h
+    │   │   │   └── IInputDevice.h
+    │   │   │
+    │   │   ├── devices/         # Concrete device implementations
+    │   │   │   ├── Plc21Device
+    │   │   │   ├── Plc42Device
+    │   │   │   ├── ServoAzimuthDriver
+    │   │   │   ├── ServoElevationDriver
+    │   │   │   ├── LrfDevice              # Laser Range Finder
+    │   │   │   ├── ImuDevice              # Gyroscope/IMU
+    │   │   │   ├── JoystickDevice
+    │   │   │   ├── DayCameraDevice
+    │   │   │   ├── NightCameraDevice
+    │   │   │   └── RadarDevice
+    │   │   │
+    │   │   └── protocols/       # Communication protocols
+    │   │       ├── ModbusProtocol
+    │   │       ├── SerialProtocol
+    │   │       └── CanBusProtocol
+    │   │
+    │   ├── utils/               # Utility classes
+    │   │   ├── ReticleAimpointCalculator
+    │   │   ├── GeometryUtils
+    │   │   └── TimestampLogger
+    │   │
+    │   └── video/               # Video pipeline
+    │       ├── GstVideoSource
+    │       └── VideoImageProvider
+
+
+```
 ## Rationale for Reorganization
 
 The project was reorganized to follow Qt/QML best practices, improving maintainability, scalability, and developer onboarding. The key principles were:
@@ -52,38 +134,7 @@ The project was reorganized to follow Qt/QML best practices, improving maintaina
 *   **Separation of Concerns:** C++ backend code (`src`), QML frontend code (`qml`), and resource files (`resources`) are now in distinct top-level directories.
 *   **Domain-Driven C++ Structure:** The `src` directory is further divided by functionality (`controllers`, `models`, `services`, `video`), making it easier to locate and understand specific parts of the C++ codebase.
 *   **Component-Based QML Structure:** The `qml` directory separates reusable UI controls (`components`) from application screens (`views`). This encourages modularity and code reuse.
-
-## File Mappings
-
-The following table maps the original file locations to their new locations:
-
-| Old Path                      | New Path                                  |
-| ----------------------------- | ----------------------------------------- |
-| `applicationcontroller.cpp`   | `src/controllers/applicationcontroller.cpp` |
-| `applicationcontroller.h`     | `src/controllers/applicationcontroller.h`   |
-| `colormenucontroller.cpp`     | `src/controllers/colormenucontroller.cpp`   |
-| `colormenucontroller.h`       | `src/controllers/colormenucontroller.h`     |
-| `mainmenucontroller.cpp`      | `src/controllers/mainmenucontroller.cpp`    |
-| `mainmenucontroller.h`        | `src/controllers/mainmenucontroller.h`      |
-| `reticlemenucontroller.cpp`   | `src/controllers/reticlemenucontroller.cpp` |
-| `reticlemenucontroller.h`     | `src/controllers/reticlemenucontroller.h`   |
-| `menuviewmodel.cpp`           | `src/models/menuviewmodel.cpp`              |
-| `menuviewmodel.h`             | `src/models/menuviewmodel.h`                |
-| `osdviewmodel.cpp`            | `src/models/osdviewmodel.cpp`               |
-| `osdviewmodel.h`              | `src/models/osdviewmodel.h`                 |
-| `servicemanager.cpp`          | `src/services/servicemanager.cpp`           |
-| `servicemanager.h`            | `src/services/servicemanager.h`             |
-| `gstvideosource.cpp`          | `src/video/gstvideosource.cpp`              |
-| `gstvideosource.h`            | `src/video/gstvideosource.h`                |
-| `videoimageprovider.cpp`      | `src/video/videoimageprovider.cpp`          |
-| `videoimageprovider.h`        | `src/video/videoimageprovider.h`            |
-| `main.cpp`                    | `src/main.cpp`                            |
-| `qml/main.qml`                | `qml/views/main.qml`                      |
-| `qml/MainMenu.qml`            | `qml/views/MainMenu.qml`                  |
-| `qml/Menu.qml`                | `qml/views/Menu.qml`                      |
-| `qml/OsdOverlay.qml`          | `qml/components/OsdOverlay.qml`           |
-| `resources.qrc`               | `resources/resources.qrc`                 |
-
+ 
 ## Build and Runtime Changes
 
 ### Build System (`.pro` file)

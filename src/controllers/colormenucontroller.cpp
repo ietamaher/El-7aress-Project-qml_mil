@@ -13,7 +13,8 @@ ColorMenuController::ColorMenuController(QObject *parent)
 
 void ColorMenuController::initialize()
 {
-    m_viewModel = ServiceManager::instance()->get<MenuViewModel>();
+    // Get the COLOR menu's ViewModel specifically by name
+    m_viewModel = ServiceManager::instance()->get<MenuViewModel>(QString("ColorMenuViewModel"));
     m_osdViewModel = ServiceManager::instance()->get<OsdViewModel>();
 
     Q_ASSERT(m_viewModel);
@@ -41,8 +42,8 @@ QString ColorMenuController::colorStyleToString(ColorStyle style) const
     case ColorStyle::Green: return "Green";
     case ColorStyle::Red: return "Red";
     case ColorStyle::White: return "White";
-    case ColorStyle::Yellow: return "Yellow";
-    case ColorStyle::Cyan: return "Cyan";
+    //case ColorStyle::Yellow: return "Yellow";
+    //case ColorStyle::Cyan: return "Cyan";
     default: return "Green";
     }
 }
@@ -52,8 +53,8 @@ ColorStyle ColorMenuController::stringToColorStyle(const QString& str) const
     if (str == "Green") return ColorStyle::Green;
     if (str == "Red") return ColorStyle::Red;
     if (str == "White") return ColorStyle::White;
-    if (str == "Yellow") return ColorStyle::Yellow;
-    if (str == "Cyan") return ColorStyle::Cyan;
+    //if (str == "Yellow") return ColorStyle::Yellow;
+    //if (str == "Cyan") return ColorStyle::Cyan;
     return ColorStyle::Green;
 }
 
@@ -63,8 +64,8 @@ QColor ColorMenuController::colorStyleToQColor(ColorStyle style) const
     case ColorStyle::Green: return QColor("#00FF99");
     case ColorStyle::Red: return QColor("#FF0000");
     case ColorStyle::White: return QColor("#FFFFFF");
-    case ColorStyle::Yellow: return QColor("#FFFF00");
-    case ColorStyle::Cyan: return QColor("#00FFFF");
+    //case ColorStyle::Yellow: return QColor("#FFFF00");
+    //case ColorStyle::Cyan: return QColor("#00FFFF");
     default: return QColor("#00FF99");
     }
 }

@@ -6,7 +6,8 @@
 class MainMenuController;
 class ReticleMenuController;
 class ColorMenuController;
-// Add other controllers as needed
+class ZeroingController;
+class WindageController;
 
 class ApplicationController : public QObject
 {
@@ -17,12 +18,10 @@ public:
     void initialize();
 
 public slots:
-    // Called by physical button handlers or QML
-    void onMenuButtonPressed();
+    // PHYSICAL BUTTONS - Only 3 buttons now
+    void onMenuValButtonPressed();  // Combined MENU and VALIDATION button
     void onUpButtonPressed();
     void onDownButtonPressed();
-    void onSelectButtonPressed();
-    void onBackButtonPressed();
 
 private slots:
     // Main Menu handlers
@@ -41,26 +40,34 @@ private slots:
     // Submenu handlers
     void handleReticleMenuFinished();
     void handleColorMenuFinished();
+    void handleZeroingFinished();
+    void handleWindageFinished();
     void handleReturnToMainMenu();
 
 private:
     enum class MenuState {
-        None,
-        MainMenu,
-        ReticleMenu,
-        ColorMenu,
-        BrightnessAdjust,
-        ZeroingProcedure,
-        WindageProcedure,
-        ZoneDefinition,
-        SystemStatus,
-        RadarTargets,
-        HelpAbout
+        None,                    // No menu visible
+        MainMenu,               // Main menu open
+        ReticleMenu,            // Reticle selection submenu
+        ColorMenu,              // Color selection submenu
+        BrightnessAdjust,       // Brightness adjustment (future)
+        ZeroingProcedure,       // Zeroing procedure active
+        WindageProcedure,       // Windage procedure active
+        ZoneDefinition,         // Zone definition (future)
+        SystemStatus,           // System status (future)
+        RadarTargets,           // Radar targets (future)
+        HelpAbout               // Help/About (future)
     };
 
     void showMainMenu();
     void hideAllMenus();
     void setMenuState(MenuState state);
+
+    // MENU/VAL button behavior depends on current state
+    void handleMenuValInNoMenuState();
+    void handleMenuValInMainMenu();
+    void handleMenuValInSubmenu();
+    void handleMenuValInProcedure();
 
     MenuState m_currentMenuState;
 
@@ -68,7 +75,8 @@ private:
     MainMenuController* m_mainMenuController;
     ReticleMenuController* m_reticleMenuController;
     ColorMenuController* m_colorMenuController;
-    // Add other controllers as needed
+    ZeroingController* m_zeroingController;
+    WindageController* m_windageController;
 };
 
 #endif // APPLICATIONCONTROLLER_H
