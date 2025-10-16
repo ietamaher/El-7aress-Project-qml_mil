@@ -8,6 +8,7 @@
 #include "models/domain/systemstatemodel.h"
 #include <QDebug>
 
+
 ApplicationController::ApplicationController(QObject *parent)
     : QObject(parent)
     , m_currentMenuState(MenuState::None)
@@ -51,7 +52,9 @@ void ApplicationController::initialize()
         m_windageController->initialize();
     }
 
-    // Connect main menu signals
+    // =========================================================================
+    // MAIN MENU CONNECTIONS
+    // =========================================================================
     connect(m_mainMenuController, &MainMenuController::personalizeReticleRequested,
             this, &ApplicationController::handlePersonalizeReticle);
     connect(m_mainMenuController, &MainMenuController::personalizeColorsRequested,
@@ -75,28 +78,43 @@ void ApplicationController::initialize()
     connect(m_mainMenuController, &MainMenuController::helpAboutRequested,
             this, &ApplicationController::handleHelpAbout);
 
-    // Connect submenu signals
+    // THIS IS CRITICAL - Handle "Return ..." from main menu
+    connect(m_mainMenuController, &MainMenuController::menuFinished,
+            this, &ApplicationController::handleMainMenuFinished);
+
+    // =========================================================================
+    // RETICLE MENU CONNECTIONS
+    // =========================================================================
     connect(m_reticleMenuController, &ReticleMenuController::returnToMainMenu,
             this, &ApplicationController::handleReturnToMainMenu);
     connect(m_reticleMenuController, &ReticleMenuController::menuFinished,
             this, &ApplicationController::handleReticleMenuFinished);
 
+    // =========================================================================
+    // COLOR MENU CONNECTIONS
+    // =========================================================================
     connect(m_colorMenuController, &ColorMenuController::returnToMainMenu,
             this, &ApplicationController::handleReturnToMainMenu);
     connect(m_colorMenuController, &ColorMenuController::menuFinished,
             this, &ApplicationController::handleColorMenuFinished);
 
-    // Connect zeroing signals
+    // =========================================================================
+    // ZEROING CONNECTIONS - THIS WAS MISSING!!!
+    // =========================================================================
     connect(m_zeroingController, &ZeroingController::returnToMainMenu,
             this, &ApplicationController::handleReturnToMainMenu);
     connect(m_zeroingController, &ZeroingController::zeroingFinished,
             this, &ApplicationController::handleZeroingFinished);
 
-    // Connect windage signals
+    // =========================================================================
+    // WINDAGE CONNECTIONS
+    // =========================================================================
     connect(m_windageController, &WindageController::returnToMainMenu,
             this, &ApplicationController::handleReturnToMainMenu);
     connect(m_windageController, &WindageController::windageFinished,
             this, &ApplicationController::handleWindageFinished);
+
+    qDebug() << "ApplicationController: All signal connections established";
 }
 
 void ApplicationController::setMenuState(MenuState state)
@@ -107,6 +125,7 @@ void ApplicationController::setMenuState(MenuState state)
 
 void ApplicationController::showMainMenu()
 {
+    qDebug() << "ApplicationController: showMainMenu() called";
     hideAllMenus();
     m_mainMenuController->show();
     setMenuState(MenuState::MainMenu);
@@ -122,7 +141,7 @@ void ApplicationController::hideAllMenus()
 }
 
 // =============================================================================
-// MENU/VAL BUTTON LOGIC - The main button that does everything
+// MENU/VAL BUTTON LOGIC
 // =============================================================================
 
 void ApplicationController::onMenuValButtonPressed()
@@ -150,8 +169,6 @@ void ApplicationController::onMenuValButtonPressed()
         break;
 
     default:
-        // For future states (brightness, zones, etc.)
-        // Default to closing and returning to main menu
         hideAllMenus();
         showMainMenu();
         break;
@@ -160,21 +177,18 @@ void ApplicationController::onMenuValButtonPressed()
 
 void ApplicationController::handleMenuValInNoMenuState()
 {
-    // No menu open - MENU/VAL opens the main menu
     qDebug() << "ApplicationController: Opening main menu";
     showMainMenu();
 }
 
 void ApplicationController::handleMenuValInMainMenu()
 {
-    // In main menu - MENU/VAL acts as SELECT to choose highlighted option
     qDebug() << "ApplicationController: Selecting main menu item";
     m_mainMenuController->onSelectButtonPressed();
 }
 
 void ApplicationController::handleMenuValInSubmenu()
 {
-    // In submenu (Reticle/Color) - MENU/VAL acts as SELECT to confirm choice
     qDebug() << "ApplicationController: Selecting submenu item";
 
     switch (m_currentMenuState) {
@@ -191,7 +205,6 @@ void ApplicationController::handleMenuValInSubmenu()
 
 void ApplicationController::handleMenuValInProcedure()
 {
-    // In procedure (Zeroing/Windage) - MENU/VAL acts as SELECT to confirm step
     qDebug() << "ApplicationController: Confirming procedure step";
 
     switch (m_currentMenuState) {
@@ -207,7 +220,7 @@ void ApplicationController::handleMenuValInProcedure()
 }
 
 // =============================================================================
-// UP/DOWN BUTTON LOGIC - Navigate through options
+// UP/DOWN BUTTON LOGIC
 // =============================================================================
 
 void ApplicationController::onUpButtonPressed()
@@ -231,7 +244,6 @@ void ApplicationController::onUpButtonPressed()
         m_windageController->onUpButtonPressed();
         break;
     default:
-        // No menu open - UP might control other things (brightness, zoom, etc.)
         qDebug() << "ApplicationController: UP pressed with no active menu";
         break;
     }
@@ -258,7 +270,6 @@ void ApplicationController::onDownButtonPressed()
         m_windageController->onDownButtonPressed();
         break;
     default:
-        // No menu open - DOWN might control other things
         qDebug() << "ApplicationController: DOWN pressed with no active menu";
         break;
     }
@@ -291,7 +302,6 @@ void ApplicationController::handleAdjustBrightness()
     setMenuState(MenuState::BrightnessAdjust);
 
     // TODO: Show brightness adjustment widget/dialog
-    // For now, just return to main menu
     showMainMenu();
 }
 
@@ -336,8 +346,6 @@ void ApplicationController::handleZoneDefinitions()
     qDebug() << "ApplicationController: Zone Definitions requested";
     hideAllMenus();
     setMenuState(MenuState::ZoneDefinition);
-
-    // TODO: Show zone definition widget
     showMainMenu();
 }
 
@@ -346,8 +354,6 @@ void ApplicationController::handleSystemStatus()
     qDebug() << "ApplicationController: System Status requested";
     hideAllMenus();
     setMenuState(MenuState::SystemStatus);
-
-    // TODO: Show system status widget
     showMainMenu();
 }
 
@@ -356,8 +362,6 @@ void ApplicationController::handleRadarTargetList()
     qDebug() << "ApplicationController: Radar Target List requested";
     hideAllMenus();
     setMenuState(MenuState::RadarTargets);
-
-    // TODO: Show radar targets widget
     showMainMenu();
 }
 
@@ -366,43 +370,64 @@ void ApplicationController::handleHelpAbout()
     qDebug() << "ApplicationController: Help/About requested";
     hideAllMenus();
     setMenuState(MenuState::HelpAbout);
-
-    // TODO: Show help/about dialog
     showMainMenu();
 }
 
 // =============================================================================
-// SUBMENU AND PROCEDURE COMPLETION HANDLERS
+// COMPLETION HANDLERS - THE KEY TO NAVIGATION
 // =============================================================================
+
+void ApplicationController::handleMainMenuFinished()
+{
+    qDebug() << "ApplicationController: handleMainMenuFinished() called";
+    qDebug() << "ApplicationController: Current state =" << static_cast<int>(m_currentMenuState);
+
+    // CRITICAL FIX: Only close menu if we're STILL in MainMenu state
+    // If state already changed (e.g. to ZeroingProcedure), an action was taken
+    // and we should NOT close the menu - it was already handled
+    if (m_currentMenuState == MenuState::MainMenu) {
+        // We're still in MainMenu state, which means "Return ..." was selected
+        qDebug() << "ApplicationController: 'Return ...' was selected - closing menu";
+        hideAllMenus();
+        setMenuState(MenuState::None);
+        qDebug() << "ApplicationController: Menu closed, state is now None";
+    } else {
+        qDebug() << "ApplicationController: State already changed, action was taken";
+    }
+}
 
 void ApplicationController::handleReticleMenuFinished()
 {
     qDebug() << "ApplicationController: Reticle menu finished";
-    // Menu controller already hid itself and applied selection
+    // Don't change state - reticle controller already did via returnToMainMenu
 }
 
 void ApplicationController::handleColorMenuFinished()
 {
     qDebug() << "ApplicationController: Color menu finished";
-    // Menu controller already hid itself and applied selection
+    // Don't change state - color controller already did via returnToMainMenu
 }
 
 void ApplicationController::handleZeroingFinished()
 {
     qDebug() << "ApplicationController: Zeroing procedure finished";
-    // Zeroing controller already hid itself
+    // State should be None now (set when returning to main menu)
 }
 
 void ApplicationController::handleWindageFinished()
 {
     qDebug() << "ApplicationController: Windage procedure finished";
-    // Windage controller already hid itself
+    // State should be None now (set when returning to main menu)
 }
 
 void ApplicationController::handleReturnToMainMenu()
 {
-    qDebug() << "ApplicationController: Returning to main menu";
+    qDebug() << "ApplicationController: handleReturnToMainMenu() CALLED";
+    qDebug() << "ApplicationController: Current state before return:" << static_cast<int>(m_currentMenuState);
+
     hideAllMenus();
     showMainMenu();
-}
 
+    qDebug() << "ApplicationController: State after return:" << static_cast<int>(m_currentMenuState);
+    qDebug() << "ApplicationController: Main menu should now be visible";
+}

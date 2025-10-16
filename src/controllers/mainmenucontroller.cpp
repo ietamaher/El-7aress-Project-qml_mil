@@ -35,7 +35,8 @@ QStringList MainMenuController::buildMainMenuOptions() const
             << "System Status"
             << "Radar Target List"
             << "--- INFO ---"
-            << "Help/About";
+            << "Help/About"
+            << "Return ...";
 
     // NO "Return ..." option since pressing MENU/VAL again will close the menu
 
@@ -108,6 +109,10 @@ void MainMenuController::handleMenuOptionSelected(const QString& option)
     }
     else if (option == "Help/About") {
         emit helpAboutRequested();
+    }
+    else if (option == "Return ...") {
+        qDebug() << "MainMenuController: Return option selected - closing menu";
+        // Just hide and emit finished - ApplicationController handles the rest
     }
     else {
         qWarning() << "MainMenuController: Unknown option:" << option;

@@ -19,9 +19,16 @@ SOURCES += \
         src/controllers/colormenucontroller.cpp \
         src/controllers/windagecontroller.cpp \
         src/controllers/zeroingcontroller.cpp \
+        src/controllers/zonedefinitioncontroller.cpp \
+        src/models/areazoneparameterviewmodel.cpp \
+        src/models/sectorscanparameterviewmodel.cpp \
+        src/models/trpparameterviewmodel.cpp \
         src/models/windageviewmodel.cpp \
         src/models/zeroingviewmodel.cpp \
         src/models/domain/systemstatemodel.cpp \
+        src/models/zonedefinitionviewmodel.cpp \
+        src/models/zonemapviewmodel.cpp \
+        src/services/zonegeometryservice.cpp \
         src/video/gstvideosource.cpp \
         src/main.cpp \
         src/controllers/mainmenucontroller.cpp \
@@ -57,11 +64,18 @@ HEADERS += \
     src/controllers/colormenucontroller.h \
     src/controllers/windagecontroller.h \
     src/controllers/zeroingcontroller.h \
+    src/controllers/zonedefinitioncontroller.h \
+    src/models/areazoneparameterviewmodel.h \
+    src/models/sectorscanparameterviewmodel.h \
     src/models/systemstatedata.h \
+    src/models/trpparameterviewmodel.h \
     src/models/windageviewmodel.h \
     src/models/zeroingviewmodel.h \
     src/models/domain/systemstatemodel.h \
     src/models/domain/systemstatedata.h \
+    src/models/zonedefinitionviewmodel.h \
+    src/models/zonemapviewmodel.h \
+    src/services/zonegeometryservice.h \
     src/video/gstvideosource.h \
     src/controllers/mainmenucontroller.h \
     src/models/menuviewmodel.h \
@@ -71,5 +85,14 @@ HEADERS += \
     src/video/videoimageprovider.h \
     src/utils/reticleaimpointcalculator.h \
     src/utils/colorutils.h
+
+DISTFILES += \
+    qml/common/NavigableList.qml \
+    qml/common/ParameterField.qml \
+    qml/components/AreaZoneParameterPanel.qml \
+    qml/components/SectorScanParameterPanel.qml \
+    qml/components/TRPParameterPanel.qml \
+    qml/components/ZoneDefinitionOverlay.qml \
+    qml/components/ZoneMapCanvas.qml
 
 

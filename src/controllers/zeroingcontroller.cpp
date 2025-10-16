@@ -20,13 +20,14 @@ void ZeroingController::initialize()
     Q_ASSERT(m_viewModel);
     Q_ASSERT(m_stateModel);
 
-    // Connect to model changes
+    // REPLACE THIS ENTIRE CONNECT BLOCK:
     connect(m_stateModel, &SystemStateModel::dataChanged,
             this, [this](const SystemStateData& data) {
-                // If zeroing is externally cancelled
-                if (!data.zeroingModeActive && m_currentState != ZeroingState::Idle
-                    && m_currentState != ZeroingState::Completed) {
-                    qDebug() << "Zeroing mode became inactive externally, finishing.";
+                // OLD: if (!data.zeroingModeActive && m_currentState != ZeroingState::Idle && m_currentState != ZeroingState::Completed)
+
+                // NEW: Only check for Instruct state specifically
+                if (!data.zeroingModeActive && m_currentState == ZeroingState::Instruct_MoveReticleToImpact) {
+                    qDebug() << "Zeroing cancelled externally during instruction phase";
                     hide();
                     emit zeroingFinished();
                 }
@@ -35,25 +36,32 @@ void ZeroingController::initialize()
 
 void ZeroingController::show()
 {
+    qDebug() << "ZeroingController::show() called";
     m_stateModel->startZeroingProcedure();
     transitionToState(ZeroingState::Instruct_MoveReticleToImpact);
     m_viewModel->setVisible(true);
+    qDebug() << "ZeroingController: Now in Instruct_MoveReticleToImpact state";
 }
 
 void ZeroingController::hide()
 {
+    qDebug() << "ZeroingController::hide() called";
     m_viewModel->setVisible(false);
     transitionToState(ZeroingState::Idle);
 }
 
 void ZeroingController::transitionToState(ZeroingState newState)
 {
+    qDebug() << "ZeroingController: State transition from" << static_cast<int>(m_currentState)
+    << "to" << static_cast<int>(newState);
     m_currentState = newState;
     updateUI();
 }
 
 void ZeroingController::updateUI()
 {
+    qDebug() << "ZeroingController::updateUI() for state" << static_cast<int>(m_currentState);
+
     switch (m_currentState) {
     case ZeroingState::Instruct_MoveReticleToImpact:
         m_viewModel->setTitle("Weapon Zeroing: Adjust");
@@ -62,7 +70,7 @@ void ZeroingController::updateUI()
             "1. (Fire weapon at a fixed target)\n"
             "2. Observe impact point.\n"
             "3. Use JOYSTICK to move main RETICLE to the ACTUAL IMPACT POINT.\n\n"
-            "Press SELECT to set this as the new zero."
+            "Press MENU/VAL to apply this as the new zero."
             );
         m_viewModel->setStatus("ADJUSTING RETICLE TO IMPACT");
         m_viewModel->setShowOffsets(false);
@@ -72,9 +80,8 @@ void ZeroingController::updateUI()
         m_viewModel->setTitle("Zeroing Applied");
         m_viewModel->setInstruction(
             "Zeroing Adjustment Applied!\n"
-            "'Z' will display on OSD when active.\n"
-            "You may need to repeat the process if further adjustment is required.\n\n"
-            "Press SELECT or BACK to return to Settings Menu."
+            "'Z' will display on OSD when active.\n\n"
+            "Press MENU/VAL to return to Main Menu."
             );
         m_viewModel->setStatus(QString("FINAL OFFSETS: Az %1, El %2")
                                    .arg(m_stateModel->data().zeroingAzimuthOffset, 0, 'f', 2)
@@ -82,6 +89,7 @@ void ZeroingController::updateUI()
         m_viewModel->setShowOffsets(true);
         m_viewModel->setAzimuthOffset(m_stateModel->data().zeroingAzimuthOffset);
         m_viewModel->setElevationOffset(m_stateModel->data().zeroingElevationOffset);
+        qDebug() << "ZeroingController: Completion screen should now be visible";
         break;
 
     case ZeroingState::Idle:
@@ -96,25 +104,19 @@ void ZeroingController::updateUI()
 
 void ZeroingController::onSelectButtonPressed()
 {
+    qDebug() << "ZeroingController::onSelectButtonPressed() called";
+    qDebug() << "ZeroingController: Current state =" << static_cast<int>(m_currentState);
+
     switch (m_currentState) {
     case ZeroingState::Instruct_MoveReticleToImpact:
-        m_stateModel->finalizeZeroing();
-        qDebug() << "Zeroing finalized. Offsets Az:"
-                 << m_stateModel->data().zeroingAzimuthOffset
-                 << "El:" << m_stateModel->data().zeroingElevationOffset;
-        transitionToState(ZeroingState::Completed);
+        transitionToState(ZeroingState::Completed);  // ← STATE FIRST
+        m_stateModel->finalizeZeroing();              // ← THEN FINALIZE
         break;
 
     case ZeroingState::Completed:
-        // FIXED: Return to main menu instead of exiting
         hide();
-        emit returnToMainMenu();  // Goes back to main menu
+        emit returnToMainMenu();
         emit zeroingFinished();
-        break;
-
-    default:
-        qWarning() << "ZeroingController: handleSelectAction unhandled for state:"
-                   << static_cast<int>(m_currentState);
         break;
     }
 }

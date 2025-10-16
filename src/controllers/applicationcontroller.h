@@ -43,6 +43,7 @@ private slots:
     void handleZeroingFinished();
     void handleWindageFinished();
     void handleReturnToMainMenu();
+    void handleMainMenuFinished();
 
 private:
     enum class MenuState {
