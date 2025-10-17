@@ -34,9 +34,9 @@
 #include <opencv2/imgproc.hpp> // For cv::Mat conversions if needed in header
 
 // --- Project Includes ---
-#include "osdrenderer.h" // For OperationalMode, MotionMode, FireMode, ReticleType
-#include "../utils/inference.h" // For Detection struct used in FrameData
-#include "../models/systemstatemodel.h" // For SystemStateData used in onSystemStateChanged slot
+//#include "osdrenderer.h" // For OperationalMode, MotionMode, FireMode, ReticleType
+#include "utils/inference.h" // For Detection struct used in FrameData
+#include "models/domain/systemstatemodel.h" // For SystemStateData used in onSystemStateChanged slot
 
 // --- Data Structure Definition ---
 

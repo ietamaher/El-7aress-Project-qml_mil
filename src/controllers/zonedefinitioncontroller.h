@@ -56,6 +56,12 @@ public:
 
     explicit ZoneDefinitionController(QObject *parent = nullptr);
     void initialize();
+    void setViewModel(ZoneDefinitionViewModel* viewModel);
+    void setParameterViewModels(AreaZoneParameterViewModel* areaVM,
+                                SectorScanParameterViewModel* sectorVM,
+                                TRPParameterViewModel* trpVM);  
+    void setMapViewModel(ZoneMapViewModel* mapViewModel);
+    void setStateModel(SystemStateModel* stateModel);
 
 public slots:
     void show();

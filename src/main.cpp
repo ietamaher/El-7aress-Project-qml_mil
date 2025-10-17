@@ -23,7 +23,7 @@
 #include "models/areazoneparameterviewmodel.h"
 #include "models/sectorscanparameterviewmodel.h"
 #include "models/trpparameterviewmodel.h"
-
+#include "controllers/systemcontroller.h"
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
     ZeroingController* zeroingController = new ZeroingController();
     WindageController* windageController = new WindageController();
     ZoneDefinitionController* zoneDefinitionController = new ZoneDefinitionController();
-
+    SystemController sysCtrl;
+    sysCtrl.initializeHardware();
     ApplicationController* appController = new ApplicationController();
 
     // === PHASE 2: REGISTER SERVICES ===

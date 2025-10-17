@@ -1,5 +1,6 @@
 #include "osdcontroller.h"
-#include "services/servicemanager.h"
+#include "models/osdviewmodel.h"
+#include "models/domain/systemstatemodel.h"
 #include <QDebug>
 
 OsdController::OsdController(QObject *parent)
@@ -9,19 +10,31 @@ OsdController::OsdController(QObject *parent)
 {
 }
 
+void OsdController::setViewModel(OsdViewModel* viewModel)
+{
+    m_viewModel = viewModel;
+    qDebug() << "OsdController: ViewModel set:" << m_viewModel;
+}
+
+void OsdController::setStateModel(SystemStateModel* stateModel)
+{
+    m_stateModel = stateModel;
+    qDebug() << "OsdController: StateModel set:" << m_stateModel;
+}
+
 void OsdController::initialize()
 {
     qDebug() << "OsdController::initialize()";
 
-    // Get services
-    m_viewModel = ServiceManager::instance()->get<OsdViewModel>();
-    m_stateModel = ServiceManager::instance()->get<SystemStateModel>();
+    if (!m_viewModel) {
+        qCritical() << "OsdController: ViewModel is null! Call setViewModel() first.";
+        return;
+    }
 
-    Q_ASSERT(m_viewModel);
-    Q_ASSERT(m_stateModel);
-
-    qDebug() << "  m_viewModel:" << m_viewModel;
-    qDebug() << "  m_stateModel:" << m_stateModel;
+    if (!m_stateModel) {
+        qCritical() << "OsdController: StateModel is null! Call setStateModel() first.";
+        return;
+    }
 
     // =========================================================================
     // PHASE 1: Connect to SystemStateModel (Active NOW)
@@ -43,13 +56,18 @@ void OsdController::initialize()
     // =========================================================================
     // PHASE 2: Connect to CameraVideoStreamDevice (Add LATER)
     // =========================================================================
-    // When you implement CameraVideoStreamDevice, add this connection:
+    // When you want frame-synchronized OSD updates, uncomment this:
     /*
-    CameraVideoStreamDevice* cameraDevice = ServiceManager::instance()->get<CameraVideoStreamDevice>();
-    if (cameraDevice) {
-        connect(cameraDevice, &CameraVideoStreamDevice::frameDataReady,
+    CameraVideoStreamDevice* dayCamera = ...; // Get from SystemController
+    CameraVideoStreamDevice* nightCamera = ...;
+
+    if (dayCamera) {
+        connect(dayCamera, &CameraVideoStreamDevice::frameDataReady,
                 this, &OsdController::onFrameDataReady);
-        qDebug() << "OsdController: Connected to CameraVideoStreamDevice for frame-level updates";
+    }
+    if (nightCamera) {
+        connect(nightCamera, &CameraVideoStreamDevice::frameDataReady,
+                this, &OsdController::onFrameDataReady);
     }
     */
 }
@@ -59,7 +77,6 @@ void OsdController::initialize()
 // ============================================================================
 void OsdController::onSystemStateChanged(const SystemStateData& data)
 {
-    // Update ViewModel from SystemStateModel data
     updateViewModelFromSystemState(data);
 }
 
@@ -69,7 +86,8 @@ void OsdController::onSystemStateChanged(const SystemStateData& data)
 /*
 void OsdController::onFrameDataReady(const FrameData& data)
 {
-    // When CameraVideoStreamDevice is implemented, this provides frame-synchronized updates
+    // When CameraVideoStreamDevice provides FrameData, this path gives
+    // frame-synchronized OSD updates with tracking data
 
     // Update basic OSD data
     m_viewModel->updateMode(data.currentOpMode);
@@ -85,7 +103,7 @@ void OsdController::onFrameDataReady(const FrameData& data)
     m_viewModel->updateFiringMode(data.fireMode);
     m_viewModel->updateLrfDistance(data.lrfDistance);
 
-    // Update tracking
+    // Update tracking (with actual bbox from VPI)
     m_viewModel->updateTrackingBox(
         data.trackingBbox.x(),
         data.trackingBbox.y(),
@@ -128,7 +146,7 @@ void OsdController::onFrameDataReady(const FrameData& data)
     // Update scan name
     m_viewModel->updateCurrentScanName(data.currentScanName);
 
-    // Update tracking phase display
+    // Update tracking phase
     m_viewModel->updateTrackingPhase(
         data.currentTrackingPhase,
         data.trackerHasValidTarget,
@@ -143,6 +161,8 @@ void OsdController::onFrameDataReady(const FrameData& data)
 // ============================================================================
 void OsdController::updateViewModelFromSystemState(const SystemStateData& data)
 {
+    if (!m_viewModel) return;
+
     // Basic OSD data
     m_viewModel->updateMode(data.opMode);
     m_viewModel->updateMotionMode(data.motionMode);
@@ -164,12 +184,11 @@ void OsdController::updateViewModelFromSystemState(const SystemStateData& data)
     QString cameraType = data.activeCameraIsDay ? "DAY" : "THERMAL";
     m_viewModel->updateCameraType(cameraType);
 
-    // Tracking (from SystemStateModel tracking data)
-    // Note: This is simplified. Full tracking bbox will come from FrameData later
+    // Tracking (simplified - full tracking box will come from FrameData later)
     if (data.trackingActive) {
-        // For now, we might not have the full tracking box from SystemStateModel
-        // This will be properly updated when CameraVideoStreamDevice provides FrameData
-        m_viewModel->updateTrackingBox(0, 0, 0, 0); // Placeholder
+        // For now, we don't have full tracking bbox from SystemStateModel
+        // This will be properly updated when using FrameData
+        m_viewModel->updateTrackingBox(0, 0, 0, 0);
     } else {
         m_viewModel->updateTrackingBox(0, 0, 0, 0);
     }

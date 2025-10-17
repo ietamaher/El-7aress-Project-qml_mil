@@ -1,7 +1,7 @@
 #ifndef BALLISTICSPROCESSOR_H
 #define BALLISTICSPROCESSOR_H
 
-#include "../models/systemstatemodel.h" // For LeadAngleStatus and AmmunitionType enum (if defined there)
+#include "models/domain/systemstatemodel.h"
 
 // Forward declare if SystemStateData is complex or to reduce includes
 // struct SystemStateData;

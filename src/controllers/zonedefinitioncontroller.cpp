@@ -1537,3 +1537,26 @@ void ZoneDefinitionController::updateMapWipZone()
     m_mapViewModel->setWipZone(wipData, wipType, isDefiningStart, isDefiningEnd);
 }
 
+// ============================================================================
+// DEPENDENCY INJECTION SETTERS
+// ============================================================================ 
+void ZoneDefinitionController::setViewModel(ZoneDefinitionViewModel* viewModel)
+{
+    m_viewModel = viewModel;
+}
+void ZoneDefinitionController::setParameterViewModels(AreaZoneParameterViewModel* areaVM,
+                                                      SectorScanParameterViewModel* sectorVM,
+                                                      TRPParameterViewModel* trpVM)
+{
+    m_areaZoneParamViewModel = areaVM;
+    m_sectorScanParamViewModel = sectorVM;
+    m_trpParamViewModel = trpVM;
+}
+void ZoneDefinitionController::setMapViewModel(ZoneMapViewModel* mapViewModel)
+{
+    m_mapViewModel = mapViewModel;
+}
+void ZoneDefinitionController::setStateModel(SystemStateModel* stateModel)
+{
+    m_stateModel = stateModel;
+}

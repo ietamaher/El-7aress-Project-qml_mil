@@ -2,38 +2,51 @@
 #define OSDCONTROLLER_H
 
 #include <QObject>
-#include "models/osdviewmodel.h"
-#include "models/domain/systemstatemodel.h"
 
-// Forward declaration for Phase 2
+// Forward declarations
+class OsdViewModel;
+class SystemStateModel;
 struct FrameData;
+struct SystemStateData;
 
+/**
+ * @brief OsdController - Manages OSD updates from SystemStateModel
+ *
+ * This controller bridges SystemStateModel to OsdViewModel.
+ *
+ * PHASE 1 (Active NOW): Updates from SystemStateModel
+ * PHASE 2 (Later): Can also update from CameraVideoStreamDevice FrameData
+ */
 class OsdController : public QObject
 {
     Q_OBJECT
 
 public:
     explicit OsdController(QObject *parent = nullptr);
+
+    // Dependency injection (called by SystemController)
+    void setViewModel(OsdViewModel* viewModel);
+    void setStateModel(SystemStateModel* stateModel);
+
+    // Initialize connections
     void initialize();
 
 public slots:
-    // Phase 1: Direct from SystemStateModel (Active NOW)
+    // PHASE 1: Direct from SystemStateModel (Active NOW)
     void onSystemStateChanged(const SystemStateData& data);
 
-    // Phase 2: From CameraVideoStreamDevice (Add LATER when tracking is ready)
+    // PHASE 2: From CameraVideoStreamDevice (Uncomment when ready)
     // void onFrameDataReady(const FrameData& data);
 
 private slots:
     void onColorStyleChanged(const QColor& color);
 
 private:
-    // Shared update logic used by both paths
+    // Shared update logic
     void updateViewModelFromSystemState(const SystemStateData& data);
 
-    // ViewModels
+    // Dependencies (injected)
     OsdViewModel* m_viewModel;
-
-    // Models
     SystemStateModel* m_stateModel;
 };
 
