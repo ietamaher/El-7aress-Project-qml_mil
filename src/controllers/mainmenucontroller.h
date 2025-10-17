@@ -2,7 +2,9 @@
 #define MAINMENUCONTROLLER_H
 
 #include <QObject>
-#include "models/menuviewmodel.h"
+
+class MenuViewModel;
+class SystemStateModel;
 
 class MainMenuController : public QObject
 {
@@ -10,6 +12,8 @@ class MainMenuController : public QObject
 public:
     explicit MainMenuController(QObject *parent = nullptr);
     void initialize();
+    void setViewModel(MenuViewModel* viewModel);
+    void setStateModel(SystemStateModel* stateModel);
 
 public slots:
     // API for the root controller to use
@@ -42,7 +46,7 @@ private slots:
     void onColorStyleChanged(const QColor& color);
 private:
     MenuViewModel* m_viewModel;
-
+    SystemStateModel* m_stateModel;  
     // Helper to build menu options
     QStringList buildMainMenuOptions() const;
 };

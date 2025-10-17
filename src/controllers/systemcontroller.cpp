@@ -1,7 +1,6 @@
 #include "systemcontroller.h"
 
-// Hardware Devices (Unchanged includes)
-
+// Hardware Devices
 #include "hardware/devices/daycameracontroldevice.h"
 #include "hardware/devices/cameravideostreamdevice.h"
 #include "hardware/devices/imudevice.h"
@@ -14,7 +13,7 @@
 #include "hardware/devices/servoactuatordevice.h"
 #include "hardware/devices/servodriverdevice.h"
 
-// Data Models (Unchanged includes)
+// Data Models
 #include "models/domain/gyrodatamodel.h"
 #include "models/domain/joystickdatamodel.h"
 #include "models/domain/lensdatamodel.h"
@@ -25,24 +24,34 @@
 #include "models/domain/servodriverdatamodel.h"
 #include "models/domain/systemstatemodel.h"
 
-// Hardware Controllers (Unchanged includes)
+// Hardware Controllers
 #include "controllers/gimbalcontroller.h"
 #include "controllers/weaponcontroller.h"
 #include "controllers/cameracontroller.h"
 #include "controllers/joystickcontroller.h"
 
-// *** ADD: QML System includes ***
+// QML System
+#include "controllers/applicationcontroller.h"
+#include "controllers/mainmenucontroller.h"
+#include "controllers/reticlemenucontroller.h"
+#include "controllers/colormenucontroller.h"
+#include "controllers/zeroingcontroller.h"
+#include "controllers/windagecontroller.h"
 #include "controllers/osdcontroller.h"
 #include "controllers/zonedefinitioncontroller.h"
 #include "models/osdviewmodel.h"
+#include "models/menuviewmodel.h"
 #include "models/zonedefinitionviewmodel.h"
 #include "models/zonemapviewmodel.h"
 #include "models/areazoneparameterviewmodel.h"
 #include "models/sectorscanparameterviewmodel.h"
 #include "models/trpparameterviewmodel.h"
+#include "models/zeroingviewmodel.h"
+#include "models/windageviewmodel.h"
 #include "video/videoimageprovider.h"
 
 #include <QQmlContext>
+#include <QQmlApplicationEngine>
 #include <QDebug>
 
 SystemController::SystemController(QObject *parent)
@@ -54,59 +63,47 @@ SystemController::~SystemController()
 {
     qInfo() << "SystemController: Shutting down...";
 
-    // Stop video processors first
+    // Stop video processors
     if (m_dayVideoProcessor && m_dayVideoProcessor->isRunning()) {
         m_dayVideoProcessor->stop();
+        m_dayVideoProcessor->wait(2000);
     }
     if (m_nightVideoProcessor && m_nightVideoProcessor->isRunning()) {
         m_nightVideoProcessor->stop();
+        m_nightVideoProcessor->wait(2000);
     }
-
-    bool stopped1 = m_dayVideoProcessor ? m_dayVideoProcessor->wait(2000) : true;
-    bool stopped2 = m_nightVideoProcessor ? m_nightVideoProcessor->wait(2000) : true;
-
-    if (!stopped1) qWarning() << "Day camera did not stop gracefully.";
-    if (!stopped2) qWarning() << "Night camera did not stop gracefully.";
 
     // Stop servo threads
     if (m_servoAzThread && m_servoAzThread->isRunning()) {
         m_servoAzThread->quit();
+        m_servoAzThread->wait(1000);
     }
     if (m_servoElThread && m_servoElThread->isRunning()) {
         m_servoElThread->quit();
+        m_servoElThread->wait(1000);
     }
-
-    bool azStopped = m_servoAzThread ? m_servoAzThread->wait(1000) : true;
-    bool elStopped = m_servoElThread ? m_servoElThread->wait(1000) : true;
-
-    if (!azStopped) qWarning() << "Azimuth servo thread did not stop gracefully.";
-    if (!elStopped) qWarning() << "Elevation servo thread did not stop gracefully.";
 
     qInfo() << "SystemController: Shutdown complete.";
 }
 
 // ============================================================================
-// PHASE 1: INITIALIZE HARDWARE (Same as before, mostly)
+// PHASE 1: INITIALIZE HARDWARE
 // ============================================================================
 void SystemController::initializeHardware()
 {
-    qInfo() << "SystemController: Phase 1 - Initializing hardware...";
+    qInfo() << "=== PHASE 1: Hardware Initialization ===";
 
     // Configuration
     const int sourceWidth = 1280;
     const int sourceHeight = 720;
-    const QString dayDevicePath = "/dev/video0";
-    const QString nightDevicePath = "/dev/video1";
+    const QString dayDevicePath = "/dev/video2";
+    const QString nightDevicePath = "/dev/video0";
 
-    // ========================================================================
-    // 1. CREATE SYSTEM STATE MODEL FIRST (needed by cameras)
-    // ========================================================================
+    // 1. Create System State Model (needed by everything)
     m_systemStateModel = new SystemStateModel(this);
     qInfo() << "  ✓ SystemStateModel created";
 
-    // ========================================================================
-    // 2. CREATE DEVICES
-    // ========================================================================
+    // 2. Create Hardware Devices
     m_dayCamControl = new DayCameraControlDevice(this);
     m_gyroDevice = new ImuDevice("/dev/ttyUSB2", 115200, 1, this);
     m_joystickDevice = new JoystickDevice(this);
@@ -117,21 +114,19 @@ void SystemController::initializeHardware()
     m_plc42Device = new Plc42Device("/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if02", 115200, 31, QSerialPort::EvenParity, this);
     m_servoActuatorDevice = new ServoActuatorDevice(this);
 
-    // Servo threads
+    // Servo devices (with threads)
     m_servoAzThread = new QThread(this);
     m_servoAzDevice = new ServoDriverDevice("az", "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if04", 230400, 2, QSerialPort::NoParity, nullptr);
     m_servoElThread = new QThread(this);
     m_servoElDevice = new ServoDriverDevice("el", "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if06", 230400, 1, QSerialPort::NoParity, nullptr);
 
-    // *** IMPORTANT: Create CameraVideoStreamDevice (with tracking) ***
+    // Video processors
     m_dayVideoProcessor = new CameraVideoStreamDevice(0, dayDevicePath, sourceWidth, sourceHeight, m_systemStateModel, nullptr);
     m_nightVideoProcessor = new CameraVideoStreamDevice(1, nightDevicePath, sourceWidth, sourceHeight, m_systemStateModel, nullptr);
 
-    qInfo() << "  ✓ Devices created";
+    qInfo() << "  ✓ Hardware devices created";
 
-    // ========================================================================
-    // 3. CREATE DATA MODELS
-    // ========================================================================
+    // 3. Create Data Models
     m_dayCamControlModel = new DayCameraDataModel(this);
     m_gyroModel = new GyroDataModel(this);
     m_joystickModel = new JoystickDataModel(this);
@@ -146,27 +141,20 @@ void SystemController::initializeHardware()
 
     qInfo() << "  ✓ Data models created";
 
-    // ========================================================================
-    // 4. CONNECT DEVICES TO MODELS
-    // ========================================================================
+    // 4. Connect Devices to Models
     connectDevicesToModels();
 
-    // ========================================================================
-    // 5. CONNECT MODELS TO SYSTEM STATE
-    // ========================================================================
+    // 5. Connect Models to System State
     connectModelsToSystemState();
 
-    // ========================================================================
-    // 6. CREATE HARDWARE CONTROLLERS
-    // ========================================================================
+    // 6. Create Hardware Controllers
     m_gimbalController = new GimbalController(m_servoAzDevice, m_servoElDevice, m_plc42Device, m_systemStateModel, this);
     m_weaponController = new WeaponController(m_systemStateModel, m_servoActuatorDevice, m_plc42Device, this);
     m_cameraController = new CameraController(m_dayCamControl, m_dayVideoProcessor, m_nightCamControl, m_nightVideoProcessor, m_lensDevice, m_systemStateModel);
     m_joystickController = new JoystickController(m_joystickModel, m_systemStateModel, m_gimbalController, m_cameraController, m_weaponController, this);
 
     qInfo() << "  ✓ Hardware controllers created";
-
-    qInfo() << "SystemController: Phase 1 complete - Hardware initialized";
+    qInfo() << "=== PHASE 1 COMPLETE ===\n";
 }
 
 // ============================================================================
@@ -174,85 +162,69 @@ void SystemController::initializeHardware()
 // ============================================================================
 void SystemController::initializeQmlSystem(QQmlApplicationEngine* engine)
 {
-    qInfo() << "SystemController: Phase 2 - Initializing QML system...";
+    qInfo() << "=== PHASE 2: QML System Initialization ===";
 
     if (!engine) {
         qCritical() << "QML engine is null!";
         return;
     }
 
-    // ========================================================================
-    // 1. CREATE VIDEO IMAGE PROVIDER (Bridge between C++ video and QML)
-    // ========================================================================
+    // 1. Create Video Provider
     m_videoProvider = new VideoImageProvider();
     engine->addImageProvider("video", m_videoProvider);
     qInfo() << "  ✓ VideoImageProvider registered";
 
-    // ========================================================================
-    // 2. CONNECT CAMERA VIDEO STREAMS TO QML PROVIDER
-    // ========================================================================
+    // 2. Connect Video Streams to Provider
     connectVideoToProvider();
 
-    // ========================================================================
-    // 3. CREATE VIEWMODELS
-    // ========================================================================
+    // 3. Create ViewModels
     m_osdViewModel = new OsdViewModel(this);
+
+    // Separate MenuViewModels for each menu
+    m_mainMenuViewModel = new MenuViewModel(this);
+    m_reticleMenuViewModel = new MenuViewModel(this);
+    m_colorMenuViewModel = new MenuViewModel(this);
+
     m_zoneDefinitionViewModel = new ZoneDefinitionViewModel(this);
     m_zoneMapViewModel = new ZoneMapViewModel(this);
     m_areaZoneParameterViewModel = new AreaZoneParameterViewModel(this);
     m_sectorScanParameterViewModel = new SectorScanParameterViewModel(this);
     m_trpParameterViewModel = new TRPParameterViewModel(this);
+    m_zeroingViewModel = new ZeroingViewModel(this);
+    m_windageViewModel = new WindageViewModel(this);
 
     qInfo() << "  ✓ ViewModels created";
 
-    // ========================================================================
-    // 4. CREATE QML CONTROLLERS
-    // ========================================================================
-    m_osdController = new OsdController(this);
-    m_zoneDefinitionController = new ZoneDefinitionController(this);
+    // 4. Create QML Controllers
+    createQmlControllers();
 
-    // Pass dependencies manually (since we're not using ServiceManager)
-    m_osdController->setViewModel(m_osdViewModel);
-    m_osdController->setStateModel(m_systemStateModel);
+    // 5. Connect QML Controllers
+    connectQmlControllers();
 
-    m_zoneDefinitionController->setViewModel(m_zoneDefinitionViewModel);
-    m_zoneDefinitionController->setMapViewModel(m_zoneMapViewModel);
-    m_zoneDefinitionController->setParameterViewModels(
-        m_areaZoneParameterViewModel,
-        m_sectorScanParameterViewModel,
-        m_trpParameterViewModel
-        );
-    m_zoneDefinitionController->setStateModel(m_systemStateModel);
-
-    qInfo() << "  ✓ QML Controllers created";
-
-    // ========================================================================
-    // 5. INITIALIZE CONTROLLERS
-    // ========================================================================
-    m_osdController->initialize();
-    m_zoneDefinitionController->initialize();
-
-    qInfo() << "  ✓ QML Controllers initialized";
-
-    // ========================================================================
-    // 6. EXPOSE TO QML (Context Properties)
-    // ========================================================================
+    // 6. Expose to QML
     QQmlContext* rootContext = engine->rootContext();
 
     // ViewModels
     rootContext->setContextProperty("osdViewModel", m_osdViewModel);
+    rootContext->setContextProperty("mainMenuViewModel", m_mainMenuViewModel);
+    rootContext->setContextProperty("reticleMenuViewModel", m_reticleMenuViewModel);
+    rootContext->setContextProperty("colorMenuViewModel", m_colorMenuViewModel);
     rootContext->setContextProperty("zoneDefinitionViewModel", m_zoneDefinitionViewModel);
     rootContext->setContextProperty("zoneMapViewModel", m_zoneMapViewModel);
     rootContext->setContextProperty("areaZoneParameterViewModel", m_areaZoneParameterViewModel);
     rootContext->setContextProperty("sectorScanParameterViewModel", m_sectorScanParameterViewModel);
     rootContext->setContextProperty("trpParameterViewModel", m_trpParameterViewModel);
+    rootContext->setContextProperty("zeroingViewModel", m_zeroingViewModel);
+    rootContext->setContextProperty("windageViewModel", m_windageViewModel);
 
-    // System State Model (for debugging/access)
+    // System State (for debugging/direct access)
     rootContext->setContextProperty("systemStateModel", m_systemStateModel);
 
-    qInfo() << "  ✓ QML context properties set";
+    // Application Controller (main entry point for QML)
+    rootContext->setContextProperty("appController", m_appController);
 
-    qInfo() << "SystemController: Phase 2 complete - QML system initialized";
+    qInfo() << "  ✓ QML context properties set";
+    qInfo() << "=== PHASE 2 COMPLETE ===\n";
 }
 
 // ============================================================================
@@ -260,11 +232,9 @@ void SystemController::initializeQmlSystem(QQmlApplicationEngine* engine)
 // ============================================================================
 void SystemController::startSystem()
 {
-    qInfo() << "SystemController: Phase 3 - Starting system...";
+    qInfo() << "=== PHASE 3: System Startup ===";
 
-    // ========================================================================
-    // 1. OPEN DEVICE CONNECTIONS
-    // ========================================================================
+    // 1. Open Device Connections
     m_dayCamControl->openSerialPort("/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if00");
     m_gyroDevice->connectDevice();
     m_lrfDevice->openSerialPort("/dev/ttyUSB1");
@@ -278,18 +248,14 @@ void SystemController::startSystem()
 
     qInfo() << "  ✓ Device connections opened";
 
-    // ========================================================================
-    // 2. INITIALIZE CAMERAS
-    // ========================================================================
+    // 2. Initialize Cameras
     m_dayCamControl->zoomOut();
     m_dayCamControl->zoomStop();
     m_nightCamControl->setDigitalZoom(0);
 
     qInfo() << "  ✓ Cameras initialized";
 
-    // ========================================================================
-    // 3. START VIDEO PROCESSING THREADS
-    // ========================================================================
+    // 3. Start Video Processing Threads
     if (m_dayVideoProcessor) {
         m_dayVideoProcessor->start();
         qInfo() << "  ✓ Day camera thread started";
@@ -300,24 +266,101 @@ void SystemController::startSystem()
         qInfo() << "  ✓ Night camera thread started";
     }
 
-    // ========================================================================
-    // 4. CLEAR ALARMS
-    // ========================================================================
+    // 4. Clear Gimbal Alarms
     if (m_gimbalController) {
         m_gimbalController->clearAlarms();
         qInfo() << "  ✓ Gimbal alarms cleared";
     }
 
-    qInfo() << "SystemController: Phase 3 complete - System started and running!";
+    qInfo() << "=== PHASE 3 COMPLETE - SYSTEM RUNNING ===\n";
 }
 
 // ============================================================================
-// HELPER METHODS
+// HELPER: CREATE QML CONTROLLERS
 // ============================================================================
+void SystemController::createQmlControllers()
+{
+    // Create OSD Controller
+    m_osdController = new OsdController(this);
+    m_osdController->setViewModel(m_osdViewModel);
+    m_osdController->setStateModel(m_systemStateModel);
 
+    // Create Menu Controllers
+    m_mainMenuController = new MainMenuController(this);
+    m_mainMenuController->setViewModel(m_mainMenuViewModel);
+    m_mainMenuController->setStateModel(m_systemStateModel);
+
+    m_reticleMenuController = new ReticleMenuController(this);
+    m_reticleMenuController->setViewModel(m_reticleMenuViewModel);
+    m_reticleMenuController->setOsdViewModel(m_osdViewModel);
+    m_reticleMenuController->setStateModel(m_systemStateModel);
+
+
+    m_colorMenuController = new ColorMenuController(this);
+    m_colorMenuController->setViewModel(m_colorMenuViewModel);
+    m_colorMenuController->setOsdViewModel(m_osdViewModel);
+    m_colorMenuController->setStateModel(m_systemStateModel);
+
+    // Create Procedure Controllers
+    m_zeroingController = new ZeroingController(this);
+    m_zeroingController->setViewModel(m_zeroingViewModel);
+    m_zeroingController->setStateModel(m_systemStateModel);
+
+    m_windageController = new WindageController(this);
+    m_windageController->setViewModel(m_windageViewModel);
+    m_windageController->setStateModel(m_systemStateModel);
+
+    // Create Zone Definition Controller
+    m_zoneDefinitionController = new ZoneDefinitionController(this);
+    m_zoneDefinitionController->setViewModel(m_zoneDefinitionViewModel);
+    m_zoneDefinitionController->setMapViewModel(m_zoneMapViewModel);
+    m_zoneDefinitionController->setParameterViewModels(
+        m_areaZoneParameterViewModel,
+        m_sectorScanParameterViewModel,
+        m_trpParameterViewModel
+        );
+    m_zoneDefinitionController->setStateModel(m_systemStateModel);
+
+    // Create Application Controller (LAST - needs all other controllers)
+    m_appController = new ApplicationController(this);
+
+    // Inject dependencies into ApplicationController
+    m_appController->setMainMenuController(m_mainMenuController);
+    m_appController->setReticleMenuController(m_reticleMenuController);
+    m_appController->setColorMenuController(m_colorMenuController);
+    m_appController->setZeroingController(m_zeroingController);
+    m_appController->setWindageController(m_windageController);
+    m_appController->setZoneDefinitionController(m_zoneDefinitionController);
+    m_appController->setSystemStateModel(m_systemStateModel);
+
+    qInfo() << "  ✓ QML Controllers created";
+}
+
+// ============================================================================
+// HELPER: CONNECT QML CONTROLLERS
+// ============================================================================
+void SystemController::connectQmlControllers()
+{
+    // Initialize all controllers
+    m_osdController->initialize();
+    m_mainMenuController->initialize();
+    m_reticleMenuController->initialize();
+    m_colorMenuController->initialize();
+    m_zeroingController->initialize();
+    m_windageController->initialize();
+    m_zoneDefinitionController->initialize();
+
+    // Initialize ApplicationController LAST (it connects to all others)
+    m_appController->initialize();
+
+    qInfo() << "  ✓ QML Controllers initialized and connected";
+}
+
+// ============================================================================
+// HELPER: CONNECT DEVICES TO MODELS
+// ============================================================================
 void SystemController::connectDevicesToModels()
 {
-    // (Same as your original code - unchanged)
     connect(m_dayCamControl, &DayCameraControlDevice::dayCameraDataChanged,
             m_dayCamControlModel, &DayCameraDataModel::updateData);
 
@@ -354,11 +397,15 @@ void SystemController::connectDevicesToModels()
 
     connect(m_servoElDevice, &ServoDriverDevice::servoDataChanged,
             m_servoElModel, &ServoDriverDataModel::updateData);
+
+    qInfo() << "  ✓ Devices connected to models";
 }
 
+// ============================================================================
+// HELPER: CONNECT MODELS TO SYSTEM STATE
+// ============================================================================
 void SystemController::connectModelsToSystemState()
 {
-    // (Same as your original code - unchanged)
     connect(m_dayCamControlModel, &DayCameraDataModel::dataChanged,
             m_systemStateModel, &SystemStateModel::onDayCameraDataChanged);
 
@@ -396,7 +443,7 @@ void SystemController::connectModelsToSystemState()
     connect(m_servoElModel, &ServoDriverDataModel::dataChanged,
             m_systemStateModel, &SystemStateModel::onServoElDataChanged);
 
-    // *** IMPORTANT: Connect SystemStateModel back to cameras (for OSD data) ***
+    // Connect SystemStateModel back to cameras
     if (m_systemStateModel && m_dayVideoProcessor) {
         connect(m_systemStateModel, &SystemStateModel::dataChanged,
                 m_dayVideoProcessor, &CameraVideoStreamDevice::onSystemStateChanged,
@@ -408,19 +455,21 @@ void SystemController::connectModelsToSystemState()
                 m_nightVideoProcessor, &CameraVideoStreamDevice::onSystemStateChanged,
                 Qt::QueuedConnection);
     }
+
+    qInfo() << "  ✓ Models connected to SystemStateModel";
 }
 
+// ============================================================================
+// HELPER: CONNECT VIDEO TO PROVIDER
+// ============================================================================
 void SystemController::connectVideoToProvider()
 {
     if (!m_videoProvider) return;
-
-    // *** CRITICAL: Connect CameraVideoStreamDevice frameDataReady to VideoImageProvider ***
 
     // Day camera
     if (m_dayVideoProcessor) {
         connect(m_dayVideoProcessor, &CameraVideoStreamDevice::frameDataReady,
                 this, [this](const FrameData& data) {
-                    // Only update provider if this is the active camera
                     if (data.cameraIndex == 0 && m_systemStateModel->data().activeCameraIsDay) {
                         m_videoProvider->updateImage(data.baseImage);
                     }
@@ -432,7 +481,6 @@ void SystemController::connectVideoToProvider()
     if (m_nightVideoProcessor) {
         connect(m_nightVideoProcessor, &CameraVideoStreamDevice::frameDataReady,
                 this, [this](const FrameData& data) {
-                    // Only update provider if this is the active camera
                     if (data.cameraIndex == 1 && !m_systemStateModel->data().activeCameraIsDay) {
                         m_videoProvider->updateImage(data.baseImage);
                     }

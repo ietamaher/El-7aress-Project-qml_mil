@@ -15,9 +15,9 @@ ColorMenuController::ColorMenuController(QObject *parent)
 void ColorMenuController::initialize()
 {
     // Get the COLOR menu's ViewModel specifically by name
-    m_viewModel = ServiceManager::instance()->get<MenuViewModel>(QString("ColorMenuViewModel"));
+    /*m_viewModel = ServiceManager::instance()->get<MenuViewModel>(QString("ColorMenuViewModel"));
     m_osdViewModel = ServiceManager::instance()->get<OsdViewModel>();
-    m_stateModel = ServiceManager::instance()->get<SystemStateModel>();
+    m_stateModel = ServiceManager::instance()->get<SystemStateModel>();*/
 
     qDebug() << "ColorMenuController::initialize()";
     qDebug() << "  m_viewModel:" << m_viewModel;
@@ -205,4 +205,18 @@ void ColorMenuController::onColorStyleChanged(const QColor& color)
     if (m_viewModel) {
         m_viewModel->setAccentColor(color);
     }
+}
+void ColorMenuController::setViewModel(MenuViewModel* viewModel)
+{
+    m_viewModel = viewModel;
+}
+
+void ColorMenuController::setOsdViewModel(OsdViewModel* osdViewModel)
+{
+    m_osdViewModel = osdViewModel;
+}
+
+void ColorMenuController::setStateModel(SystemStateModel* stateModel)
+{
+    m_stateModel = stateModel;
 }

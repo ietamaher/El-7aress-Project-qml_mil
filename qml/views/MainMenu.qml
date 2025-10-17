@@ -4,111 +4,183 @@ import QtQuick.Effects
 
 Rectangle {
     id: mainmenuroot
-    property var osdViewModel: null // Public property to receive the C++ model
-
+    property var osdViewModel: null
     width: 380
     height: 520
-    radius: 5
-    color: Qt.rgba(0, 0, 0, 0.6)
-    border.color: "#404040"
+    radius: 8
+    color: "#0A0A0A"  // Deep black background like BMW
+    border.color: "#1A1A1A"
     border.width: 1
     visible: viewModel ? viewModel.visible : false
-
     property var viewModel: null
-    property color accentColor: viewModel ? viewModel.accentColor : "#46E2A5"
+    property color accentColor: viewModel ? viewModel.accentColor : "#FF5722"  // BMW-style orange-red
 
-
-    // Subtle drop shadow using new Effects API
+    // Subtle drop shadow
     layer.enabled: true
     layer.effect: MultiEffect {
         shadowEnabled: true
         shadowColor: "#80000000"
-        shadowBlur: 0.3
-        shadowVerticalOffset: 6
+        shadowBlur: 0.4
+        shadowVerticalOffset: 8
     }
 
     Column {
         anchors.fill: parent
-        anchors.margins: 20
-        spacing: 12
+        anchors.margins: 0
+        spacing: 0
 
-        Text {
-            text: viewModel ? viewModel.title : "Main Menu"
-            font.pixelSize: 28
-            font.bold: true
-            color: accentColor
-            horizontalAlignment: Text.AlignHCenter
-            anchors.horizontalCenter: parent.horizontalCenter
+        // Header section
+        Item {
+            width: parent.width
+            height: 100
+
+            Column {
+                anchors.centerIn: parent
+                spacing: 8
+
+                Text {
+                    text: viewModel ? viewModel.title : "Main menu"
+                    font.pixelSize: 22
+                    font.weight: Font.Normal
+                    color: "#FFFFFF"
+                    font.family: "Segoe UI"
+                    horizontalAlignment: Text.AlignHCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                Text {
+                    text: viewModel ? viewModel.description : "Select an option"
+                    font.pixelSize: 13
+                    color: "#808080"
+                    font.family: "Segoe UI"
+                    horizontalAlignment: Text.AlignHCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+            }
         }
 
-        Text {
-            text: viewModel ? viewModel.description : "Select an option"
-            font.pixelSize: 16
-            color: "#CCCCCC"
-            horizontalAlignment: Text.AlignHCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
+        // Subtle divider
         Rectangle {
             width: parent.width
             height: 1
-            color: "#505050"
-            opacity: 0.6
-            anchors.horizontalCenter: parent.horizontalCenter
+            color: "#1A1A1A"
         }
 
+        // Menu items list
         ListView {
             id: listView
             width: parent.width
-            height: parent.height - 140
-            spacing: 6
+            height: parent.height - 100
+            spacing: 0
             clip: true
-
             model: viewModel ? viewModel.optionsModel : null
-
-            // KEY FIX: Bind the ListView's currentIndex to the ViewModel's currentIndex
             currentIndex: viewModel ? viewModel.currentIndex : -1
-
-            // Ensure the current item is always visible when selection changes
             highlightFollowsCurrentItem: true
-            highlightMoveDuration: 200
+            highlightMoveDuration: 250
             highlightMoveVelocity: -1
 
-            delegate: ItemDelegate {
+            delegate: Item {
                 width: listView.width
-                text: model.display
-                font.pixelSize: 18
-                font.bold: model.display.startsWith("---")
-                opacity: model.display.startsWith("---") ? 0.5 : 1.0
+                height: 52
                 enabled: !model.display.startsWith("---")
+                opacity: model.display.startsWith("---") ? 0.4 : 1.0
 
-                background: Rectangle {
-                    radius: 3
-                    color: highlighted ? accentColor : Qt.rgba(1, 1, 1, 0.08)
-                    border.color: highlighted ? "#FFFFFF" : "transparent"
-                    border.width: highlighted ? 2 : 0
-
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                    Behavior on border.color { ColorAnimation { duration: 200 } }
-                }
-
-                contentItem: Text {
-                    text: model.display
-                    color: highlighted ? "black" : "white"
-                    font.pixelSize: 18
-                    font.bold: model.display.startsWith("---")
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
+                // Background for hover effect
+                Rectangle {
                     anchors.fill: parent
+                    color: mouseArea.containsMouse && !highlighted ? "#15FFFFFF" : "transparent"
+
+                    Behavior on color {
+                        ColorAnimation { duration: 150 }
+                    }
                 }
 
-                // This is the key property that determines highlighting
-                highlighted: ListView.isCurrentItem
+                // Left accent bar for selected item (BMW style)
+                Rectangle {
+                    id: accentBar
+                    width: 4
+                    height: parent.height
+                    anchors.left: parent.left
+                    color: accentColor
+                    visible: highlighted
+
+                    // Smooth animation when selection changes
+                    opacity: highlighted ? 1 : 0
+                    Behavior on opacity {
+                        NumberAnimation { duration: 200 }
+                    }
+                }
+
+                // Menu item text
+                Text {
+                    text: model.display
+                    color: highlighted ? "#FFFFFF" : "#CCCCCC"
+                    font.pixelSize: 17
+                    font.weight: highlighted ? Font.DemiBold : Font.Normal
+                    font.family: "Segoe UI"
+                    verticalAlignment: Text.AlignVCenter
+                    anchors {
+                        left: parent.left
+                        leftMargin: 28
+                        right: parent.right
+                        rightMargin: 20
+                        verticalCenter: parent.verticalCenter
+                    }
+
+                    Behavior on color {
+                        ColorAnimation { duration: 150 }
+                    }
+
+                    Behavior on font.weight {
+                        NumberAnimation { duration: 150 }
+                    }
+                }
+
+                // Bottom divider line
+                Rectangle {
+                    width: parent.width - 28
+                    height: 1
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    color: "#151515"
+                    visible: index < listView.count - 1
+                }
+
+                // Mouse area for hover effects
+                MouseArea {
+                    id: mouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        if (!model.display.startsWith("---")) {
+                            listView.currentIndex = index
+                        }
+                    }
+                }
+
+                // Property to determine if this item is selected
+                property bool highlighted: ListView.isCurrentItem
             }
 
+            // Custom scrollbar styling
             ScrollBar.vertical: ScrollBar {
                 policy: ScrollBar.AsNeeded
                 active: true
+
+                contentItem: Rectangle {
+                    implicitWidth: 6
+                    radius: 3
+                    color: "#40FFFFFF"
+                    opacity: parent.active ? 1 : 0.5
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 200 }
+                    }
+                }
+
+                background: Rectangle {
+                    color: "transparent"
+                }
             }
         }
     }

@@ -14,8 +14,8 @@ ZeroingController::ZeroingController(QObject *parent)
 
 void ZeroingController::initialize()
 {
-    m_viewModel = ServiceManager::instance()->get<ZeroingViewModel>(QString("ZeroingViewModel"));
-    m_stateModel = ServiceManager::instance()->get<SystemStateModel>();
+    /*m_viewModel = ServiceManager::instance()->get<ZeroingViewModel>(QString("ZeroingViewModel"));
+    m_stateModel = ServiceManager::instance()->get<SystemStateModel>();*/
 
     Q_ASSERT(m_viewModel);
     Q_ASSERT(m_stateModel);
@@ -165,4 +165,14 @@ void ZeroingController::onColorStyleChanged(const QColor& color)
 {
     qDebug() << "ZeroingController: Color changed to" << color;
     m_viewModel->setAccentColor(color);
+}
+
+void ZeroingController::setViewModel(ZeroingViewModel* viewModel)
+{
+    m_viewModel = viewModel;
+}
+
+void ZeroingController::setStateModel(SystemStateModel* stateModel)
+{
+    m_stateModel = stateModel;
 }

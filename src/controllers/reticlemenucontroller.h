@@ -24,6 +24,9 @@ class ReticleMenuController : public QObject
 public:
     explicit ReticleMenuController(QObject *parent = nullptr);
     void initialize();
+    void setViewModel(MenuViewModel* viewModel);
+    void setOsdViewModel(OsdViewModel* osdViewModel);
+    void setStateModel(SystemStateModel* stateModel);
 
 public slots:
     void show();

@@ -813,7 +813,7 @@ void SystemStateModel::clearWindage() { // Called on startup typically
     m_currentStateData.windageAppliedToBallistics = false;
     qDebug() << "Windage cleared.";
     // Don't necessarily emit here if it's part of initial state reset
-    // emit dataChanged(m_currentStateData);
+    emit dataChanged(m_currentStateData);
     // emit windageStateChanged(false, 0.0f);
 }
 

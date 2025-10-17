@@ -13,6 +13,8 @@ class WindageController : public QObject
 public:
     explicit WindageController(QObject *parent = nullptr);
     void initialize();
+    void setViewModel(WindageViewModel* viewModel);
+    void setStateModel(SystemStateModel* stateModel);
 
 public slots:
     void show();

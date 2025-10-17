@@ -4,39 +4,55 @@ import "qrc:/qml/components"
 import "qrc:/qml/views"
 import "../components"
 
-ApplicationWindow {
-    id: appWindow
+Window {
+    id: mainWindow
+    visible: true
     width: 1024
     height: 768
-    visible: true
     title: "RCWS System"
 
-    // --- Video Feed Background ---
+    // Background color (visible if video fails)
+    color: "black"
+
+    // ========================================================================
+    // VIDEO FEED BACKGROUND
+    // ========================================================================
     Image {
         id: videoDisplay
         anchors.fill: parent
-        fillMode: Image.PreserveAspectFit // Fill screen with video, keeping aspect ratio
+        fillMode: Image.PreserveAspectFit
         source: "image://video/camera"
+        cache: false // Don't cache, we want fresh frames
 
-        // Update the image source (as per previous solution)
+        // Timer to refresh video feed
         Timer {
-            interval: 33 // ~30 FPS refresh rate
+            interval: 33 // ~30 FPS (adjust based on your camera framerate)
             running: true
             repeat: true
             onTriggered: {
-                // To force refresh from QQuickImageProvider, change source (e.g., add timestamp)
-                videoDisplay.source = "image://video/camera" + "?" + Date.now()
+                // Force QML to request new image from provider
+                videoDisplay.source = "image://video/camera?" + Date.now()
             }
+        }
+
+        // Fallback if video not available
+        Text {
+            anchors.centerIn: parent
+            text: "Waiting for video signal..."
+            color: "gray"
+            font.pixelSize: 24
+            visible: videoDisplay.status === Image.Null || videoDisplay.status === Image.Error
         }
     }
 
-    // *** OSD Overlay (On top of video) ***
+    // ========================================================================
+    // OSD OVERLAY (On top of video)
+    // ========================================================================
     OsdOverlay {
         id: osdOverlay
         anchors.fill: parent
         z: 10 // Above video
     }
-
 
     // === MAIN MENU ===
     MainMenu {
@@ -88,6 +104,43 @@ ApplicationWindow {
         // Already bound in ZoneDefinitionOverlay.qml
     }
 
+    // ========================================================================
+    // DEBUG INFO (Remove in production)
+    // ========================================================================
+    Rectangle {
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 10
+        width: 200
+        height: 60
+        color: "red"
+        opacity: 0.7
+        visible: true // Set to true for debugging
+        z: 1000
+        Column {
+            anchors.centerIn: parent
+            spacing: 5
+
+            Text {
+                text: "Video: " + (videoDisplay.status === Image.Ready ? "OK" : "NO SIGNAL")
+                color: videoDisplay.status === Image.Ready ? "green" : "red"
+                font.pixelSize: 12
+            }
+
+            Text {
+                text: "Size: " + videoDisplay.sourceSize.width + "x" + videoDisplay.sourceSize.height
+                color: "white"
+                font.pixelSize: 12
+            }
+
+            Text {
+                text: "OSD: " + (osdViewModel ? "ACTIVE" : "INACTIVE")
+                color: osdViewModel ? "green" : "red"
+                font.pixelSize: 12
+            }
+        }
+    }
+
     // Physical Button Handlers - ONLY 3 BUTTONS
     Row {
         anchors.bottom: parent.bottom
@@ -127,4 +180,5 @@ ApplicationWindow {
             }
         }
     }
+
 }

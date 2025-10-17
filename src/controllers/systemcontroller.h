@@ -2,11 +2,9 @@
 #define SYSTEMCONTROLLER_H
 
 #include <QObject>
-#include <QPointer>
 #include <QThread>
-#include <QQmlApplicationEngine>
 
-// Forward declares (Hardware Devices)
+// Forward declarations - Hardware
 class DayCameraControlDevice;
 class CameraVideoStreamDevice;
 class ImuDevice;
@@ -19,7 +17,7 @@ class Plc42Device;
 class ServoActuatorDevice;
 class ServoDriverDevice;
 
-// Forward declares (Data Models)
+// Forward declarations - Data Models
 class DayCameraDataModel;
 class GyroDataModel;
 class JoystickDataModel;
@@ -30,69 +28,76 @@ class Plc21DataModel;
 class Plc42DataModel;
 class ServoActuatorDataModel;
 class ServoDriverDataModel;
-
-// Forward declares (System Models & Controllers)
 class SystemStateModel;
+
+// Forward declarations - Hardware Controllers
 class GimbalController;
 class WeaponController;
 class CameraController;
 class JoystickController;
 
-// *** ADD: QML-related controllers ***
-class OsdController;
-class ZoneDefinitionController;
-
-// *** ADD: ViewModels ***
+// Forward declarations - QML System
+class VideoImageProvider;
 class OsdViewModel;
+class OsdController;
 class ZoneDefinitionViewModel;
 class ZoneMapViewModel;
 class AreaZoneParameterViewModel;
 class SectorScanParameterViewModel;
 class TRPParameterViewModel;
+class ZoneDefinitionController;
+class MenuViewModel;
+class MainMenuController;
+class ReticleMenuController;
+class ColorMenuController;
+class ZeroingViewModel;
+class ZeroingController;
+class WindageViewModel;
+class WindageController;
+class ApplicationController;
 
-// *** ADD: Video provider for QML ***
-class VideoImageProvider;
+class QQmlApplicationEngine;
 
 class SystemController : public QObject
 {
     Q_OBJECT
-
 public:
     explicit SystemController(QObject *parent = nullptr);
     ~SystemController();
 
-    // Phase 1: Initialize hardware, models, controllers
+    // Three-phase initialization
     void initializeHardware();
-
-    // Phase 2: Initialize QML system (ViewModels, UI Controllers, Video Provider)
     void initializeQmlSystem(QQmlApplicationEngine* engine);
-
-    // Phase 3: Start the system (threads, video streams)
     void startSystem();
 
 private:
-    // ========================================================================
-    // HARDWARE DEVICES (Unchanged)
-    // ========================================================================
+    // Helper methods
+    void connectDevicesToModels();
+    void connectModelsToSystemState();
+    void connectVideoToProvider();
+    void createQmlControllers();      // NEW
+    void connectQmlControllers();     // NEW
+
+    // === HARDWARE DEVICES ===
     DayCameraControlDevice* m_dayCamControl = nullptr;
-    CameraVideoStreamDevice* m_dayVideoProcessor = nullptr;  // ✅ Keep this (has tracking)
+    CameraVideoStreamDevice* m_dayVideoProcessor = nullptr;
     ImuDevice* m_gyroDevice = nullptr;
     JoystickDevice* m_joystickDevice = nullptr;
     LensDevice* m_lensDevice = nullptr;
     LRFDevice* m_lrfDevice = nullptr;
-    CameraVideoStreamDevice* m_nightVideoProcessor = nullptr;  // ✅ Keep this
     NightCameraControlDevice* m_nightCamControl = nullptr;
+    CameraVideoStreamDevice* m_nightVideoProcessor = nullptr;
     Plc21Device* m_plc21Device = nullptr;
     Plc42Device* m_plc42Device = nullptr;
     ServoActuatorDevice* m_servoActuatorDevice = nullptr;
     ServoDriverDevice* m_servoAzDevice = nullptr;
     ServoDriverDevice* m_servoElDevice = nullptr;
+
+    // === DEVICE THREADS ===
     QThread* m_servoAzThread = nullptr;
     QThread* m_servoElThread = nullptr;
 
-    // ========================================================================
-    // DATA MODELS (Unchanged)
-    // ========================================================================
+    // === DATA MODELS ===
     DayCameraDataModel* m_dayCamControlModel = nullptr;
     GyroDataModel* m_gyroModel = nullptr;
     JoystickDataModel* m_joystickModel = nullptr;
@@ -104,31 +109,18 @@ private:
     ServoActuatorDataModel* m_servoActuatorModel = nullptr;
     ServoDriverDataModel* m_servoAzModel = nullptr;
     ServoDriverDataModel* m_servoElModel = nullptr;
-
-    // ========================================================================
-    // SYSTEM STATE MODEL (Unchanged)
-    // ========================================================================
     SystemStateModel* m_systemStateModel = nullptr;
 
-    // ========================================================================
-    // HARDWARE CONTROLLERS (Unchanged)
-    // ========================================================================
+    // === HARDWARE CONTROLLERS ===
     GimbalController* m_gimbalController = nullptr;
     WeaponController* m_weaponController = nullptr;
     CameraController* m_cameraController = nullptr;
     JoystickController* m_joystickController = nullptr;
 
-    // ========================================================================
-    // QML SYSTEM (NEW)
-    // ========================================================================
-    // Video provider for QML
+    // === QML SYSTEM ===
     VideoImageProvider* m_videoProvider = nullptr;
 
-    // QML Controllers
-    OsdController* m_osdController = nullptr;
-    ZoneDefinitionController* m_zoneDefinitionController = nullptr;
-
-    // ViewModels (exposed to QML)
+    // ViewModels
     OsdViewModel* m_osdViewModel = nullptr;
     ZoneDefinitionViewModel* m_zoneDefinitionViewModel = nullptr;
     ZoneMapViewModel* m_zoneMapViewModel = nullptr;
@@ -136,10 +128,23 @@ private:
     SectorScanParameterViewModel* m_sectorScanParameterViewModel = nullptr;
     TRPParameterViewModel* m_trpParameterViewModel = nullptr;
 
-    // Helper methods
-    void connectDevicesToModels();
-    void connectModelsToSystemState();
-    void connectVideoToProvider();
+    // Separate MenuViewModels for each menu
+    MenuViewModel* m_mainMenuViewModel = nullptr;
+    MenuViewModel* m_reticleMenuViewModel = nullptr;
+    MenuViewModel* m_colorMenuViewModel = nullptr;
+
+    ZeroingViewModel* m_zeroingViewModel = nullptr;
+    WindageViewModel* m_windageViewModel = nullptr;
+
+    // QML Controllers
+    OsdController* m_osdController = nullptr;
+    ZoneDefinitionController* m_zoneDefinitionController = nullptr;
+    MainMenuController* m_mainMenuController = nullptr;
+    ReticleMenuController* m_reticleMenuController = nullptr;
+    ColorMenuController* m_colorMenuController = nullptr;
+    ZeroingController* m_zeroingController = nullptr;
+    WindageController* m_windageController = nullptr;
+    ApplicationController* m_appController = nullptr;
 };
 
 #endif // SYSTEMCONTROLLER_H

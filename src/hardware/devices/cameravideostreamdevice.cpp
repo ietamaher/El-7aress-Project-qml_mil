@@ -7,6 +7,8 @@
 
 #include <opencv2/imgcodecs.hpp>
 
+
+
 CameraVideoStreamDevice::CameraVideoStreamDevice(int cameraIndex,
                                const QString &deviceName,
                                int sourceWidth,
@@ -340,7 +342,7 @@ bool CameraVideoStreamDevice::initializeGStreamer()
                               "appsink name=mysink emit-signals=true max-buffers=2 drop=true sync=false"
                               ).arg(m_deviceName).arg(m_sourceWidth).arg(m_sourceHeight);*/
 
-    QString pipelineStr = QString("v4l2src device=%1 do-timestamp=true ! "
+    /*QString pipelineStr = QString("v4l2src device=%1 do-timestamp=true ! "
         "video/x-raw,format=YUY2,width=%2,height=%3,framerate=30/1 ! "
         "videocrop top=%4 left= %6 bottom=%5  right=%7 ! "
         "videoscale ! "
@@ -354,8 +356,8 @@ bool CameraVideoStreamDevice::initializeGStreamer()
         .arg(m_cropBottom)
         .arg(m_cropLeft)
         .arg(m_cropRight);
-
-    /*QString pipelineStr = QString(
+*/
+    QString pipelineStr = QString(
                               "v4l2src device=%1 do-timestamp=true ! "
                               "image/jpeg,width=%2,height=%3,framerate=30/1 ! jpegdec ! video/x-raw ! "
                               "aspectratiocrop aspect-ratio=4/3 ! "
@@ -364,7 +366,7 @@ bool CameraVideoStreamDevice::initializeGStreamer()
                               "videoconvert ! video/x-raw,format=YUY2 ! " // Explicit conversion
                               "queue max-size-buffers=2 leaky=downstream ! "
                               "appsink name=mysink emit-signals=true max-buffers=2 drop=true sync=false"
-                              ).arg(m_deviceName).arg(m_sourceWidth).arg(m_sourceHeight);*/
+                              ).arg(m_deviceName).arg(m_sourceWidth).arg(m_sourceHeight);
 
     qInfo() << "Cam" << m_cameraIndex << " GStreamer Pipeline:" << pipelineStr;
     GError *error = nullptr;
@@ -980,34 +982,35 @@ bool CameraVideoStreamDevice::runTrackingCycle(VPIImage vpiFrameInput)
 
 
 // --- Helper Functions --- (No changes needed based on errors)
-QImage CameraVideoStreamDevice::cvMatToQImage(const cv::Mat &inMat)
+QImage CameraVideoStreamDevice::cvMatToQImage(const cv::Mat &mat)
 {
-    switch (inMat.type()) {
-        case CV_8UC4: { // BGRA
-            QImage image(inMat.data, inMat.cols, inMat.rows, static_cast<int>(inMat.step), QImage::Format_ARGB32);
-            return image.copy();
-        }
-        case CV_8UC3: { // BGR
-            QImage image(inMat.data, inMat.cols, inMat.rows, static_cast<int>(inMat.step), QImage::Format_RGB888);
-            return image.rgbSwapped().copy();
-        }
-        case CV_8UC1: { // Grayscale
-             #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-                 QImage image(inMat.data, inMat.cols, inMat.rows, static_cast<int>(inMat.step), QImage::Format_Grayscale8);
-             #else
-                 static QVector<QRgb> sColorTable; // Fallback for older Qt
-                 if (sColorTable.isEmpty()) {
-                     sColorTable.resize(256);
-                     for (int i = 0; i < 256; ++i) sColorTable[i] = qRgb(i, i, i);
-                 }
-                 QImage image(inMat.data, inMat.cols, inMat.rows, static_cast<int>(inMat.step), QImage::Format_Indexed8);
-                 image.setColorTable(sColorTable);
-            #endif
-            return image.copy();
-        }
-        default:
-            qWarning("cvMatToQImage() - Unsupported CV type: %d for cam %d", inMat.type(), m_cameraIndex);
-            break;
+    if (mat.empty()) return QImage();
+
+    switch (mat.type()) {
+    case CV_8UC4: { // 4-channel BGRA (OpenCV default ordering: B,G,R,A)
+        // QImage::Format_ARGB32 is stored in memory as BGRA on little-endian systems,
+        // so this mapping is correct and avoids expensive per-pixel conversions.
+        QImage img(mat.data, mat.cols, mat.rows, static_cast<int>(mat.step),
+                   QImage::Format_ARGB32);
+        return img.copy(); // deep copy because mat.data will be freed/unmapped soon
     }
-    return QImage();
+
+    case CV_8UC3: { // 3-channel BGR
+        // QImage::Format_RGB888 expects R,G,B order. OpenCV is B,G,R -> use rgbSwapped().
+        QImage img(mat.data, mat.cols, mat.rows, static_cast<int>(mat.step),
+                   QImage::Format_RGB888);
+        QImage swapped = img.rgbSwapped(); // Creates the correct RGB ordering
+        return swapped.copy();
+    }
+
+    case CV_8UC1: { // Grayscale
+        QImage img(mat.data, mat.cols, mat.rows, static_cast<int>(mat.step),
+                   QImage::Format_Grayscale8);
+        return img.copy();
+    }
+
+    default:
+        qWarning() << "cvMatToQImage: Unsupported cv::Mat type:" << mat.type();
+        return QImage();
+    }
 }

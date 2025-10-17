@@ -15,9 +15,6 @@ WindageController::WindageController(QObject *parent)
 
 void WindageController::initialize()
 {
-    m_viewModel = ServiceManager::instance()->get<WindageViewModel>(QString("WindageViewModel"));
-    m_stateModel = ServiceManager::instance()->get<SystemStateModel>();
-
     Q_ASSERT(m_viewModel);
     Q_ASSERT(m_stateModel);
 
@@ -36,6 +33,7 @@ void WindageController::initialize()
                     updateUI();
                 }
             });
+
     connect(m_stateModel, &SystemStateModel::colorStyleChanged,
             this, &WindageController::onColorStyleChanged);
     
@@ -84,6 +82,11 @@ void WindageController::updateUI()
             );
         m_viewModel->setWindSpeed(m_currentWindSpeedEdit);
         m_viewModel->setShowWindSpeed(true);
+
+        // Always update the label for editing state (no "APPLIED" suffix)
+        m_viewModel->setWindSpeedLabel(
+            QString("Headwind: %1 knots").arg(m_currentWindSpeedEdit, 0, 'f', 0)
+            );
         break;
 
     case WindageState::Completed:
@@ -179,4 +182,14 @@ void WindageController::onColorStyleChanged(const QColor& color)
 {
     qDebug() << "WindageController: Color changed to" << color;
     m_viewModel->setAccentColor(color);
+}
+
+void WindageController::setViewModel(WindageViewModel* viewModel)
+{
+    m_viewModel = viewModel;
+}
+
+void WindageController::setStateModel(SystemStateModel* stateModel)
+{
+    m_stateModel = stateModel;
 }

@@ -13,6 +13,8 @@ class ZeroingController : public QObject
 public:
     explicit ZeroingController(QObject *parent = nullptr);
     void initialize();
+    void setViewModel(ZeroingViewModel* viewModel);
+    void setStateModel(SystemStateModel* stateModel);
 
 public slots:
     void show();

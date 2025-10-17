@@ -15,6 +15,9 @@ class ColorMenuController : public QObject
 public:
     explicit ColorMenuController(QObject *parent = nullptr);
     void initialize();
+    void setViewModel(MenuViewModel* viewModel);
+    void setOsdViewModel(OsdViewModel* osdViewModel);
+    void setStateModel(SystemStateModel* stateModel);
 
 public slots:
     void show();
@@ -44,6 +47,7 @@ private:
     QColor colorStyleToQColor(ColorStyle style) const;
 
     ColorStyle m_originalColorStyle;
+
 };
 
 #endif // COLORMENUCONTROLLER_H
