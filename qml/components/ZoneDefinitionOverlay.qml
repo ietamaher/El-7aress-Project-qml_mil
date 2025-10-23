@@ -1,17 +1,17 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 
 Rectangle {
     id: root
 
-    // Get ViewModels from context
     property var viewModel: zoneDefinitionViewModel
     property var mapViewModel: zoneMapViewModel
     property color accentColor: viewModel ? viewModel.accentColor : Qt.rgba(70, 226, 165, 1.0)
 
     visible: viewModel ? viewModel.visible : false
-    color: Qt.rgba(0, 0, 0, 0.59) // Semi-transparent background
+    color: Qt.rgba(0, 0, 0, 0.7)
     anchors.fill: parent
 
     // Main content container
@@ -20,63 +20,97 @@ Rectangle {
         anchors.centerIn: parent
         width: Math.min(parent.width - 20, 800)
         height: Math.min(parent.height - 20, 700)
-        color: Qt.rgba(0, 0, 0, 0.9)
-        border.color: accentColor
-        border.width: 2
-        radius: 5
+        color: "#0A0A0A"
+        border.color: "#1A1A1A"
+        border.width: 1
+        radius: 8
 
-
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: "#80000000"
+            shadowBlur: 0.5
+            shadowVerticalOffset: 10
+        }
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 10
-            spacing: 10
+            anchors.margins: 0
+            spacing: 0
 
-            // Title
-            Text {
+            // Header section
+            Rectangle {
                 Layout.fillWidth: true
-                text: viewModel ? viewModel.title : ""
-                font.pixelSize: 18
-                font.bold: true
-                color: accentColor
-                horizontalAlignment: Text.AlignHCenter
-            }
+                Layout.preferredHeight: 80
+                color: "transparent"
 
-            // Instruction text
-            Text {
-                Layout.fillWidth: true
-                text: viewModel ? viewModel.instruction : ""
-                font.pixelSize: 12
-                color: accentColor
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    Text {
+                        text: viewModel ? viewModel.title : ""
+                        font.pixelSize: 20
+                        font.weight: Font.Normal
+                        font.family: "Segoe UI"
+                        color: "#FFFFFF"
+                        horizontalAlignment: Text.AlignHCenter
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    Text {
+                        text: viewModel ? viewModel.instruction : ""
+                        font.pixelSize: 12
+                        font.family: "Segoe UI"
+                        color: "#808080"
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                }
             }
 
             // Gimbal position display
-            RowLayout {
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 25
-                spacing: 20
+                Layout.preferredHeight: 40
+                color: "#0D0D0D"
 
-                Text {
-                    text: "WS Pos:"
-                    font.pixelSize: 11
-                    color: accentColor
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 25
+                    anchors.rightMargin: 25
+                    spacing: 20
+
+                    Text {
+                        text: "WS Pos:"
+                        font.pixelSize: 14
+                        font.family: "Segoe UI"
+                        color: "#606060"
+                    }
+
+                    Text {
+                        text: viewModel ? "Az: " + viewModel.gimbalAz.toFixed(1) + "°" : "Az: ---°"
+                        font.pixelSize: 14
+                        font.family: "Segoe UI"
+                        color: accentColor
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    Text {
+                        text: viewModel ? "El: " + viewModel.gimbalEl.toFixed(1) + "°" : "El: ---°"
+                        font.pixelSize: 14
+                        font.family: "Segoe UI"
+                        color: accentColor
+                    }
                 }
+            }
 
-                Text {
-                    text: viewModel ? "Az: " + viewModel.gimbalAz.toFixed(1) + "°" : "Az: ---°"
-                    font.pixelSize: 11
-                    color: accentColor
-                }
-
-                Item { Layout.fillWidth: true }
-
-                Text {
-                    text: viewModel ? "El: " + viewModel.gimbalEl.toFixed(1) + "°" : "El: ---°"
-                    font.pixelSize: 11
-                    color: accentColor
-                }
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: "#151515"
             }
 
             // Main content area (menu OR map)
@@ -92,23 +126,72 @@ Rectangle {
                     model: viewModel ? viewModel.menuOptions : []
                     currentIndex: viewModel ? viewModel.currentIndex : 0
                     clip: true
+                    spacing: 0
 
-                    delegate: Rectangle {
+                    delegate: Item {
                         width: mainMenuList.width
-                        height: 35
-                        color: index === mainMenuList.currentIndex ?
-                               accentColor : "transparent"
-                        border.color: accentColor
-                        border.width: 1
+                        height: 48
+                        enabled: !modelData.startsWith("---")
+                        opacity: modelData.startsWith("---") ? 0.4 : 1.0
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: mouseArea.containsMouse && !highlighted ? "#15FFFFFF" : "transparent"
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                        }
+
+                        Rectangle {
+                            width: 4
+                            height: parent.height
+                            anchors.left: parent.left
+                            color: accentColor
+                            visible: highlighted
+                            opacity: highlighted ? 1 : 0
+                            Behavior on opacity { NumberAnimation { duration: 200 } }
+                        }
 
                         Text {
-                            anchors.centerIn: parent
                             text: modelData
-                            font.pixelSize: 13
-                            font.family: "Archivo Narrow"
-                            font.weight: Font.DemiBold
-                            color: index === mainMenuList.currentIndex ?
-                                   "black" : accentColor
+                            color: highlighted ? "#FFFFFF" : "#CCCCCC"
+                            font.pixelSize: 16
+                            font.weight: highlighted ? Font.DemiBold : Font.Normal
+                            font.family: "Segoe UI"
+                            verticalAlignment: Text.AlignVCenter
+                            anchors {
+                                left: parent.left
+                                leftMargin: 28
+                                right: parent.right
+                                rightMargin: 20
+                                verticalCenter: parent.verticalCenter
+                            }
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                        }
+
+                        Rectangle {
+                            width: parent.width - 28
+                            height: 1
+                            anchors.bottom: parent.bottom
+                            anchors.right: parent.right
+                            color: "#151515"
+                            visible: index < mainMenuList.count - 1
+                        }
+
+                        MouseArea {
+                            id: mouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: if (!modelData.startsWith("---")) mainMenuList.currentIndex = index
+                        }
+
+                        property bool highlighted: ListView.isCurrentItem
+                    }
+
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                        contentItem: Rectangle {
+                            implicitWidth: 6
+                            radius: 3
+                            color: "#40FFFFFF"
                         }
                     }
                 }
@@ -121,23 +204,72 @@ Rectangle {
                     model: viewModel ? viewModel.menuOptions : []
                     currentIndex: viewModel ? viewModel.currentIndex : 0
                     clip: true
+                    spacing: 0
 
-                    delegate: Rectangle {
+                    delegate: Item {
                         width: zoneSelectionList.width
-                        height: 35
-                        color: index === zoneSelectionList.currentIndex ?
-                               accentColor : "transparent"
-                        border.color: accentColor
-                        border.width: 1
+                        height: 48
+                        enabled: !modelData.startsWith("---")
+                        opacity: modelData.startsWith("---") ? 0.4 : 1.0
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: mouseArea2.containsMouse && !highlighted ? "#15FFFFFF" : "transparent"
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                        }
+
+                        Rectangle {
+                            width: 4
+                            height: parent.height
+                            anchors.left: parent.left
+                            color: accentColor
+                            visible: highlighted
+                            opacity: highlighted ? 1 : 0
+                            Behavior on opacity { NumberAnimation { duration: 200 } }
+                        }
 
                         Text {
-                            anchors.centerIn: parent
                             text: modelData
-                            font.pixelSize: 12
-                            font.family: "Archivo Narrow"
-                            font.weight: Font.DemiBold
-                            color: index === zoneSelectionList.currentIndex ?
-                                   "black" : accentColor
+                            color: highlighted ? "#FFFFFF" : "#CCCCCC"
+                            font.pixelSize: 16
+                            font.weight: highlighted ? Font.DemiBold : Font.Normal
+                            font.family: "Segoe UI"
+                            verticalAlignment: Text.AlignVCenter
+                            anchors {
+                                left: parent.left
+                                leftMargin: 28
+                                right: parent.right
+                                rightMargin: 20
+                                verticalCenter: parent.verticalCenter
+                            }
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                        }
+
+                        Rectangle {
+                            width: parent.width - 28
+                            height: 1
+                            anchors.bottom: parent.bottom
+                            anchors.right: parent.right
+                            color: "#151515"
+                            visible: index < zoneSelectionList.count - 1
+                        }
+
+                        MouseArea {
+                            id: mouseArea2
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: if (!modelData.startsWith("---")) zoneSelectionList.currentIndex = index
+                        }
+
+                        property bool highlighted: ListView.isCurrentItem
+                    }
+
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                        contentItem: Rectangle {
+                            implicitWidth: 6
+                            radius: 3
+                            color: "#40FFFFFF"
                         }
                     }
                 }
@@ -146,50 +278,62 @@ Rectangle {
                 ListView {
                     id: confirmList
                     anchors.centerIn: parent
-                    width: parent.width * 0.5
-                    height: 80
+                    width: parent.width * 0.6
+                    height: 70
                     visible: viewModel ? viewModel.showConfirmDialog : false
                     model: viewModel ? viewModel.menuOptions : []
                     currentIndex: viewModel ? viewModel.currentIndex : 0
                     clip: true
-                    spacing: 10
+                    spacing: 15
                     orientation: ListView.Horizontal
 
                     delegate: Rectangle {
-                        width: 120
-                        height: 50
-                        color: index === confirmList.currentIndex ?
-                               accentColor : "transparent"
-                        border.color: accentColor
-                        border.width: 2
-                        radius: 3
+                        width: 140
+                        height: 60
+                        color: "transparent"
+                        border.color: highlighted ? accentColor : "#404040"
+                        border.width: highlighted ? 3 : 1
+                        radius: 5
+
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
+                        Behavior on border.width { NumberAnimation { duration: 150 } }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: highlighted ? 0 : 3
+                            color: highlighted ? accentColor : "transparent"
+                            radius: 5
+                            opacity: highlighted ? 0.15 : 0
+                            Behavior on opacity { NumberAnimation { duration: 150 } }
+                        }
 
                         Text {
                             anchors.centerIn: parent
                             text: modelData
-                            font.pixelSize: 14
-                            font.bold: true
-                            color: index === confirmList.currentIndex ?
-                                   "black" : accentColor
+                            font.pixelSize: 16
+                            font.weight: highlighted ? Font.DemiBold : Font.Normal
+                            font.family: "Segoe UI"
+                            color: highlighted ? "#FFFFFF" : "#CCCCCC"
+                            Behavior on color { ColorAnimation { duration: 150 } }
                         }
+
+                        property bool highlighted: ListView.isCurrentItem
                     }
                 }
             }
 
-            // Zone Map
-            ZoneMapCanvas {
-                id: zoneMap
+            // Parameter Panel Container
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 250
-                visible: viewModel ? viewModel.showMap : true
-                viewModel: mapViewModel
+                height: 1
+                color: "#151515"
+                visible: viewModel ? viewModel.showParameterPanel : false
             }
 
-            // Parameter Panel Container
             Loader {
                 id: parameterPanelLoader
                 Layout.fillWidth: true
-                Layout.preferredHeight: 200
+                Layout.preferredHeight: 320
                 visible: viewModel ? viewModel.showParameterPanel : false
 
                 sourceComponent: {
@@ -203,6 +347,24 @@ Rectangle {
                     }
                 }
             }
+
+            // Zone Map
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: "#151515"
+                visible: viewModel ? viewModel.showMap : true
+            }
+
+            ZoneMapCanvas {
+                id: zoneMap
+                Layout.fillWidth: true
+                Layout.preferredHeight: 250
+                visible: viewModel ? viewModel.showMap : true
+                viewModel: mapViewModel
+            }
+
+
         }
     }
 
@@ -211,6 +373,7 @@ Rectangle {
         id: areaZonePanelComponent
         AreaZoneParameterPanel {
             viewModel: areaZoneParameterViewModel
+            accentColor: root.accentColor
         }
     }
 
@@ -218,6 +381,7 @@ Rectangle {
         id: sectorScanPanelComponent
         SectorScanParameterPanel {
             viewModel: sectorScanParameterViewModel
+            accentColor: root.accentColor
         }
     }
 
@@ -225,6 +389,7 @@ Rectangle {
         id: trpPanelComponent
         TRPParameterPanel {
             viewModel: trpParameterViewModel
+            accentColor: root.accentColor
         }
     }
 }

@@ -54,6 +54,10 @@ class ZeroingViewModel;
 class ZeroingController;
 class WindageViewModel;
 class WindageController;
+class SystemStatusController;
+class SystemStatusViewModel;
+class AboutController;
+class AboutViewModel;
 class ApplicationController;
 
 class QQmlApplicationEngine;
@@ -127,6 +131,8 @@ private:
     AreaZoneParameterViewModel* m_areaZoneParameterViewModel = nullptr;
     SectorScanParameterViewModel* m_sectorScanParameterViewModel = nullptr;
     TRPParameterViewModel* m_trpParameterViewModel = nullptr;
+    SystemStatusViewModel* m_systemStatusViewModel = nullptr;
+    AboutViewModel* m_aboutViewModel = nullptr;
 
     // Separate MenuViewModels for each menu
     MenuViewModel* m_mainMenuViewModel = nullptr;
@@ -144,7 +150,9 @@ private:
     ColorMenuController* m_colorMenuController = nullptr;
     ZeroingController* m_zeroingController = nullptr;
     WindageController* m_windageController = nullptr;
+    SystemStatusController* m_systemStatusController = nullptr;
+    AboutController* m_aboutController = nullptr;
     ApplicationController* m_appController = nullptr;
-};
+ };
 
 #endif // SYSTEMCONTROLLER_H

@@ -46,7 +46,6 @@ QStringList MainMenuController::buildMainMenuOptions() const
             << "--- SYSTEM ---"
             << "Zone Definitions"
             << "System Status"
-            << "Radar Target List"
             << "--- INFO ---"
             << "Help/About"
             << "Return ...";
@@ -124,15 +123,15 @@ void MainMenuController::handleMenuOptionSelected(const QString& option)
     }
     else if (option == "System Status") {
         emit systemStatusRequested();
-        emit menuFinished();
+       // emit menuFinished();
     }
     else if (option == "Radar Target List") {
         emit radarTargetListRequested();
-        emit menuFinished();
+        //emit menuFinished();
     }
     else if (option == "Help/About") {
         emit helpAboutRequested();
-        emit menuFinished();
+        // menuFinished();
     }
     else if (option == "Return ...") {
         qDebug() << "MainMenuController: Return option selected - closing menu";

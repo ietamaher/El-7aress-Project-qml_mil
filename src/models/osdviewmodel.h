@@ -79,6 +79,11 @@ class OsdViewModel : public QObject
     Q_PROPERTY(QString scanNameText READ scanNameText NOTIFY scanNameTextChanged)
     Q_PROPERTY(bool scanNameVisible READ scanNameVisible NOTIFY scanNameVisibleChanged)
 
+    Q_PROPERTY(bool lacActive READ lacActive NOTIFY lacActiveChanged)
+    Q_PROPERTY(float rangeMeters READ rangeMeters NOTIFY rangeMetersChanged)
+    Q_PROPERTY(float confidenceLevel READ confidenceLevel NOTIFY confidenceLevelChanged)
+
+
 public:
     explicit OsdViewModel(QObject *parent = nullptr);
 
@@ -126,6 +131,10 @@ public:
     QString scanNameText() const { return m_scanNameText; }
     bool scanNameVisible() const { return m_scanNameVisible; }
 
+    bool lacActive() const { return m_lacActive; }
+    float rangeMeters() const { return m_rangeMeters; }
+    float confidenceLevel() const { return m_confidenceLevel; }
+
 public slots:
     // Setters
     void setAccentColor(const QColor& color);
@@ -158,6 +167,12 @@ public slots:
     void updateZoneWarning(bool inNoFireZone, bool inNoTraverseLimit);
     void updateLeadAngleDisplay(const QString& statusText);
     void updateCurrentScanName(const QString& scanName);
+
+    void updateLacActive(bool active);
+    void updateRangeMeters(float range);
+    void updateConfidenceLevel(float confidence);
+
+
 
 signals:
     void accentColorChanged();
@@ -201,6 +216,12 @@ signals:
 
     void scanNameTextChanged();
     void scanNameVisibleChanged();
+
+    void lacActiveChanged();
+    void rangeMetersChanged();
+    void confidenceLevelChanged();
+
+
 
 private:
     // Member variables
@@ -256,6 +277,12 @@ private:
     // Screen dimensions (for reticle offset calculations)
     int m_screenWidth;
     int m_screenHeight;
+
+    bool m_lacActive;
+    float m_rangeMeters;
+    float m_confidenceLevel;
+
+
 };
 
 #endif // OSDVIEWMODEL_H

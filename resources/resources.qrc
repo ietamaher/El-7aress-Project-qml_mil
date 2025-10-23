@@ -14,5 +14,8 @@
         <file>../qml/components/ElevationScale.qml</file>
         <file>../qml/components/TrackingBox.qml</file>
         <file>../qml/components/ReticleRenderer.qml</file>
+        <file>../qml/components/AboutDialog.qml</file>
+        <file>../qml/components/SystemStatusOverlay.qml</file>
+        <file>../config/devices.json</file>
     </qresource>
 </RCC>

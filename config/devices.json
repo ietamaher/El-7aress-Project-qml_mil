@@ -1,0 +1,63 @@
+{
+  "version": "1.0",
+  "system": {
+    "name": "El 7arress RCWS",
+    "version": "4.5",
+    "accentColor": "#46E2A5"
+  },
+  "video": {
+    "sourceWidth": 1280,
+    "sourceHeight": 720,
+    "dayCamera": {
+      "devicePath": "/dev/video2",
+      "controlPort": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if00"
+    },
+    "nightCamera": {
+      "devicePath": "/dev/video0",
+      "controlPort": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_56D1123075-if00"
+    }
+  },
+  "imu": {
+    "port": "/dev/ttyUSB2",
+    "baudRate": 115200,
+    "slaveId": 1
+  },
+  "lrf": {
+    "port": "/dev/ttyUSB1",
+    "baudRate": 115200
+  },
+  "plc": {
+    "plc21": {
+      "port": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if00",
+      "baudRate": 115200,
+      "slaveId": 31,
+      "parity": "even"
+    },
+    "plc42": {
+      "port": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if02",
+      "baudRate": 115200,
+      "slaveId": 31,
+      "parity": "even"
+    }
+  },
+  "servo": {
+    "azimuth": {
+      "name": "az",
+      "port": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if04",
+      "baudRate": 230400,
+      "slaveId": 2,
+      "parity": "none"
+    },
+    "elevation": {
+      "name": "el",
+      "port": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if06",
+      "baudRate": 230400,
+      "slaveId": 1,
+      "parity": "none"
+    }
+  },
+  "actuator": {
+    "port": "/dev/ttyUSB0",
+    "baudRate": 115200
+  }
+}

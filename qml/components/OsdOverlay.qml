@@ -26,77 +26,95 @@ Item {
             text: viewModel ? viewModel.modeText : "MODE: IDLE"
             font.pixelSize: 16
             font.bold: true
-            font.family: "Archivo Narrow"
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         // Motion Mode
         Text {
             text: viewModel ? viewModel.motionText : "MOTION: MAN"
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         // System Status
         Text {
             text: viewModel ? viewModel.statusText : "SYS: --- SAF NRD"
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         // Rate
         Text {
             text: viewModel ? viewModel.rateText : "RATE: SINGLE SHOT"
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         // LRF Distance
         Text {
             text: viewModel ? viewModel.lrfText : "LRF: --- m"
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         // Zeroing Status
         Text {
             visible: viewModel ? viewModel.zeroingVisible : false
             text: viewModel ? viewModel.zeroingText : ""
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         // Windage Status
         Text {
             visible: viewModel ? viewModel.windageVisible : false
             text: viewModel ? viewModel.windageText : ""
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         // Lead Angle Status
         Text {
             visible: viewModel ? viewModel.leadAngleVisible : false
             text: viewModel ? viewModel.leadAngleText : ""
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: viewModel && viewModel.leadAngleText.includes("LAG") ? "yellow" :
                    (viewModel && viewModel.leadAngleText.includes("ZOOM") ? "#C81428" : osdRoot.accentColor)
+            style: Text.Outline
+            styleColor: "black"
         }
 
         // Scan Name
         Text {
             visible: viewModel ? viewModel.scanNameVisible : false
             text: viewModel ? viewModel.scanNameText : ""
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
     }
 
@@ -110,8 +128,10 @@ Item {
         text: viewModel ? viewModel.speedText : "SPD: 0.0%"
         font.pixelSize: 16
         font.bold: true
-        font.family: "Archivo Narrow"
+        font.family: "Segoe UI"
         color: osdRoot.accentColor
+        style: Text.Outline
+        styleColor: "black"
     }
 
     // ========================================================================
@@ -121,27 +141,33 @@ Item {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.margins: 10
-        spacing: 20
+        spacing: 50
 
         Text {
             text: viewModel ? viewModel.stabText : "STAB: OFF"
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         Text {
             text: viewModel ? viewModel.cameraText : "CAM: DAY"
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
 
         Text {
             text: viewModel ? viewModel.fovText : "FOV: 45.0°"
-            font.pixelSize: 14
-            font.family: "Archivo Narrow"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
             color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
         }
     }
 
@@ -155,8 +181,10 @@ Item {
         text: viewModel ? viewModel.zoneWarningText : ""
         font.pixelSize: 24
         font.bold: true
-        font.family: "Archivo Narrow"
+        font.family: "Segoe UI"
         color: "#C81428" // Red for warnings
+        style: Text.Outline
+        styleColor: "black"
 
         // Background for better visibility
         Rectangle {
@@ -229,14 +257,33 @@ Item {
     // RETICLE (Center with offset)
     // ========================================================================
     ReticleRenderer {
-        id: reticle
+        /*id: reticle
         anchors.centerIn: parent
         x: parent.width / 2 + (viewModel ? viewModel.reticleOffsetX : 0)
         y: parent.height / 2 + (viewModel ? viewModel.reticleOffsetY : 0)
 
-        reticleType: viewModel ? viewModel.reticleType : 1 // 1 = BoxCrosshair
+        reticleType: viewModel ? viewModel.reticleType : 1
         color: osdRoot.accentColor
         currentFov: viewModel ? viewModel.currentFov : 45.0
+
+        // CCIP-specific properties
+        lacActive: viewModel ? viewModel.lacActive : false
+        rangeMeters: viewModel ? viewModel.rangeMeters : 0
+        confidenceLevel: viewModel ? viewModel.confidenceLevel : 1.0*/
+
+        id: reticle
+        anchors.centerIn: parent
+        anchors.horizontalCenterOffset: viewModel ? viewModel.reticleOffsetX : 0
+        anchors.verticalCenterOffset: viewModel ? viewModel.reticleOffsetY : 0
+
+        reticleType: viewModel ? viewModel.reticleType : 1
+        color: osdRoot.accentColor
+        currentFov: viewModel ? viewModel.currentFov : 45.0
+
+
+        lacActive: viewModel ? viewModel.lacActive : false
+        rangeMeters: viewModel ? viewModel.rangeMeters : 0
+        confidenceLevel: viewModel ? viewModel.confidenceLevel : 1.0
     }
 
     // ========================================================================

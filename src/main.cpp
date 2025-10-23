@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include "controllers/systemcontroller.h"
+#include "controllers/deviceconfiguration.h"
 #include <gst/gst.h>
 
 int main(int argc, char *argv[])
@@ -8,6 +9,13 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     gst_init(&argc, &argv);
 
+    // ========================================================================
+    // LOAD DEVICE CONFIGURATION
+    // ========================================================================
+    if (!DeviceConfiguration::load("./config/devices.json")) {
+        qCritical() << "Failed to load device configuration!";
+        return -1;
+    }
     // ========================================================================
     // PHASE 1: Initialize Hardware
     // ========================================================================

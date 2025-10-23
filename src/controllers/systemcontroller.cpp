@@ -39,6 +39,8 @@
 #include "controllers/windagecontroller.h"
 #include "controllers/osdcontroller.h"
 #include "controllers/zonedefinitioncontroller.h"
+#include "controllers/systemstatuscontroller.h"
+#include "controllers/aboutcontroller.h"
 #include "models/osdviewmodel.h"
 #include "models/menuviewmodel.h"
 #include "models/zonedefinitionviewmodel.h"
@@ -48,7 +50,11 @@
 #include "models/trpparameterviewmodel.h"
 #include "models/zeroingviewmodel.h"
 #include "models/windageviewmodel.h"
+#include "models/systemstatusviewmodel.h"
+#include "models/aboutviewmodel.h"
 #include "video/videoimageprovider.h"
+
+#include "deviceconfiguration.h"
 
 #include <QQmlContext>
 #include <QQmlApplicationEngine>
@@ -93,38 +99,42 @@ void SystemController::initializeHardware()
 {
     qInfo() << "=== PHASE 1: Hardware Initialization ===";
 
-    // Configuration
-    const int sourceWidth = 1280;
-    const int sourceHeight = 720;
-    const QString dayDevicePath = "/dev/video2";
-    const QString nightDevicePath = "/dev/video0";
+    // Get configuration
+    const auto& videoConf = DeviceConfiguration::video();
+    const auto& imuConf = DeviceConfiguration::imu();
+    const auto& lrfConf = DeviceConfiguration::lrf();
+    const auto& plc21Conf = DeviceConfiguration::plc21();
+    const auto& plc42Conf = DeviceConfiguration::plc42();
+    const auto& servoAzConf = DeviceConfiguration::servoAz();
+    const auto& servoElConf = DeviceConfiguration::servoEl();
+    const auto& actuatorConf = DeviceConfiguration::actuator();
 
-    // 1. Create System State Model (needed by everything)
+    // 1. Create System State Model
     m_systemStateModel = new SystemStateModel(this);
     qInfo() << "  ✓ SystemStateModel created";
 
-    // 2. Create Hardware Devices
+    // 2. Create Hardware Devices using configuration
     m_dayCamControl = new DayCameraControlDevice(this);
-    m_gyroDevice = new ImuDevice("/dev/ttyUSB2", 115200, 1, this);
+    m_gyroDevice = new ImuDevice(imuConf.port, imuConf.baudRate, imuConf.slaveId, this);
     m_joystickDevice = new JoystickDevice(this);
     m_lensDevice = new LensDevice(this);
     m_lrfDevice = new LRFDevice(this);
     m_nightCamControl = new NightCameraControlDevice(this);
-    m_plc21Device = new Plc21Device("/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if00", 115200, 31, QSerialPort::EvenParity, this);
-    m_plc42Device = new Plc42Device("/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if02", 115200, 31, QSerialPort::EvenParity, this);
+    m_plc21Device = new Plc21Device(plc21Conf.port, plc21Conf.baudRate, plc21Conf.slaveId, plc21Conf.parity, this);
+    m_plc42Device = new Plc42Device(plc42Conf.port, plc42Conf.baudRate, plc42Conf.slaveId, plc42Conf.parity, this);
     m_servoActuatorDevice = new ServoActuatorDevice(this);
 
-    // Servo devices (with threads)
+    // Servo devices with configuration
     m_servoAzThread = new QThread(this);
-    m_servoAzDevice = new ServoDriverDevice("az", "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if04", 230400, 2, QSerialPort::NoParity, nullptr);
+    m_servoAzDevice = new ServoDriverDevice(servoAzConf.name, servoAzConf.port, servoAzConf.baudRate, servoAzConf.slaveId, servoAzConf.parity, nullptr);
     m_servoElThread = new QThread(this);
-    m_servoElDevice = new ServoDriverDevice("el", "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if06", 230400, 1, QSerialPort::NoParity, nullptr);
+    m_servoElDevice = new ServoDriverDevice(servoElConf.name, servoElConf.port, servoElConf.baudRate, servoElConf.slaveId, servoElConf.parity, nullptr);
 
-    // Video processors
-    m_dayVideoProcessor = new CameraVideoStreamDevice(0, dayDevicePath, sourceWidth, sourceHeight, m_systemStateModel, nullptr);
-    m_nightVideoProcessor = new CameraVideoStreamDevice(1, nightDevicePath, sourceWidth, sourceHeight, m_systemStateModel, nullptr);
+    // Video processors with configuration
+    m_dayVideoProcessor = new CameraVideoStreamDevice(0, videoConf.dayDevicePath, videoConf.sourceWidth, videoConf.sourceHeight, m_systemStateModel, nullptr);
+    m_nightVideoProcessor = new CameraVideoStreamDevice(1, videoConf.nightDevicePath, videoConf.sourceWidth, videoConf.sourceHeight, m_systemStateModel, nullptr);
 
-    qInfo() << "  ✓ Hardware devices created";
+    qInfo() << "  ✓ Hardware devices created from configuration";
 
     // 3. Create Data Models
     m_dayCamControlModel = new DayCameraDataModel(this);
@@ -192,6 +202,8 @@ void SystemController::initializeQmlSystem(QQmlApplicationEngine* engine)
     m_trpParameterViewModel = new TRPParameterViewModel(this);
     m_zeroingViewModel = new ZeroingViewModel(this);
     m_windageViewModel = new WindageViewModel(this);
+    m_systemStatusViewModel = new SystemStatusViewModel(this);
+    m_aboutViewModel = new AboutViewModel(this);
 
     qInfo() << "  ✓ ViewModels created";
 
@@ -216,7 +228,8 @@ void SystemController::initializeQmlSystem(QQmlApplicationEngine* engine)
     rootContext->setContextProperty("trpParameterViewModel", m_trpParameterViewModel);
     rootContext->setContextProperty("zeroingViewModel", m_zeroingViewModel);
     rootContext->setContextProperty("windageViewModel", m_windageViewModel);
-
+    rootContext->setContextProperty("systemStatusViewModel", m_systemStatusViewModel);
+    rootContext->setContextProperty("aboutViewModel", m_aboutViewModel);
     // System State (for debugging/direct access)
     rootContext->setContextProperty("systemStateModel", m_systemStateModel);
 
@@ -234,14 +247,19 @@ void SystemController::startSystem()
 {
     qInfo() << "=== PHASE 3: System Startup ===";
 
-    // 1. Open Device Connections
-    m_dayCamControl->openSerialPort("/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if00");
+    // Get configuration
+    const auto& videoConf = DeviceConfiguration::video();
+    const auto& lrfConf = DeviceConfiguration::lrf();
+    const auto& actuatorConf = DeviceConfiguration::actuator();
+
+    // Open Device Connections using configuration
+    m_dayCamControl->openSerialPort(videoConf.dayControlPort);
     m_gyroDevice->connectDevice();
-    m_lrfDevice->openSerialPort("/dev/ttyUSB1");
-    m_nightCamControl->openSerialPort("/dev/serial/by-id/usb-1a86_USB_Single_Serial_56D1123075-if00");
+    m_lrfDevice->openSerialPort(lrfConf.port);
+    m_nightCamControl->openSerialPort(videoConf.nightControlPort);
     m_plc21Device->connectDevice();
     m_plc42Device->connectDevice();
-    m_servoActuatorDevice->openSerialPort("/dev/ttyUSB0");
+    m_servoActuatorDevice->openSerialPort(actuatorConf.port);
 
     if (m_servoAzDevice) m_servoAzDevice->connectDevice();
     if (m_servoElDevice) m_servoElDevice->connectDevice();
@@ -321,6 +339,16 @@ void SystemController::createQmlControllers()
         );
     m_zoneDefinitionController->setStateModel(m_systemStateModel);
 
+    m_systemStatusController = new SystemStatusController();
+    m_systemStatusController->setViewModel(m_systemStatusViewModel);
+    m_systemStatusController->setStateModel(m_systemStateModel);
+
+
+    m_aboutController = new AboutController();
+    m_aboutController->setViewModel(m_aboutViewModel);
+    m_aboutController->setStateModel(m_systemStateModel);
+
+
     // Create Application Controller (LAST - needs all other controllers)
     m_appController = new ApplicationController(this);
 
@@ -331,6 +359,9 @@ void SystemController::createQmlControllers()
     m_appController->setZeroingController(m_zeroingController);
     m_appController->setWindageController(m_windageController);
     m_appController->setZoneDefinitionController(m_zoneDefinitionController);
+    m_appController->setSystemStatusController(m_systemStatusController);
+    m_appController->setAboutController(m_aboutController);
+
     m_appController->setSystemStateModel(m_systemStateModel);
 
     qInfo() << "  ✓ QML Controllers created";
@@ -349,10 +380,40 @@ void SystemController::connectQmlControllers()
     m_zeroingController->initialize();
     m_windageController->initialize();
     m_zoneDefinitionController->initialize();
+    m_systemStatusController->initialize();
+    m_aboutController->initialize();
 
     // Initialize ApplicationController LAST (it connects to all others)
     m_appController->initialize();
+    // =========================================================================
+    // OSD CONTROLLER CONNECTIONS
+    // =========================================================================
+    if (m_osdController) {
+        qDebug() << "Connecting OsdController...";
 
+        // Phase 1: Connect to SystemStateModel (already done in OsdController::initialize())
+        // Phase 2: Connect to camera frame data (ACTIVATE HERE!)
+
+        if (m_dayVideoProcessor) {
+            connect(m_dayVideoProcessor, &CameraVideoStreamDevice::frameDataReady,
+                    m_osdController, &OsdController::onFrameDataReady);
+            qDebug() << "✅ Day camera frameDataReady → OsdController (Phase 2 ACTIVE)";
+        } else {
+            qWarning() << "⚠️ Day camera not available for OSD connection";
+        }
+
+        if (m_nightVideoProcessor) {
+            connect(m_nightVideoProcessor, &CameraVideoStreamDevice::frameDataReady,
+                    m_osdController, &OsdController::onFrameDataReady);
+            qDebug() << "✅ Night camera frameDataReady → OsdController (Phase 2 ACTIVE)";
+        } else {
+            qWarning() << "⚠️ Night camera not available for OSD connection";
+        }
+
+        qDebug() << "=== OSD Phase 2: Frame-synchronized updates ENABLED ===";
+    } else {
+        qWarning() << "⚠️ OsdController is null, cannot connect cameras";
+    }
     qInfo() << "  ✓ QML Controllers initialized and connected";
 }
 
@@ -397,6 +458,7 @@ void SystemController::connectDevicesToModels()
 
     connect(m_servoElDevice, &ServoDriverDevice::servoDataChanged,
             m_servoElModel, &ServoDriverDataModel::updateData);
+
 
     qInfo() << "  ✓ Devices connected to models";
 }

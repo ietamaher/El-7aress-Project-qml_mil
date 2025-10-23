@@ -27,11 +27,15 @@ LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lope
 LIBS += -L/usr/local/lib -lopencv_core   -lopencv_dnn -lopencv_videoio
 PKGCONFIG += gstreamer-gl-1.0
 
+INCLUDEPATH += /usr/local/cuda/include
+LIBS += -L/usr/local/cuda/lib64 -lcudart
 
 SOURCES += \
+    src/controllers/aboutcontroller.cpp \
     src/controllers/applicationcontroller.cpp \
     src/controllers/cameracontroller.cpp \
     src/controllers/colormenucontroller.cpp \
+    src/controllers/deviceconfiguration.cpp \
     src/controllers/gimbalcontroller.cpp \
     src/controllers/joystickcontroller.cpp \
     src/controllers/mainmenucontroller.cpp \
@@ -44,6 +48,7 @@ SOURCES += \
     src/controllers/osdcontroller.cpp \
     src/controllers/reticlemenucontroller.cpp \
     src/controllers/systemcontroller.cpp \
+    src/controllers/systemstatuscontroller.cpp \
     src/controllers/weaponcontroller.cpp \
     src/controllers/windagecontroller.cpp \
     src/controllers/zeroingcontroller.cpp \
@@ -63,12 +68,14 @@ SOURCES += \
     src/hardware/devices/servoactuatordevice.cpp \
     src/hardware/devices/servodriverdevice.cpp \
     src/main.cpp \
+    src/models/aboutviewmodel.cpp \
     src/models/areazoneparameterviewmodel.cpp \
     src/models/domain/joystickdatamodel.cpp \
     src/models/domain/systemstatemodel.cpp \
     src/models/menuviewmodel.cpp \
     src/models/osdviewmodel.cpp \
     src/models/sectorscanparameterviewmodel.cpp \
+    src/models/systemstatusviewmodel.cpp \
     src/models/trpparameterviewmodel.cpp \
     src/models/windageviewmodel.cpp \
     src/models/zeroingviewmodel.cpp \
@@ -102,9 +109,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    src/controllers/aboutcontroller.h \
     src/controllers/applicationcontroller.h \
     src/controllers/cameracontroller.h \
     src/controllers/colormenucontroller.h \
+    src/controllers/deviceconfiguration.h \
     src/controllers/gimbalcontroller.h \
     src/controllers/joystickcontroller.h \
     src/controllers/mainmenucontroller.h \
@@ -118,6 +127,7 @@ HEADERS += \
     src/controllers/osdcontroller.h \
     src/controllers/reticlemenucontroller.h \
     src/controllers/systemcontroller.h \
+    src/controllers/systemstatuscontroller.h \
     src/controllers/weaponcontroller.h \
     src/controllers/windagecontroller.h \
     src/controllers/zeroingcontroller.h \
@@ -137,6 +147,7 @@ HEADERS += \
     src/hardware/devices/servoactuatordevice.h \
     src/hardware/devices/servodriverdevice.h \
     src/hardware/devices/vpi_helpers.h \
+    src/models/aboutviewmodel.h \
     src/models/areazoneparameterviewmodel.h \
     src/models/domain/daycameradatamodel.h \
     src/models/domain/gyrodatamodel.h \
@@ -154,6 +165,7 @@ HEADERS += \
     src/models/menuviewmodel.h \
     src/models/osdviewmodel.h \
     src/models/sectorscanparameterviewmodel.h \
+    src/models/systemstatusviewmodel.h \
     src/models/trpparameterviewmodel.h \
     src/models/windageviewmodel.h \
     src/models/zeroingviewmodel.h \
@@ -170,4 +182,6 @@ HEADERS += \
     src/utils/targetstate.h \
     src/video/gstvideosource.h \
     src/video/videoimageprovider.h
+
+
 

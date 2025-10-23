@@ -470,6 +470,10 @@ void SystemStateModel::onServoAzDataChanged(const ServoData &azData) {
         m_currentStateData.gimbalAz = azData.position* 0.0016179775280;;
         m_currentStateData.azMotorTemp = azData.motorTemp;
         m_currentStateData.azDriverTemp = azData.driverTemp;
+        m_currentStateData.azServoConnected = azData.isConnected;
+        m_currentStateData.azRpm = azData.rpm;           // ✅ ADDED
+        m_currentStateData.azTorque = azData.torque;     // ✅ ADDED
+        m_currentStateData.azFault = azData.fault;       // ✅ ADDED
         // Potentially update other related fields from azData
         emit dataChanged(m_currentStateData); // Emit general data change
         emit gimbalPositionChanged(m_currentStateData.gimbalAz, m_currentStateData.gimbalEl); // Emit specific gimbal change
@@ -482,6 +486,10 @@ void SystemStateModel::onServoElDataChanged(const ServoData &elData) {
         m_currentStateData.gimbalEl = elData.position * (-0.0018);
         m_currentStateData.elMotorTemp = elData.motorTemp;
         m_currentStateData.elDriverTemp = elData.driverTemp;
+        m_currentStateData.elServoConnected = elData.isConnected;
+        m_currentStateData.elRpm = elData.rpm;           // ✅ ADDED
+        m_currentStateData.elTorque = elData.torque;     // ✅ ADDED
+        m_currentStateData.elFault = elData.fault;       // ✅ ADDED
         // Potentially update other related fields from elData
         emit dataChanged(m_currentStateData); // Emit general data change
         emit gimbalPositionChanged(m_currentStateData.gimbalAz, m_currentStateData.gimbalEl); // Emit specific gimbal change
@@ -497,6 +505,8 @@ void SystemStateModel::onDayCameraDataChanged(const DayCameraData &dayData)
     newData.dayCameraConnected = dayData.isConnected;
     newData.dayCameraError = dayData.errorState;
     newData.dayCameraStatus = dayData.cameraStatus;
+    newData.dayAutofocusEnabled = dayData.autofocusEnabled;   // ✅ ADDED
+    newData.dayFocusPosition = dayData.focusPosition;
     updateData(newData);
 
 }
@@ -525,10 +535,11 @@ void SystemStateModel::setTrackingStarted(bool start) { if(m_currentStateData.st
 void SystemStateModel::onGyroDataChanged(const ImuData &gyroData)
 {
     SystemStateData newData = m_currentStateData;
+    newData.imuConnected = gyroData.isConnected;
     newData.imuRollDeg = gyroData.imuRollDeg; // or convert to float
     newData.imuPitchDeg = gyroData.imuPitchDeg; // or convert to float
     newData.imuYawDeg = gyroData.imuYawDeg; // or convert to float
-    newData.temperature = gyroData.temperature; // Assuming this is a float
+    newData.imuTemp = gyroData.temperature;
     newData.AccelX = gyroData.accelX_g; // Assuming this is an int
     newData.AccelY = gyroData.accelY_g; // Assuming this is an int
     newData.AccelZ = gyroData.accelZ_g; // Assuming this is an int
@@ -628,10 +639,17 @@ void SystemStateModel::onLensDataChanged(const LensData &lensData)
 
 void SystemStateModel::onLrfDataChanged(const LrfData &lrfData)
 {
-    SystemStateData newData = m_currentStateData;
-    newData.lrfDistance = lrfData.lastDistance; // or convert to float
-    newData.lrfSystemStatus = lrfData.isFault; // or convert to float
-    newData.isOverTemperature = lrfData.isOverTemperature; // Assuming this is a boolean flag
+    SystemStateData newData = m_currentStateData;  
+    newData.lrfConnected = lrfData.isConnected;             // ✅ ADDED
+    newData.lrfDistance = lrfData.lastDistance;             // ✅ Already correct
+    newData.lrfTemp = lrfData.temperature;                  // ✅ ADDED
+    newData.lrfLaserCount = lrfData.laserCount;             // ✅ ADDED
+    newData.lrfSystemStatus = lrfData.rawStatusByte;        // ✅ FIXED (was: isFault)
+    newData.lrfFault = lrfData.isFault;                     // ✅ ADDED
+    newData.lrfNoEcho = lrfData.noEcho;                     // ✅ ADDED
+    newData.lrfLaserNotOut = lrfData.laserNotOut;           // ✅ ADDED
+    newData.lrfOverTemp = lrfData.isOverTemperature;        // ✅ ADDED
+    newData.isOverTemperature = lrfData.isOverTemperature;
     updateData(newData);
 }
 
@@ -644,6 +662,8 @@ void SystemStateModel::onNightCameraDataChanged(const NightCameraData &nightData
     newData.nightCameraConnected = nightData.isConnected;
     newData.nightCameraError = nightData.errorState;
     newData.nightCameraStatus = nightData.cameraStatus;
+    newData.nightDigitalZoomLevel = nightData.digitalZoomLevel;  // ✅ ADDED (proper field)
+    newData.nightFfcInProgress = nightData.ffcInProgress;
     updateData(newData);
 
 }
@@ -681,6 +701,7 @@ void SystemStateModel::onPlc21DataChanged(const Plc21PanelData &pData)
     }
 
     newData.gimbalSpeed = pData.speedSW;
+    newData.plc21Connected = pData.isConnected;
 
     updateData(newData);
 }
@@ -710,6 +731,8 @@ void SystemStateModel::onPlc42DataChanged(const Plc42Data &pData)
     newData.solenoidState = pData.solenoidState;
     newData.resetAlarm = pData.resetAlarm;
 
+    newData.plc42Connected = pData.isConnected;
+
     updateData(newData);
 }
 
@@ -717,7 +740,15 @@ void SystemStateModel::onPlc42DataChanged(const Plc42Data &pData)
 void SystemStateModel::onServoActuatorDataChanged(const ServoActuatorData &actuatorData)
 {
     SystemStateData newData = m_currentStateData;
-    newData.actuatorPosition = actuatorData.position_mm; // or convert to float
+    newData.actuatorPosition = actuatorData.position_mm;
+    newData.actuatorConnected = actuatorData.isConnected;           // ✅ ADDED
+    newData.actuatorVelocity = actuatorData.velocity_mm_s;          // ✅ ADDED
+    newData.actuatorTemp = actuatorData.temperature_c;              // ✅ ADDED
+    newData.actuatorBusVoltage = actuatorData.busVoltage_v;         // ✅ ADDED
+    newData.actuatorTorque = actuatorData.torque_percent;           // ✅ ADDED
+    newData.actuatorMotorOff = actuatorData.status.isMotorOff;      // ✅ ADDED
+    newData.actuatorFault = actuatorData.status.isLatchingFaultActive; // ✅ ADDED
+
     updateData(newData);
 }
 
@@ -775,46 +806,72 @@ void SystemStateModel::clearZeroing() { // Called on power down, or manually
     emit zeroingStateChanged(false, 0.0f, 0.0f);
 }
 
-
 void SystemStateModel::startWindageProcedure() {
     if (!m_currentStateData.windageModeActive) {
         m_currentStateData.windageModeActive = true;
+        m_currentStateData.windageDirectionCaptured = false;
         // PDF: "Windage is always zero when CROWS is started."
-        // So, starting the procedure doesn't necessarily clear the current value being entered.
+        // Note: We don't clear existing values here - they persist from previous session
         qDebug() << "Windage procedure started.";
         emit dataChanged(m_currentStateData);
-        emit windageStateChanged(true, m_currentStateData.windageSpeedKnots);
+        emit windageStateChanged(true, 
+                                 m_currentStateData.windageSpeedKnots,
+                                 m_currentStateData.windageDirectionDegrees);
+    }
+}
+
+void SystemStateModel::captureWindageDirection(float currentAzimuthDegrees) {
+    // Called when user presses MENU SEL in step 5 after aligning WS to wind
+    if (m_currentStateData.windageModeActive && !m_currentStateData.windageDirectionCaptured) {
+        m_currentStateData.windageDirectionDegrees = currentAzimuthDegrees;
+        m_currentStateData.windageDirectionCaptured = true;
+        qDebug() << "Windage direction captured:" << m_currentStateData.windageDirectionDegrees << "degrees";
+        emit dataChanged(m_currentStateData);
+        emit windageStateChanged(true,
+                                 m_currentStateData.windageSpeedKnots,
+                                 m_currentStateData.windageDirectionDegrees);
     }
 }
 
 void SystemStateModel::setWindageSpeed(float knots) {
-    if (m_currentStateData.windageModeActive) {
+    // Called during step 6 when user adjusts wind speed with U/D buttons
+    if (m_currentStateData.windageModeActive && m_currentStateData.windageDirectionCaptured) {
         m_currentStateData.windageSpeedKnots = qMax(0.0f, knots); // Speed can't be negative
         qDebug() << "Windage speed set to:" << m_currentStateData.windageSpeedKnots << "knots";
         emit dataChanged(m_currentStateData);
-        emit windageStateChanged(true, m_currentStateData.windageSpeedKnots);
+        emit windageStateChanged(true,
+                                 m_currentStateData.windageSpeedKnots,
+                                 m_currentStateData.windageDirectionDegrees);
     }
 }
 
 void SystemStateModel::finalizeWindage() {
-    if (m_currentStateData.windageModeActive) {
+    // Called when user presses MENU SEL in step 6 to confirm wind speed
+    if (m_currentStateData.windageModeActive && m_currentStateData.windageDirectionCaptured) {
         m_currentStateData.windageModeActive = false;
         m_currentStateData.windageAppliedToBallistics = (m_currentStateData.windageSpeedKnots > 0.001f); // Apply if speed > 0
-        qDebug() << "Windage procedure finalized. Speed:" << m_currentStateData.windageSpeedKnots
+        qDebug() << "Windage procedure finalized."
+                 << "Direction:" << m_currentStateData.windageDirectionDegrees << "degrees"
+                 << "Speed:" << m_currentStateData.windageSpeedKnots << "knots"
                  << "Applied:" << m_currentStateData.windageAppliedToBallistics;
         emit dataChanged(m_currentStateData);
-        emit windageStateChanged(false, m_currentStateData.windageSpeedKnots);
+        emit windageStateChanged(false,
+                                 m_currentStateData.windageSpeedKnots,
+                                 m_currentStateData.windageDirectionDegrees);
     }
 }
 
-void SystemStateModel::clearWindage() { // Called on startup typically
+void SystemStateModel::clearWindage() {
+    // Called on startup or when windage needs to be reset
+    // PDF: "Windage is always zero when CROWS is started."
     m_currentStateData.windageModeActive = false;
     m_currentStateData.windageSpeedKnots = 0.0f;
+    m_currentStateData.windageDirectionDegrees = 0.0f;
+    m_currentStateData.windageDirectionCaptured = false;
     m_currentStateData.windageAppliedToBallistics = false;
     qDebug() << "Windage cleared.";
-    // Don't necessarily emit here if it's part of initial state reset
     emit dataChanged(m_currentStateData);
-    // emit windageStateChanged(false, 0.0f);
+    emit windageStateChanged(false, 0.0f, 0.0f);
 }
 
 void SystemStateModel::setLeadAngleCompensationActive(bool active) {

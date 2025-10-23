@@ -5,175 +5,333 @@ import QtQuick.Layouts
 Rectangle {
     id: root
 
+    // Public viewModel binding
     property var viewModel: null
-    property color accentColor: zoneDefinitionViewModel ? zoneDefinitionViewModel.accentColor : Qt.rgba(70, 226, 165, 1.0)
 
+    // Safe accent color with fallback
+    property color accentColor: viewModel && viewModel.accentColor ? viewModel.accentColor : "#46E2A5"
 
-    color: Qt.rgba(0, 0.16, 0.12, 0.8)
-    radius: 5
-    border.color: accentColor
-    border.width: 1
+    // Safe viewModel property access with defaults
+    property int vmActiveField: viewModel && viewModel.activeField !== undefined ? viewModel.activeField : -1
+    property bool vmEnabled: viewModel ? !!viewModel.isEnabled : false
+    property int vmScanSpeed: viewModel && viewModel.scanSpeed !== undefined ? viewModel.scanSpeed : 5
+    property bool vmIsEditingValue: viewModel ? !!viewModel.isEditingValue : false
+
+    // Pre-computed colors for consistency
+    property color highlightBg: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.1)
+    property color dangerColor: "#C81428"
+    property color dangerBg: Qt.rgba(200/255.0, 20/255.0, 40/255.0, 0.1)
+    property color editIndicatorColor: "#FF9800"
+    property color editIndicatorBg: Qt.rgba(255/255.0, 152/255.0, 0/255.0, 0.2)
+
+    color: "#0A0A0A"
+    radius: 0
+    border.color: "transparent"
+    border.width: 0
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 15
-        spacing: 12
+        anchors.margins: 0
+        spacing: 0
 
-        // Title
-        Text {
-            Layout.fillWidth: true
-            text: "Sector Scan Parameters"
-            font.pixelSize: 16
-            font.bold: true
-            font.family: "Archivo Narrow"
-            color: accentColor
-            horizontalAlignment: Text.AlignHCenter
-        }
-
-        // Enabled field
+        // Title section
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 40
-            radius: 3
-            color: (viewModel && viewModel.activeField === 0) ? accentColor : "transparent"
-            border.color: accentColor
-            border.width: 1
+            Layout.preferredHeight: 60
+            color: "transparent"
 
-            RowLayout {
+            Text {
+                anchors.centerIn: parent
+                text: "Sector Scan Parameters"
+                font.pixelSize: 18
+                font.weight: Font.Normal
+                font.family: "Segoe UI"
+                color: "#FFFFFF"
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "#151515"
+        }
+
+        // Parameter fields container with fixed height
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 104  // 2 rows * 52
+            color: "transparent"
+            clip: true  // Prevent overflow
+
+            ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 10
+                spacing: 0
 
-                Text {
-                    text: "Enabled:"
-                    font.pixelSize: 14
-                    font.family: "Archivo Narrow"
-                    font.weight: Font.DemiBold
-                    color: (viewModel && viewModel.activeField === 0) ? "black" : accentColor
-                }
+                // Enabled field
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 52
+                    clip: true
 
-                Rectangle {
-                    width: 24
-                    height: 24
-                    radius: 3
-                    border.color: accentColor
-                    border.width: 2
-                    color: (viewModel && viewModel.isEnabled) ? accentColor : "transparent"
+                     // Row hover background
+                   Rectangle {
+                        anchors.fill: parent
+                        color: mouseArea1.containsMouse && vmActiveField !== 0 ? "#15FFFFFF" : "transparent"
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
 
-                    Text {
-                        text: "✓"
-                        font.pixelSize: 18
-                        font.bold: true
-                        color: "black"
-                        anchors.centerIn: parent
-                        visible: viewModel && viewModel.isEnabled
+                     // Accent left strip (anchored to row bounds)
+                     Rectangle {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 4
+                        color: accentColor
+                        visible: vmActiveField === 0
+                        opacity: vmActiveField === 0 ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                    }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 28
+                        anchors.rightMargin: 20
+                        spacing: 12
+
+                        Text {
+                            text: "Enabled:"
+                            font.pixelSize: 15
+                            font.weight: vmActiveField === 0 ? Font.DemiBold : Font.Normal
+                            font.family: "Segoe UI"
+                            color: vmActiveField === 0 ? "#FFFFFF" : "#CCCCCC"
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        // Checkbox visual
+                        Rectangle {
+                            width: 20
+                            height: 20
+                            radius: 3
+                            border.color: vmEnabled ? accentColor : "#404040"
+                            border.width: 2
+                            color: vmEnabled ? accentColor : "transparent"
+
+                            Behavior on border.color { ColorAnimation { duration: 200 } }
+                            Behavior on color { ColorAnimation { duration: 200 } }
+
+                            Text {
+                                text: "✓"
+                                font.pixelSize: 14
+                                font.bold: true
+                                color: "#0A0A0A"
+                                anchors.centerIn: parent
+                                visible: vmEnabled
+                            }
+                        }
+
+                        Item { Layout.fillWidth: true }
+                    }
+
+                    Rectangle {
+                        width: parent.width - 28
+                        height: 1
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        color: "#151515"
+                    }
+
+                    MouseArea {
+                        id: mouseArea1
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            if (viewModel) viewModel.isEnabled = !viewModel.isEnabled
+                        }
                     }
                 }
 
-                Item { Layout.fillWidth: true }
+                // Scan Speed field
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 52
+                    clip: true
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: mouseArea2.containsMouse && vmActiveField !== 1 ? "#15FFFFFF" : "transparent"
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
+
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: 4
+                        color: accentColor
+                        visible: vmActiveField === 1
+                        opacity: vmActiveField === 1 ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                    }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 28
+                        anchors.rightMargin: 20
+                        spacing: 12
+
+                        Text {
+                            text: "Scan Speed:"
+                            font.pixelSize: 15
+                            font.weight: vmActiveField === 1 ? Font.DemiBold : Font.Normal
+                            font.family: "Segoe UI"
+                            color: vmActiveField === 1 ? "#FFFFFF" : "#CCCCCC"
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        Text {
+                            text: vmScanSpeed + " deg/s"
+                            font.pixelSize: 15
+                            font.weight: Font.Bold
+                            font.family: "Segoe UI"
+                            color: vmActiveField === 1 ? accentColor : "#808080"
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                        }
+
+                        Rectangle {
+                            width: 50
+                            height: 20
+                            radius: 3
+                            color: editIndicatorBg
+                            border.color: editIndicatorColor
+                            border.width: 1
+                            visible: vmIsEditingValue && vmActiveField === 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "EDIT"
+                                font.pixelSize: 10
+                                font.family: "Segoe UI"
+                                font.weight: Font.DemiBold
+                                color: editIndicatorColor
+                            }
+                        }
+
+                        Item { Layout.fillWidth: true }
+                    }
+
+                    Rectangle {
+                        width: parent.width - 28
+                        height: 1
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        color: "#151515"
+                    }
+
+                    MouseArea {
+                        id: mouseArea2
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            if (viewModel && viewModel.selectField) viewModel.selectField(1)
+                        }
+                    }
+                }
             }
         }
 
-        // Scan Speed field
+        // Spacer
+        Item { Layout.fillHeight: true }
+
+        // Bottom action buttons divider
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 40
-            radius: 3
-            color: (viewModel && viewModel.activeField === 1) ?
-                   (viewModel.isEditingValue ? Qt.rgba(255, 152, 0, 1.0) : accentColor) : "transparent"
-            border.color: accentColor
-            border.width: 1
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 10
-
-                Text {
-                    text: "Scan Speed:"
-                    font.pixelSize: 14
-                    font.family: "Archivo Narrow"
-                    font.weight: Font.DemiBold
-                    color: (viewModel && viewModel.activeField === 1) ? "black" : accentColor
-                }
-
-                Text {
-                    text: viewModel ? viewModel.scanSpeed + " deg/s" : "5 deg/s"
-                    font.pixelSize: 14
-                    font.family: "Archivo Narrow"
-                    font.weight: Font.Bold
-                    color: (viewModel && viewModel.activeField === 1) ? "black" : accentColor
-                }
-
-                Text {
-                    text: "[EDIT]"
-                    font.pixelSize: 12
-                    font.family: "Archivo Narrow"
-                    font.italic: true
-                    color: Qt.rgba(255, 152, 0, 1.0)
-                    visible: viewModel && viewModel.isEditingValue && viewModel.activeField === 1
-                }
-
-                Item { Layout.fillWidth: true }
-            }
+            height: 1
+            color: "#151515"
         }
 
-        Item { Layout.fillHeight: true }  // Spacer
-
-        // Buttons
+        // Buttons row (fixed height) with proper clipping
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 45
-            spacing: 15
+            Layout.preferredHeight: 52
+            Layout.maximumHeight: 52
+            spacing: 0
 
+            // Validate button
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                radius: 3
-                color: (viewModel && viewModel.activeField === 2) ? accentColor : "transparent"
-                border.color: accentColor
-                border.width: 2
+                color: vmActiveField === 2 ? highlightBg : "transparent"
+                clip: true
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 4
+                    color: accentColor
+                    visible: vmActiveField === 2
+                }
 
                 Text {
-                    text: "Validate"
-                    font.pixelSize: 14
-                    font.bold: true
-                    font.family: "Archivo Narrow"
-                    color: (viewModel && viewModel.activeField === 2) ? "black" : accentColor
                     anchors.centerIn: parent
+                    text: "Validate"
+                    font.pixelSize: 16
+                    font.weight: vmActiveField === 2 ? Font.DemiBold : Font.Normal
+                    font.family: "Segoe UI"
+                    color: vmActiveField === 2 ? "#FFFFFF" : "#808080"
                 }
             }
 
             Rectangle {
+                width: 1
+                Layout.fillHeight: true
+                color: "#151515"
+            }
+
+            // Cancel button
+            Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                radius: 3
-                color: (viewModel && viewModel.activeField === 3) ? Qt.rgba(200, 20, 40, 1.0) : "transparent"
-                border.color: Qt.rgba(200, 20, 40, 1.0)
-                border.width: 2
+                color: vmActiveField === 3 ? dangerBg : "transparent"
+                clip: true
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 4
+                    color: dangerColor
+                    visible: vmActiveField === 3
+                }
 
                 Text {
-                    text: "Cancel"
-                    font.pixelSize: 14
-                    font.bold: true
-                    font.family: "Archivo Narrow"
-                    color: (viewModel && viewModel.activeField === 3) ? "white" : Qt.rgba(200, 20, 40, 1.0)
                     anchors.centerIn: parent
+                    text: "Cancel"
+                    font.pixelSize: 16
+                    font.weight: vmActiveField === 3 ? Font.DemiBold : Font.Normal
+                    font.family: "Segoe UI"
+                    color: vmActiveField === 3 ? dangerColor : "#808080"
                 }
             }
         }
 
-        // Instructions
-        Text {
+        // Instructions footer
+        Rectangle {
             Layout.fillWidth: true
-            text: viewModel && viewModel.isEditingValue ?
-                  "UP/DOWN to adjust value • MENU/VAL to confirm" :
-                  "UP/DOWN to navigate • MENU/VAL to edit/confirm"
-            font.pixelSize: 10
-            font.family: "Archivo Narrow"
-            color: Qt.rgba(136, 136, 136, 1.0)
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
+            Layout.preferredHeight: 35
+            color: "#0D0D0D"
+
+            Text {
+                anchors.centerIn: parent
+                text: vmIsEditingValue ?
+                      "UP/DOWN to adjust value • MENU/VAL to confirm" :
+                      "UP/DOWN to navigate • MENU/VAL to edit/confirm"
+                font.pixelSize: 10
+                font.family: "Segoe UI"
+                color: "#606060"
+            }
         }
     }
 }

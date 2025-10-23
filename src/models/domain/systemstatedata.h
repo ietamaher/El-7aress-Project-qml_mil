@@ -70,10 +70,10 @@ const QColor COLOR_TRACKING_FIRING = QColor(255, 255, 0); ///< Firing mode activ
  * @brief Available reticle types for weapon aiming system
  */
 enum class ReticleType {
-    Basic,              ///< Simple crosshair reticle
+    CircleDotReticle,              ///< Simple crosshair reticle
     BoxCrosshair,       ///< Box-style crosshair with corner markers
-    StandardCrosshair,  ///< Standard military crosshair
-    PrecisionCrosshair, ///< High-precision crosshair with fine markings
+    TacticalCrosshair,  ///< Standard military crosshair
+    CCIPFireControl, ///< High-precision crosshair with fine markings
     MilDot,            ///< Military dot reticle for range estimation
     COUNT              ///< Total number of reticle types (for iteration)
 };
@@ -343,15 +343,19 @@ struct SystemStateData {
     double dayCurrentHFOV = 9.0;        ///< Day camera current horizontal field of view in degrees
     bool dayCameraConnected = false;    ///< Day camera connection status
     bool dayCameraError = false;        ///< Day camera error status
-    quint8 dayCameraStatus = 0;         ///< Day camera detailed status code
-    
+    quint8 dayCameraStatus = 0;         ///< Day camera detailed status code  
+    bool dayAutofocusEnabled = true;    ///< Day camera autofocus enabled status
+    quint16 dayFocusPosition = 0;       ///< Day camera focus position (12-bit max)
+
     // Night Camera
     double nightZoomPosition = 0.0;     ///< Night camera zoom position (0-1 normalized)
     double nightCurrentHFOV = 8.0;      ///< Night camera current horizontal field of view in degrees
     bool nightCameraConnected = false;  ///< Night camera connection status
     bool nightCameraError = false;      ///< Night camera error status
     quint8 nightCameraStatus = 0;       ///< Night camera detailed status code
-    
+    quint8 nightDigitalZoomLevel = 1;   ///< Night camera digital zoom level (FIXED TYPE: was bool, now quint8)
+    bool nightFfcInProgress = false;    ///< Night camera FFC (Flat Field Correction) in progress status
+
     // Camera Control
     bool activeCameraIsDay = false;     ///< True if day camera is active, false if night camera
     
@@ -360,20 +364,49 @@ struct SystemStateData {
     // =================================
     double gimbalAz = 0.0;              ///< Current gimbal azimuth position in degrees
     double gimbalEl = 0.0;              ///< Current gimbal elevation position in degrees
+
+    // Azimuth Servo (Enhanced)
+    bool azServoConnected = false;      ///< Azimuth servo connection status
     float azMotorTemp = 0.0f;           ///< Azimuth motor temperature in Celsius
     float azDriverTemp = 0.0f;          ///< Azimuth driver temperature in Celsius
+    float azRpm = 0.0f;                 ///< Azimuth servo RPM
+    float azTorque = 0.0f;              ///< Azimuth servo torque percentage (0-100)
+    bool azFault = false;               ///< Azimuth servo fault status
+
+    // Elevation Servo (Enhanced)
+    bool elServoConnected = false;      ///< Elevation servo connection status
     float elMotorTemp = 0.0f;           ///< Elevation motor temperature in Celsius
     float elDriverTemp = 0.0f;          ///< Elevation driver temperature in Celsius
+    float elRpm = 0.0f;                 ///< Elevation servo RPM
+    float elTorque = 0.0f;              ///< Elevation servo torque percentage (0-100)
+    bool elFault = false;               ///< Elevation servo fault status
+
     float reticleAz = 0.0f;             ///< Reticle azimuth position in degrees
     float reticleEl = 0.0f;             ///< Reticle elevation position in degrees
-    double actuatorPosition = 0.0;       ///< Linear actuator position
+
+
+    // =================================
+    // SERVO ACTUATOR  
+    // =================================
+    bool actuatorConnected = false;      ///< Servo actuator connection status
+    double actuatorPosition = 0.0;       ///< Linear actuator position in mm
+    double actuatorVelocity = 0.0;       ///< Actuator velocity in mm/s
+    double actuatorTemp = 0.0;           ///< Actuator temperature in Celsius
+    double actuatorBusVoltage = 0.0;     ///< Actuator bus voltage in volts
+    double actuatorTorque = 0.0;         ///< Actuator torque percentage (0-100)
+    bool actuatorMotorOff = false;       ///< Actuator motor off status
+    bool actuatorFault = false;          ///< Actuator fault/latching fault status
+ 
+
     
     // =================================
     // ORIENTATION & STABILIZATION
     // =================================
+    bool imuConnected = false;          ///< IMU connection status
     double imuRollDeg = 0.0;            ///< IMU Roll angle in degrees
     double imuPitchDeg = 0.0;           ///< IMU Pitch angle in degrees
     double imuYawDeg = 0.0;             ///< IMU Yaw angle in degrees
+    double imuTemp = 0.0;               ///< IMU temperature in Celsius
     double GyroX = 0.0;                 ///< Gyro X-axis rate in deg/s
     double GyroY = 0.0;                 ///< Gyro Y-axis rate in deg/s
     double GyroZ = 0.0;                 ///< Gyro Z-axis rate in deg/s
@@ -382,6 +415,7 @@ struct SystemStateData {
     double AccelZ = 0.0;                ///< Accelerometer Z-axis in G
     bool isStabilizationActive = false; ///< Stabilization system active status
     double temperature = 0.0;           ///< Current system temperature in Celsius
+
     // Stationary detection variables
     bool isVehicleStationary = false;   ///< Flag indicating if the vehicle is stationary
     double previousAccelMagnitude = 0.0; ///< Previous accelerometer magnitude for delta calculation
@@ -389,9 +423,17 @@ struct SystemStateData {
     // =================================
     // LASER RANGE FINDER (LRF)
     // =================================
-    double lrfDistance = 0.0;           ///< Last measured distance in meters
+    bool lrfConnected = false;          ///< LRF connection status
+    double lrfDistance = 900.0;         ///< Last measured distance in meters
+    float lrfTemp = 0.0f;               ///< LRF temperature in Celsius
+    quint32 lrfLaserCount = 0;          ///< Count of laser pulses emitted (FIXED TYPO)
     quint8 lrfSystemStatus = 0;         ///< LRF system status code
-    quint8 isOverTemperature = 0;         ///< LRF over-temperature status (1 = true, 0 = false)
+    bool lrfFault = false;              ///< LRF fault status
+    bool lrfNoEcho = false;             ///< LRF no-echo received status
+    bool lrfLaserNotOut = false;        ///< LRF laser not outputting status
+    bool lrfOverTemp = false;           ///< LRF over-temperature condition
+    quint8 isOverTemperature = 0;       ///< LRF over-temperature status (1 = true, 0 = false)
+
     // =================================
     // --- Radar Data ---
     // =================================
@@ -415,6 +457,7 @@ struct SystemStateData {
     // =================================
     // WEAPON SYSTEM CONTROL (PLC21)
     // =================================
+    bool plc21Connected = false;          ///< PLC21 connection status
     bool stationEnabled = true;         ///< Weapon station enable status
     bool gotoHomePosition = false;                ///< Home position switch status
     bool gunArmed = false;              ///< Weapon arming status
@@ -429,6 +472,7 @@ struct SystemStateData {
     // GIMBAL STATION HARDWARE (PLC42)
     // =================================
     // Limit Sensors
+    bool plc42Connected = false;          ///< PLC42 connection status
     bool upperLimitSensorActive = false; ///< Upper travel limit sensor status
     bool lowerLimitSensorActive = false; ///< Lower travel limit sensor status
     bool emergencyStopActive = false;    ///< Emergency stop activation status
@@ -498,8 +542,9 @@ struct SystemStateData {
     // Windage Compensation
     bool windageModeActive = false;         ///< Windage compensation mode active status
     float windageSpeedKnots = 0.0f;         ///< Wind speed for windage calculation in knots
+    float windageDirectionDegrees = 0.0f;   ///< Wind direction for windage calculation in degrees
     bool windageAppliedToBallistics = false; ///< Whether windage is applied to ballistic calculations
-    
+    bool windageDirectionCaptured = false;    
     // Lead Angle Compensation
     bool leadAngleCompensationActive = false;           ///< Lead angle compensation active status
     LeadAngleStatus currentLeadAngleStatus = LeadAngleStatus::Off; ///< Current lead angle system status

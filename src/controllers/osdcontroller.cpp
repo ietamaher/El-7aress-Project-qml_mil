@@ -1,6 +1,7 @@
 #include "osdcontroller.h"
 #include "models/osdviewmodel.h"
 #include "models/domain/systemstatemodel.h"
+#include "hardware/devices/cameravideostreamdevice.h"
 #include <QDebug>
 
 OsdController::OsdController(QObject *parent)
@@ -39,8 +40,8 @@ void OsdController::initialize()
     // =========================================================================
     // PHASE 1: Connect to SystemStateModel (Active NOW)
     // =========================================================================
-    connect(m_stateModel, &SystemStateModel::dataChanged,
-            this, &OsdController::onSystemStateChanged);
+    /*connect(m_stateModel, &SystemStateModel::dataChanged,
+            this, &OsdController::onSystemStateChanged);*/
 
     // Connect to color changes
     connect(m_stateModel, &SystemStateModel::colorStyleChanged,
@@ -48,7 +49,7 @@ void OsdController::initialize()
 
     // Set initial state
     const auto& initialData = m_stateModel->data();
-    updateViewModelFromSystemState(initialData);
+    //updateViewModelFromSystemState(initialData);
     m_viewModel->setAccentColor(initialData.colorStyle);
 
     qDebug() << "OsdController initialized successfully";
@@ -72,24 +73,13 @@ void OsdController::initialize()
     */
 }
 
-// ============================================================================
-// PHASE 1 UPDATE PATH: From SystemStateModel
-// ============================================================================
-void OsdController::onSystemStateChanged(const SystemStateData& data)
-{
-    updateViewModelFromSystemState(data);
-}
 
-// ============================================================================
-// PHASE 2 UPDATE PATH: From FrameData (Uncomment when ready)
-// ============================================================================
-/*
+
 void OsdController::onFrameDataReady(const FrameData& data)
 {
-    // When CameraVideoStreamDevice provides FrameData, this path gives
-    // frame-synchronized OSD updates with tracking data
+    if (!m_viewModel) return;
 
-    // Update basic OSD data
+    // === BASIC OSD DATA ===
     m_viewModel->updateMode(data.currentOpMode);
     m_viewModel->updateMotionMode(data.motionMode);
     m_viewModel->updateStabilization(data.stabEnabled);
@@ -98,68 +88,125 @@ void OsdController::onFrameDataReady(const FrameData& data)
     m_viewModel->updateSpeed(data.speed);
     m_viewModel->updateFov(data.cameraFOV);
 
-    // Update system status
+    // Camera type
+    QString cameraType = (data.cameraIndex == 0) ? "DAY" : "THERMAL";
+    m_viewModel->updateCameraType(cameraType);
+
+    // === SYSTEM STATUS ===
     m_viewModel->updateSystemStatus(data.sysCharged, data.sysArmed, data.sysReady);
     m_viewModel->updateFiringMode(data.fireMode);
     m_viewModel->updateLrfDistance(data.lrfDistance);
 
-    // Update tracking (with actual bbox from VPI)
+    // ========================================================================
+    // === RETICLE   ===
+    // ========================================================================
+    m_viewModel->updateReticleType(data.reticleType);
+    // ⭐ CRITICAL: Verify that pixel position is correct based on LAC status!
+    // SystemStateModel SHOULD have already calculated correct position,
+    // but let's verify the logic here as a safety check.
+
+    float finalReticleX = data.reticleAimpointImageX_px;
+    float finalReticleY = data.reticleAimpointImageY_px;
+
+    // ⭐ SAFETY CHECK: If LAC is active but status is ZoomOut,
+    // the reticle should be at zero offset (just zeroing applied)
+    // This should already be handled by SystemStateModel, but verify:
+    if (data.leadAngleActive && data.leadAngleStatus == LeadAngleStatus::ZoomOut) {
+        qWarning() << "OsdController: LAC active but ZoomOut status!"
+                   << "Reticle offsets should not include lead."
+                   << "Current position: X=" << finalReticleX << "Y=" << finalReticleY;
+        // The position SHOULD already be correct (without lead offsets)
+        // because SystemStateModel should have handled this.
+    }
+
+    // ⭐ DEBUG: Log reticle position when LAC is active
+    if (data.leadAngleActive) {
+        qDebug() << "OsdController: LAC active"
+                 << "Status =" << static_cast<int>(data.leadAngleStatus)
+                 << "ReticlePos: X=" << finalReticleX << "Y=" << finalReticleY;
+    }
+
+    m_viewModel->updateReticleOffset(finalReticleX, finalReticleY);
+
+    // ========================================================================
+    // === LAC VISUAL INDICATORS (for CCIP display elements) ===
+    // ========================================================================
+    // These are for visual feedback, not for reticle positioning
+
+    // Determine if LAC is "effectively active" (On or Lag, not ZoomOut)
+    bool lacEffectivelyActive = data.leadAngleActive &&
+                                (data.leadAngleStatus == LeadAngleStatus::On ||
+                                 data.leadAngleStatus == LeadAngleStatus::Lag);
+
+    m_viewModel->updateLacActive(lacEffectivelyActive);
+    m_viewModel->updateRangeMeters(data.lrfDistance);
+
+    // Confidence level based on status
+    float confidence = 1.0f;
+    if (data.leadAngleActive) {
+        switch (data.leadAngleStatus) {
+        case LeadAngleStatus::On:
+            confidence = 1.0f;
+            break;
+        case LeadAngleStatus::Lag:
+            confidence = 0.5f;  // Reduced confidence
+            break;
+        case LeadAngleStatus::ZoomOut:
+            confidence = 0.0f;  // No confidence - can't calculate lead
+            break;
+        default:
+            confidence = 0.0f;
+            break;
+        }
+    }
+    m_viewModel->updateConfidenceLevel(confidence);
+
+    // === TRACKING BOX ===
     m_viewModel->updateTrackingBox(
-        data.trackingBbox.x(),
-        data.trackingBbox.y(),
-        data.trackingBbox.width(),
-        data.trackingBbox.height()
-    );
+        data.trackingBbox.x(), data.trackingBbox.y(),
+        data.trackingBbox.width(), data.trackingBbox.height()
+        );
     m_viewModel->updateTrackingState(data.trackingState);
 
-    // Update reticle
-    m_viewModel->updateReticleType(data.reticleType);
-    m_viewModel->updateReticleOffset(
-        data.reticleAimpointImageX_px,
-        data.reticleAimpointImageY_px
-    );
-
-    // Update zeroing
-    m_viewModel->updateZeroingDisplay(
-        data.zeroingModeActive,
-        data.zeroingAppliedToBallistics,
-        data.zeroingAzimuthOffset,
-        data.zeroingElevationOffset
-    );
-
-    // Update windage
-    m_viewModel->updateWindageDisplay(
-        data.windageModeActive,
-        data.windageAppliedToBallistics,
-        data.windageSpeedKnots
-    );
-
-    // Update zones
-    m_viewModel->updateZoneWarning(
-        data.isReticleInNoFireZone,
-        data.gimbalStoppedAtNTZLimit
-    );
-
-    // Update lead angle
-    m_viewModel->updateLeadAngleDisplay(data.leadStatusText);
-
-    // Update scan name
-    m_viewModel->updateCurrentScanName(data.currentScanName);
-
-    // Update tracking phase
+    // === TRACKING PHASE ===
     m_viewModel->updateTrackingPhase(
         data.currentTrackingPhase,
         data.trackerHasValidTarget,
         QRectF(data.acquisitionBoxX_px, data.acquisitionBoxY_px,
                data.acquisitionBoxW_px, data.acquisitionBoxH_px)
-    );
-}
-*/
+        );
 
+    // === ZEROING ===
+    m_viewModel->updateZeroingDisplay(
+        data.zeroingModeActive,
+        data.zeroingAppliedToBallistics,
+        data.zeroingAzimuthOffset,
+        data.zeroingElevationOffset
+        );
+
+    // === WINDAGE ===
+    m_viewModel->updateWindageDisplay(
+        data.windageModeActive,
+        data.windageAppliedToBallistics,
+        data.windageSpeedKnots
+        );
+
+    // === ZONE WARNINGS ===
+    m_viewModel->updateZoneWarning(
+        data.isReticleInNoFireZone,
+        data.gimbalStoppedAtNTZLimit
+        );
+
+    // === LEAD ANGLE STATUS TEXT ===
+    m_viewModel->updateLeadAngleDisplay(data.leadStatusText);
+
+    // === SCAN NAME ===
+    m_viewModel->updateCurrentScanName(data.currentScanName);
+}
 // ============================================================================
 // SHARED UPDATE LOGIC
 // ============================================================================
-void OsdController::updateViewModelFromSystemState(const SystemStateData& data)
+/*void OsdController::updateViewModelFromSystemState(const SystemStateData& data)
 {
     if (!m_viewModel) return;
 
@@ -234,7 +281,7 @@ void OsdController::updateViewModelFromSystemState(const SystemStateData& data)
         QRectF(data.acquisitionBoxX_px, data.acquisitionBoxY_px,
                data.acquisitionBoxW_px, data.acquisitionBoxH_px)
         );
-}
+}*/
 
 void OsdController::onColorStyleChanged(const QColor& color)
 {

@@ -33,17 +33,17 @@ public:
 
 public slots:
     // PHASE 1: Direct from SystemStateModel (Active NOW)
-    void onSystemStateChanged(const SystemStateData& data);
+    //void onSystemStateChanged(const SystemStateData& data);
 
     // PHASE 2: From CameraVideoStreamDevice (Uncomment when ready)
-    // void onFrameDataReady(const FrameData& data);
+    void onFrameDataReady(const FrameData& data);
 
 private slots:
     void onColorStyleChanged(const QColor& color);
 
 private:
     // Shared update logic
-    void updateViewModelFromSystemState(const SystemStateData& data);
+    //void updateViewModelFromSystemState(const SystemStateData& data);
 
     // Dependencies (injected)
     OsdViewModel* m_viewModel;

@@ -100,6 +100,16 @@ void GimbalMotionModeBase::sendStabilizedServoCommands(GimbalController* control
                                                        double desiredAzVelocity,
                                                        double desiredElVelocity)
 {
+
+   /*if (!controller) {
+        qWarning() << "sendStabilizedServoCommands: controller is null";
+        return;
+    }
+
+     if (!controller->systemStateModel()) {
+        qWarning() << "sendStabilizedServoCommands: systemStateModel is null";
+        return;
+    }*/
     // --- Step 1: Get current system state ---
     SystemStateData systemState = controller->systemStateModel()->data();
 

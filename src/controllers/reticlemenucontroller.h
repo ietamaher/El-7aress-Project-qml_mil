@@ -9,8 +9,8 @@
 /*enum class ReticleType {
     Basic = 0,
     BoxCrosshair,
-    StandardCrosshair,
-    PrecisionCrosshair,
+    TacticalCrosshair,
+    CCIPFireControl,
     MilDot,
     COUNT
 };*/

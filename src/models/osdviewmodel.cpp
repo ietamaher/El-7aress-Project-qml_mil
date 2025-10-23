@@ -42,6 +42,10 @@ OsdViewModel::OsdViewModel(QObject *parent)
     , m_fireMode(FireMode::SingleShot)
     , m_screenWidth(1024)
     , m_screenHeight(768)
+    , m_lacActive(false)
+    , m_rangeMeters(0.0f)
+    , m_confidenceLevel(1.0f)
+
 {
 }
 
@@ -335,22 +339,25 @@ void OsdViewModel::updateReticleType(ReticleType type)
     }
 }
 
-void OsdViewModel::updateReticleOffset(float x_px, float y_px)
+void OsdViewModel::updateReticleOffset(float screen_x_px, float screen_y_px)
 {
-    // Calculate offset from screen center
+    // ✅ SIMPLE: Just convert absolute screen position to offset from center
     float centerX = m_screenWidth / 2.0f;
     float centerY = m_screenHeight / 2.0f;
 
-    float offsetX = x_px - centerX;
-    float offsetY = y_px - centerY;
+    float offsetX = screen_x_px - centerX;
+    float offsetY = screen_y_px - centerY;
 
     if (m_reticleOffsetX != offsetX || m_reticleOffsetY != offsetY) {
         m_reticleOffsetX = offsetX;
         m_reticleOffsetY = offsetY;
         emit reticleOffsetChanged();
+
+        qDebug() << "Reticle Offset:"
+                 << "Screen(" << screen_x_px << "," << screen_y_px << ")"
+                 << "→ Offset(" << offsetX << "," << offsetY << ")";
     }
 }
-
 // ============================================================================
 // PROCEDURE UPDATES (Zeroing, Windage)
 // ============================================================================
@@ -385,7 +392,7 @@ void OsdViewModel::updateWindageDisplay(bool modeActive, bool applied, float spe
     bool newVisible = false;
 
     if (modeActive) {
-        newText = QString("WINDAGE: %1 kt").arg(speedKnots, 0, 'f', 0);
+        newText = QString("W: %1 kt").arg(speedKnots, 0, 'f', 0);
         newVisible = true;
     } else if (applied) {
         newText = QString("W: %1 kt").arg(speedKnots, 0, 'f', 0);
@@ -460,3 +467,29 @@ void OsdViewModel::updateCurrentScanName(const QString& scanName)
         emit scanNameVisibleChanged();
     }
 }
+
+void OsdViewModel::updateLacActive(bool active)
+{
+    if (m_lacActive != active) {
+        m_lacActive = active;
+        emit lacActiveChanged();
+    }
+}
+
+void OsdViewModel::updateRangeMeters(float range)
+{
+    if (m_rangeMeters != range) {
+        m_rangeMeters = range;
+        emit rangeMetersChanged();
+    }
+}
+
+void OsdViewModel::updateConfidenceLevel(float confidence)
+{
+    if (m_confidenceLevel != confidence) {
+        m_confidenceLevel = confidence;
+        emit confidenceLevelChanged();
+    }
+}
+
+

@@ -5,6 +5,8 @@
 #include "controllers/zeroingcontroller.h"
 #include "controllers/windagecontroller.h"
 #include "controllers/zonedefinitioncontroller.h"
+#include "controllers/systemstatuscontroller.h"
+#include "controllers/aboutcontroller.h"
 #include "models/domain/systemstatemodel.h"
 #include <QDebug>
 
@@ -18,6 +20,7 @@ ApplicationController::ApplicationController(QObject *parent)
     , m_windageController(nullptr)
     , m_zoneDefinitionController(nullptr)
     , m_systemStateModel(nullptr)
+    , m_aboutController(nullptr)
 {
 }
 
@@ -55,6 +58,16 @@ void ApplicationController::setZoneDefinitionController(ZoneDefinitionController
     m_zoneDefinitionController = controller;
 }
 
+void ApplicationController::setSystemStatusController(SystemStatusController* controller)
+{
+    m_systemStatusController = controller;
+}
+
+void ApplicationController::setAboutController(AboutController* controller)
+{
+    m_aboutController = controller;
+}
+
 void ApplicationController::setSystemStateModel(SystemStateModel* model)
 {
     m_systemStateModel = model;
@@ -75,6 +88,8 @@ void ApplicationController::initialize()
     Q_ASSERT(m_zeroingController);
     Q_ASSERT(m_windageController);
     Q_ASSERT(m_zoneDefinitionController);
+    Q_ASSERT(m_systemStatusController);
+    Q_ASSERT(m_aboutController);
     Q_ASSERT(m_systemStateModel);
 
     // =========================================================================
@@ -145,6 +160,28 @@ void ApplicationController::initialize()
     connect(m_zoneDefinitionController, &ZoneDefinitionController::closed,
             this, &ApplicationController::handleZoneDefinitionFinished);
 
+    // ========================================================================
+    // CONNECT SYSTEM STATUS CONTROLLER
+    // ========================================================================
+    if (m_systemStatusController) {
+        connect(m_systemStatusController, &SystemStatusController::menuFinished,
+                this, &ApplicationController::handleSystemStatusFinished);
+        connect(m_systemStatusController, &SystemStatusController::returnToMainMenu,
+                this, &ApplicationController::handleReturnToMainMenu);
+        qDebug() << "ApplicationController: SystemStatusController signals connected";
+    }
+
+    // ========================================================================
+    // CONNECT ABOUT CONTROLLER
+    // ========================================================================
+    if (m_aboutController) {
+        connect(m_aboutController, &AboutController::aboutFinished,
+                this, &ApplicationController::handleAboutFinished);
+        connect(m_aboutController, &AboutController::returnToMainMenu,
+                this, &ApplicationController::handleReturnToMainMenu);
+        qDebug() << "ApplicationController: AboutController signals connected";
+    }
+
     qDebug() << "ApplicationController: All signal connections established";
 }
 
@@ -174,6 +211,8 @@ void ApplicationController::hideAllMenus()
     m_zeroingController->hide();
     m_windageController->hide();
     m_zoneDefinitionController->hide();
+    m_systemStatusController->hide();
+    m_aboutController->hide();
 }
 
 // ============================================================================
@@ -188,7 +227,9 @@ void ApplicationController::onMenuValButtonPressed()
     // Handle procedures first (they have priority)
     if (m_currentMenuState == MenuState::ZeroingProcedure ||
         m_currentMenuState == MenuState::WindageProcedure ||
-        m_currentMenuState == MenuState::ZoneDefinition) {
+        m_currentMenuState == MenuState::ZoneDefinition     ||
+        m_currentMenuState == MenuState::HelpAbout ||   
+        m_currentMenuState == MenuState::SystemStatus  ) {
         handleMenuValInProcedure();
         return;
     }
@@ -213,6 +254,8 @@ void ApplicationController::onMenuValButtonPressed()
         m_colorMenuController->onSelectButtonPressed();
         return;
     }
+
+
 
     qWarning() << "ApplicationController: MENU/VAL pressed in unhandled state:"
                << static_cast<int>(m_currentMenuState);
@@ -260,6 +303,12 @@ void ApplicationController::handleMenuValInProcedure()
     case MenuState::ZoneDefinition:
         m_zoneDefinitionController->onMenuValButtonPressed();
         break;
+    case MenuState::SystemStatus:
+        if (m_systemStatusController) m_systemStatusController->onSelectButtonPressed();
+        break;
+    case MenuState::HelpAbout:
+        if (m_aboutController) m_aboutController->onSelectButtonPressed();
+        break;
     default:
         break;
     }
@@ -288,6 +337,13 @@ void ApplicationController::onUpButtonPressed()
     case MenuState::ZoneDefinition:
         m_zoneDefinitionController->onUpButtonPressed();
         break;
+    case MenuState::SystemStatus:
+        if (m_systemStatusController) m_systemStatusController->onUpButtonPressed();
+        break;
+    case MenuState::HelpAbout:
+        if (m_aboutController) m_aboutController->onUpButtonPressed();
+        break;
+
     default:
         qDebug() << "ApplicationController: UP pressed with no active menu";
         break;
@@ -316,6 +372,12 @@ void ApplicationController::onDownButtonPressed()
         break;
     case MenuState::ZoneDefinition:
         m_zoneDefinitionController->onDownButtonPressed();
+        break;
+    case MenuState::SystemStatus:
+        if (m_systemStatusController) m_systemStatusController->onDownButtonPressed();
+        break;
+    case MenuState::HelpAbout:
+        if (m_aboutController) m_aboutController->onDownButtonPressed();
         break;
     default:
         qDebug() << "ApplicationController: DOWN pressed with no active menu";
@@ -398,9 +460,8 @@ void ApplicationController::handleSystemStatus()
 {
     qDebug() << "ApplicationController: System Status requested";
     hideAllMenus();
+    m_systemStatusController->show();
     setMenuState(MenuState::SystemStatus);
-    // TODO: Show system status UI
-    showMainMenu();
 }
 
 void ApplicationController::handleRadarTargetList()
@@ -408,7 +469,6 @@ void ApplicationController::handleRadarTargetList()
     qDebug() << "ApplicationController: Radar Target List requested";
     hideAllMenus();
     setMenuState(MenuState::RadarTargets);
-    // TODO: Show radar target list UI
     showMainMenu();
 }
 
@@ -416,9 +476,8 @@ void ApplicationController::handleHelpAbout()
 {
     qDebug() << "ApplicationController: Help/About requested";
     hideAllMenus();
+    m_aboutController->show();
     setMenuState(MenuState::HelpAbout);
-    // TODO: Show help/about UI
-    showMainMenu();
 }
 
 // ============================================================================
@@ -464,6 +523,16 @@ void ApplicationController::handleWindageFinished()
 void ApplicationController::handleZoneDefinitionFinished()
 {
     qDebug() << "ApplicationController: Zone Definition finished";
+}
+
+void ApplicationController::handleSystemStatusFinished()
+{
+    qDebug() << "ApplicationController: System Status finished";
+}
+
+void ApplicationController::handleAboutFinished()
+{
+    qDebug() << "ApplicationController: About finished";
 }
 
 void ApplicationController::handleReturnToMainMenu()

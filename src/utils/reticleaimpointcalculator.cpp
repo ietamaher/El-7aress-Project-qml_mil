@@ -50,8 +50,8 @@ QPointF ReticleAimpointCalculator::calculateReticleImagePositionPx(
 
     bool applyLeadOffset = leadActive &&
                            (leadStatus == LeadAngleStatus::On ||
-                            leadStatus == LeadAngleStatus::Lag ||
-                            leadStatus == LeadAngleStatus::ZoomOut);
+                            leadStatus == LeadAngleStatus::Lag ); //||
+                            //leadStatus == LeadAngleStatus::ZoomOut);
     if (applyLeadOffset) {
         // Qualify with class name
         totalPixelShift += ReticleAimpointCalculator::convertSingleAngularToPixelShift(

@@ -1,0 +1,431 @@
+#include "systemstatusviewmodel.h"
+#include <QDebug>
+
+SystemStatusViewModel::SystemStatusViewModel(QObject *parent)
+    : QObject(parent)
+    , m_azConnected(false)
+    , m_azPositionText("N/A")
+    , m_azRpmText("N/A")
+    , m_azTorqueText("N/A")
+    , m_azMotorTempText("N/A")
+    , m_azDriverTempText("N/A")
+    , m_azFault(false)
+    , m_elConnected(false)
+    , m_elPositionText("N/A")
+    , m_elRpmText("N/A")
+    , m_elTorqueText("N/A")
+    , m_elMotorTempText("N/A")
+    , m_elDriverTempText("N/A")
+    , m_elFault(false)
+    , m_imuConnected(false)
+    , m_imuRollText("N/A")
+    , m_imuPitchText("N/A")
+    , m_imuYawText("N/A")
+    , m_imuTempText("N/A")
+    , m_lrfConnected(false)
+    , m_lrfDistanceText("N/A")
+    , m_lrfTempText("N/A")
+    , m_lrfLaserCountText("N/A")
+    , m_lrfFault(false)
+    , m_lrfFaultText("No Faults")
+    , m_dayCamConnected(false)
+    , m_dayCamActive(false)
+    , m_dayCamFovText("N/A")
+    , m_dayCamZoomText("N/A")
+    , m_dayCamFocusText("N/A")
+    , m_dayCamAutofocus(false)
+    , m_dayCamError(false)
+    , m_nightCamConnected(false)
+    , m_nightCamActive(false)
+    , m_nightCamFovText("N/A")
+    , m_nightCamZoomText("N/A")
+    , m_nightCamFfcInProgress(false)
+    , m_nightCamError(false)
+    , m_plc21Connected(false)
+    , m_plc42Connected(false)
+    , m_stationEnabled(false)
+    , m_gunArmed(false)
+    , m_hasAlarms(false)
+    , m_visible(false)
+    , m_accentColor(QColor(70, 226, 165))
+{
+}
+
+void SystemStatusViewModel::setVisible(bool visible)
+{
+    if (m_visible != visible) {
+        m_visible = visible;
+        emit visibleChanged();
+    }
+}
+
+void SystemStatusViewModel::setAccentColor(const QColor& color)
+{
+    if (m_accentColor != color) {
+        m_accentColor = color;
+        emit accentColorChanged();
+    }
+}
+
+// ============================================================================
+// AZIMUTH SERVO
+// ============================================================================
+void SystemStatusViewModel::updateAzimuthServo(bool connected, float position, float rpm,
+                                               float torque, float motorTemp,
+                                               float driverTemp, bool fault)
+{
+    if (m_azConnected != connected) {
+        m_azConnected = connected;
+        emit azConnectedChanged();
+    }
+
+    QString newPos = QString::number(position, 'f', 2) + "°";
+    if (m_azPositionText != newPos) {
+        m_azPositionText = newPos;
+        emit azPositionTextChanged();
+    }
+
+    QString newRpm = QString::number(rpm, 'f', 0);
+    if (m_azRpmText != newRpm) {
+        m_azRpmText = newRpm;
+        emit azRpmTextChanged();
+    }
+
+    QString newTorque = QString::number(torque, 'f', 1) + "%";
+    if (m_azTorqueText != newTorque) {
+        m_azTorqueText = newTorque;
+        emit azTorqueTextChanged();
+    }
+
+    QString newMotorTemp = QString::number(motorTemp, 'f', 1) + "°C";
+    if (m_azMotorTempText != newMotorTemp) {
+        m_azMotorTempText = newMotorTemp;
+        emit azMotorTempTextChanged();
+    }
+
+    QString newDriverTemp = QString::number(driverTemp, 'f', 1) + "°C";
+    if (m_azDriverTempText != newDriverTemp) {
+        m_azDriverTempText = newDriverTemp;
+        emit azDriverTempTextChanged();
+    }
+
+    if (m_azFault != fault) {
+        m_azFault = fault;
+        emit azFaultChanged();
+    }
+}
+
+// ============================================================================
+// ELEVATION SERVO
+// ============================================================================
+void SystemStatusViewModel::updateElevationServo(bool connected, float position, float rpm,
+                                                 float torque, float motorTemp,
+                                                 float driverTemp, bool fault)
+{
+    if (m_elConnected != connected) {
+        m_elConnected = connected;
+        emit elConnectedChanged();
+    }
+
+    QString newPos = QString::number(position, 'f', 2) + "°";
+    if (m_elPositionText != newPos) {
+        m_elPositionText = newPos;
+        emit elPositionTextChanged();
+    }
+
+    QString newRpm = QString::number(rpm, 'f', 0);
+    if (m_elRpmText != newRpm) {
+        m_elRpmText = newRpm;
+        emit elRpmTextChanged();
+    }
+
+    QString newTorque = QString::number(torque, 'f', 1) + "%";
+    if (m_elTorqueText != newTorque) {
+        m_elTorqueText = newTorque;
+        emit elTorqueTextChanged();
+    }
+
+    QString newMotorTemp = QString::number(motorTemp, 'f', 1) + "°C";
+    if (m_elMotorTempText != newMotorTemp) {
+        m_elMotorTempText = newMotorTemp;
+        emit elMotorTempTextChanged();
+    }
+
+    QString newDriverTemp = QString::number(driverTemp, 'f', 1) + "°C";
+    if (m_elDriverTempText != newDriverTemp) {
+        m_elDriverTempText = newDriverTemp;
+        emit elDriverTempTextChanged();
+    }
+
+    if (m_elFault != fault) {
+        m_elFault = fault;
+        emit elFaultChanged();
+    }
+}
+
+// ============================================================================
+// IMU
+// ============================================================================
+void SystemStatusViewModel::updateImu(bool connected, double roll, double pitch,
+                                      double yaw, double temp)
+{
+    if (m_imuConnected != connected) {
+        m_imuConnected = connected;
+        emit imuConnectedChanged();
+    }
+
+    QString newRoll = QString::number(roll, 'f', 2) + "°";
+    if (m_imuRollText != newRoll) {
+        m_imuRollText = newRoll;
+        emit imuRollTextChanged();
+    }
+
+    QString newPitch = QString::number(pitch, 'f', 2) + "°";
+    if (m_imuPitchText != newPitch) {
+        m_imuPitchText = newPitch;
+        emit imuPitchTextChanged();
+    }
+
+    QString newYaw = QString::number(yaw, 'f', 2) + "°";
+    if (m_imuYawText != newYaw) {
+        m_imuYawText = newYaw;
+        emit imuYawTextChanged();
+    }
+
+    QString newTemp = QString::number(temp, 'f', 1) + "°C";
+    if (m_imuTempText != newTemp) {
+        m_imuTempText = newTemp;
+        emit imuTempTextChanged();
+    }
+}
+
+// ============================================================================
+// LRF
+// ============================================================================
+void SystemStatusViewModel::updateLrf(bool connected, float distance, float temp,
+                                      quint32 laserCount, bool fault, bool noEcho,
+                                      bool laserNotOut, bool overTemp)
+{
+    if (m_lrfConnected != connected) {
+        m_lrfConnected = connected;
+        emit lrfConnectedChanged();
+    }
+
+    QString newDist = QString::number(distance, 'f', 1) + "m";
+    if (m_lrfDistanceText != newDist) {
+        m_lrfDistanceText = newDist;
+        emit lrfDistanceTextChanged();
+    }
+
+    QString newTemp = QString::number(temp, 'f', 1) + "°C";
+    if (m_lrfTempText != newTemp) {
+        m_lrfTempText = newTemp;
+        emit lrfTempTextChanged();
+    }
+
+    QString newCount = QString::number(laserCount);
+    if (m_lrfLaserCountText != newCount) {
+        m_lrfLaserCountText = newCount;
+        emit lrfLaserCountTextChanged();
+    }
+
+    if (m_lrfFault != fault) {
+        m_lrfFault = fault;
+        emit lrfFaultChanged();
+    }
+
+    // Build fault text
+    QStringList faults;
+    if (noEcho) faults.append("No Echo");
+    if (laserNotOut) faults.append("Laser Not Out");
+    if (overTemp) faults.append("Over Temp");
+
+    QString newFaultText = faults.isEmpty() ? "No Faults" : faults.join(", ");
+    if (m_lrfFaultText != newFaultText) {
+        m_lrfFaultText = newFaultText;
+        emit lrfFaultTextChanged();
+    }
+}
+
+// ============================================================================
+// DAY CAMERA
+// ============================================================================
+void SystemStatusViewModel::updateDayCamera(bool connected, bool isActive, float fov,
+                                            quint16 zoom, quint16 focus,
+                                            bool autofocus, bool error)
+{
+    if (m_dayCamConnected != connected) {
+        m_dayCamConnected = connected;
+        emit dayCamConnectedChanged();
+    }
+
+    if (m_dayCamActive != isActive) {
+        m_dayCamActive = isActive;
+        emit dayCamActiveChanged();
+    }
+
+    QString newFov = QString::number(fov, 'f', 1) + "°";
+    if (m_dayCamFovText != newFov) {
+        m_dayCamFovText = newFov;
+        emit dayCamFovTextChanged();
+    }
+
+    QString newZoom = QString::number(zoom);
+    if (m_dayCamZoomText != newZoom) {
+        m_dayCamZoomText = newZoom;
+        emit dayCamZoomTextChanged();
+    }
+
+    QString newFocus = QString::number(focus);
+    if (m_dayCamFocusText != newFocus) {
+        m_dayCamFocusText = newFocus;
+        emit dayCamFocusTextChanged();
+    }
+
+    if (m_dayCamAutofocus != autofocus) {
+        m_dayCamAutofocus = autofocus;
+        emit dayCamAutofocusChanged();
+    }
+
+    if (m_dayCamError != error) {
+        m_dayCamError = error;
+        emit dayCamErrorChanged();
+    }
+}
+
+// ============================================================================
+// NIGHT CAMERA
+// ============================================================================
+void SystemStatusViewModel::updateNightCamera(bool connected, bool isActive, float fov,
+                                              quint8 digitalZoom, bool ffcInProgress,
+                                              bool error)
+{
+    if (m_nightCamConnected != connected) {
+        m_nightCamConnected = connected;
+        emit nightCamConnectedChanged();
+    }
+
+    if (m_nightCamActive != isActive) {
+        m_nightCamActive = isActive;
+        emit nightCamActiveChanged();
+    }
+
+    QString newFov = QString::number(fov, 'f', 1) + "°";
+    if (m_nightCamFovText != newFov) {
+        m_nightCamFovText = newFov;
+        emit nightCamFovTextChanged();
+    }
+
+    QString newZoom = QString::number(digitalZoom) + "x";
+    if (m_nightCamZoomText != newZoom) {
+        m_nightCamZoomText = newZoom;
+        emit nightCamZoomTextChanged();
+    }
+
+    if (m_nightCamFfcInProgress != ffcInProgress) {
+        m_nightCamFfcInProgress = ffcInProgress;
+        emit nightCamFfcInProgressChanged();
+    }
+
+    if (m_nightCamError != error) {
+        m_nightCamError = error;
+        emit nightCamErrorChanged();
+    }
+}
+
+// ============================================================================
+// PLC
+// ============================================================================
+void SystemStatusViewModel::updatePlcStatus(bool plc21Conn, bool plc42Conn,
+                                            bool stationEn, bool gunArm)
+{
+    if (m_plc21Connected != plc21Conn) {
+        m_plc21Connected = plc21Conn;
+        emit plc21ConnectedChanged();
+    }
+
+    if (m_plc42Connected != plc42Conn) {
+        m_plc42Connected = plc42Conn;
+        emit plc42ConnectedChanged();
+    }
+
+    if (m_stationEnabled != stationEn) {
+        m_stationEnabled = stationEn;
+        emit stationEnabledChanged();
+    }
+
+    if (m_gunArmed != gunArm) {
+        m_gunArmed = gunArm;
+        emit gunArmedChanged();
+    }
+}
+
+// ===========================================================================
+// Servo Actuator
+// ============================================================================ 
+void SystemStatusViewModel::updateServoActuator(bool connected, double position, double velocity,
+                                                double temp, double voltage, double torque,
+                                                bool motorOff, bool fault)
+{
+    if (m_actuatorConnected != connected) {
+        m_actuatorConnected = connected;
+        emit actuatorConnectedChanged();
+    }
+
+    QString newPos = QString::number(position, 'f', 2) + "mm";
+    if (m_actuatorPositionText != newPos) {
+        m_actuatorPositionText = newPos;
+        emit actuatorPositionTextChanged();
+    }
+
+    QString newVel = QString::number(velocity, 'f', 1) + "mm/s";
+    if (m_actuatorVelocityText != newVel) {
+        m_actuatorVelocityText = newVel;
+        emit actuatorVelocityTextChanged();
+    }
+
+    QString newTemp = QString::number(temp, 'f', 1) + "°C";
+    if (m_actuatorTempText != newTemp) {
+        m_actuatorTempText = newTemp;
+        emit actuatorTempTextChanged();
+    }
+
+    QString newVoltage = QString::number(voltage, 'f', 2) + "V";
+    if (m_actuatorVoltageText != newVoltage) {
+        m_actuatorVoltageText = newVoltage;
+        emit actuatorVoltageTextChanged();
+    }
+
+    QString newTorque = QString::number(torque, 'f', 1) + "%";
+    if (m_actuatorTorqueText != newTorque) {
+        m_actuatorTorqueText = newTorque;
+        emit actuatorTorqueTextChanged();
+    }
+
+    if (m_actuatorMotorOff != motorOff) {
+        m_actuatorMotorOff = motorOff;
+        emit actuatorMotorOffChanged();
+    }
+
+    if (m_actuatorFault != fault) {
+        m_actuatorFault = fault;
+        emit actuatorFaultChanged();
+    }
+}
+
+// ============================================================================
+// ALARMS
+// ============================================================================
+void SystemStatusViewModel::updateAlarms(const QStringList& alarms)
+{
+    if (m_alarmsList != alarms) {
+        m_alarmsList = alarms;
+        emit alarmsListChanged();
+
+        bool newHasAlarms = !alarms.isEmpty();
+        if (m_hasAlarms != newHasAlarms) {
+            m_hasAlarms = newHasAlarms;
+            emit hasAlarmsChanged();
+        }
+    }
+}

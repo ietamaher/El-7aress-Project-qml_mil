@@ -94,7 +94,7 @@ void WindageController::updateUI()
         m_viewModel->setInstruction(
             QString("Windage set to %1 knots and applied.\n"
                     "'W' will display on OSD.\n\n"
-                    "Press BACK or SELECT to return.")
+                    "Press SELECT to return.")
                 .arg(m_stateModel->data().windageSpeedKnots, 0, 'f', 0)
             );
         m_viewModel->setWindSpeed(m_stateModel->data().windageSpeedKnots);
@@ -118,16 +118,33 @@ void WindageController::onSelectButtonPressed()
 {
     switch (m_currentState) {
     case WindageState::Instruct_AlignToWind:
-        m_currentWindSpeedEdit = m_stateModel->data().windageSpeedKnots;
+    {
+        // Capture wind direction from current WS azimuth
+        const SystemStateData& data = m_stateModel->data();
+        float currentAzimuth = data.azimuthDirection; // Get current WS orientation
+
+        m_stateModel->captureWindageDirection(currentAzimuth);
+        qDebug() << "Wind direction captured at azimuth:" << currentAzimuth << "degrees";
+
+        // Load current wind speed for editing
+        m_currentWindSpeedEdit = data.windageSpeedKnots;
         transitionToState(WindageState::Set_WindSpeed);
-        break;
+    }
+    break;
 
     case WindageState::Set_WindSpeed:
+    {
+        // Set wind speed and finalize
         m_stateModel->setWindageSpeed(m_currentWindSpeedEdit);
         m_stateModel->finalizeWindage();
-        qDebug() << "Windage finalized with speed:" << m_currentWindSpeedEdit;
+
+        const SystemStateData& data = m_stateModel->data();
+        qDebug() << "Windage finalized - Direction:" << data.windageDirectionDegrees
+                 << "degrees, Speed:" << m_currentWindSpeedEdit << "knots";
+
         transitionToState(WindageState::Completed);
-        break;
+    }
+    break;
 
     case WindageState::Completed:
         hide();

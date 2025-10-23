@@ -6,7 +6,7 @@ Rectangle {
     id: mainmenuroot
     property var osdViewModel: null
     width: 380
-    height: 520
+    height: 500
     radius: 8
     color: "#0A0A0A"  // Deep black background like BMW
     border.color: "#1A1A1A"
@@ -32,7 +32,7 @@ Rectangle {
         // Header section
         Item {
             width: parent.width
-            height: 100
+            height: 80
 
             Column {
                 anchors.centerIn: parent
@@ -70,7 +70,7 @@ Rectangle {
         ListView {
             id: listView
             width: parent.width
-            height: parent.height - 100
+            height: parent.height - 80
             spacing: 0
             clip: true
             model: viewModel ? viewModel.optionsModel : null
@@ -81,14 +81,14 @@ Rectangle {
 
             delegate: Item {
                 width: listView.width
-                height: 52
+                height: 34
                 enabled: !model.display.startsWith("---")
                 opacity: model.display.startsWith("---") ? 0.4 : 1.0
 
                 // Background for hover effect
                 Rectangle {
                     anchors.fill: parent
-                    color: mouseArea.containsMouse && !highlighted ? "#15FFFFFF" : "transparent"
+                    color: !highlighted ? "#15FFFFFF" : "transparent"
 
                     Behavior on color {
                         ColorAnimation { duration: 150 }
@@ -146,17 +146,6 @@ Rectangle {
                     visible: index < listView.count - 1
                 }
 
-                // Mouse area for hover effects
-                MouseArea {
-                    id: mouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        if (!model.display.startsWith("---")) {
-                            listView.currentIndex = index
-                        }
-                    }
-                }
 
                 // Property to determine if this item is selected
                 property bool highlighted: ListView.isCurrentItem

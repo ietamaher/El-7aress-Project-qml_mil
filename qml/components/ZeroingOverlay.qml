@@ -1,119 +1,216 @@
-// ZeroingOverlay.qml
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
 
 Rectangle {
     id: zeroingRoot
-
     width: 500
     height: 400
-    radius: 5
-    color: Qt.rgba(0, 0, 0, 0.85)
-    
-    border.width: 2
+    radius: 8
+    color: "#0A0A0A"
 
+    border.width: 1
+    border.color: "#1A1A1A"
     visible: zeroingViewModel ? zeroingViewModel.visible : false
-
     property color accentColor: zeroingViewModel ? zeroingViewModel.accentColor : "#46E2A5"
-    border.color: accentColor
 
-    // Subtle drop shadow
     layer.enabled: true
     layer.effect: MultiEffect {
         shadowEnabled: true
         shadowColor: "#80000000"
-        shadowBlur: 0.3
-        shadowVerticalOffset: 6
+        shadowBlur: 0.5
+        shadowVerticalOffset: 10
     }
 
     Column {
         anchors.fill: parent
-        anchors.margins: 25
-        spacing: 20
+        anchors.margins: 0
+        spacing: 0
 
-        // Title
-        Text {
-            text: zeroingViewModel ? zeroingViewModel.title : "Weapon Zeroing"
-            font.pixelSize: 24
-            font.bold: true
-            color: accentColor
-            horizontalAlignment: Text.AlignHCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
+        // Header section
         Rectangle {
             width: parent.width
-            height: 2
-            color: accentColor
-            opacity: 0.3
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        // Instruction text
-        Text {
-            width: parent.width
-            text: zeroingViewModel ? zeroingViewModel.instruction : ""
-            font.pixelSize: 16
-            color: "#EEEEEE"
-            wrapMode: Text.WordWrap
-            horizontalAlignment: Text.AlignHCenter
-            minimumPixelSize: 12
-        }
-
-        Item { height: 10 } // Spacer
-
-        // Status text
-        Text {
-            width: parent.width
-            text: zeroingViewModel ? zeroingViewModel.status : ""
-            font.pixelSize: 18
-            font.bold: true
-            color: "#00FF99"
-            wrapMode: Text.WordWrap
-            horizontalAlignment: Text.AlignHCenter
-        }
-
-        // Optional: Show offsets when in completed state
-        Rectangle {
-            width: parent.width
-            height: 60
-            color: Qt.rgba(0, 1, 0.6, 0.1)
-            radius: 3
-            border.color: accentColor
-            border.width: 1
-            visible: zeroingViewModel ? zeroingViewModel.showOffsets : false
+            height: 80
+            color: "transparent"
 
             Column {
                 anchors.centerIn: parent
-                spacing: 5
+                spacing: 8
 
                 Text {
-                    text: "Azimuth Offset: " + (zeroingViewModel ? zeroingViewModel.azimuthOffset.toFixed(2) : "0.00")
-                    font.pixelSize: 14
+                    text: zeroingViewModel ? zeroingViewModel.title : "Weapon Zeroing"
+                    font.pixelSize: 22
+                    font.weight: Font.Normal
+                    font.family: "Segoe UI"
                     color: "#FFFFFF"
+                    horizontalAlignment: Text.AlignHCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
 
+
+            }
+        }
+
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: "#151515"
+        }
+
+
+
+        // Content section
+        Item {
+            width: parent.width
+            height: parent.height - 130
+
+            Column {
+                anchors.centerIn: parent
+                spacing: 10
+                width: parent.width - 60
+
                 Text {
-                    text: "Elevation Offset: " + (zeroingViewModel ? zeroingViewModel.elevationOffset.toFixed(2) : "0.00")
+                    text: zeroingViewModel ? zeroingViewModel.instruction : ""
                     font.pixelSize: 14
-                    color: "#FFFFFF"
+                    font.family: "Segoe UI"
+                    color: "#CCCCCC"
+                    wrapMode: Text.WordWrap
+                    horizontalAlignment: Text.AlignHCenter
                     anchors.horizontalCenter: parent.horizontalCenter
+                    width: zeroingRoot.width - 80
+                }
+                // Status text
+                Text {
+                    width: parent.width
+                    text: zeroingViewModel ? zeroingViewModel.status : ""
+                    font.pixelSize: 18
+                    font.weight: Font.DemiBold
+                    font.family: "Segoe UI"
+                    color: accentColor
+                    wrapMode: Text.WordWrap
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
+                Rectangle {
+                    width: parent.width
+                    height: 120  // Increased height for better spacing
+                    color: "#0F0F0F"  // Darker background for better contrast
+                    radius: 5
+                    border.color: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.3)
+                    border.width: 1
+                    visible: zeroingViewModel ? zeroingViewModel.showOffsets : false
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 20  // Increased spacing
+
+                        // Azimuth Row
+                        Row {
+                            spacing: 20
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            Text {
+                                text: "Azimuth Offset:"
+                                font.pixelSize: 14
+                                font.family: "Segoe UI"
+                                color: "#AAAAAA"  // Lighter gray for labels
+                                width: 120  // Fixed width for alignment
+                                horizontalAlignment: Text.AlignRight
+                            }
+
+                            Rectangle {
+                                width: 100  // Fixed width container for value
+                                height: 24
+                                color: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.1)
+                                border.color: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.2)
+                                border.width: 1
+                                radius: 3
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: {
+                                        if (zeroingViewModel && zeroingViewModel.azimuthOffset !== undefined) {
+                                            return zeroingViewModel.azimuthOffset.toFixed(2) + "°"
+                                        }
+                                        return "0.00°"
+                                    }
+                                    font.pixelSize: 14
+                                    font.weight: Font.Bold
+                                    font.family: "Segoe UI Mono", "Consolas", "Segoe UI"  // Monospace for numbers
+                                    color: "#FFFFFF"  // White for maximum contrast
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: 250
+                            height: 1
+                            color: "#252525"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        // Elevation Row
+                        Row {
+                            spacing: 20
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            Text {
+                                text: "Elevation Offset:"
+                                font.pixelSize: 14
+                                font.family: "Segoe UI"
+                                color: "#AAAAAA"  // Lighter gray for labels
+                                width: 120  // Fixed width for alignment
+                                horizontalAlignment: Text.AlignRight
+                            }
+
+                            Rectangle {
+                                width: 100  // Fixed width container for value
+                                height: 24
+                                color: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.1)
+                                border.color: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.2)
+                                border.width: 1
+                                radius: 3
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: {
+                                        if (zeroingViewModel && zeroingViewModel.elevationOffset !== undefined) {
+                                            return zeroingViewModel.elevationOffset.toFixed(2) + "°"
+                                        }
+                                        return "0.00°"
+                                    }
+                                    font.pixelSize: 14
+                                    font.weight: Font.Bold
+                                    font.family: "Segoe UI Mono", "Consolas", "Segoe UI"  // Monospace for numbers
+                                    color: "#FFFFFF"  // White for maximum contrast
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        //Item { Layout.fillHeight: true } // Push button to bottom
-
-        // Return button hint
-        Text {
+        // Footer section
+        Rectangle {
             width: parent.width
-            text: "Press MENU/VAL to confirm"
-            font.pixelSize: 12
-            color: "#888888"
-            horizontalAlignment: Text.AlignHCenter
-            anchors.horizontalCenter: parent.horizontalCenter
+            height: 1
+            color: "#151515"
+        }
+
+        Rectangle {
+            width: parent.width
+            height: 50
+            color: "#0D0D0D"
+
+            Text {
+                anchors.centerIn: parent
+                text: "Press MENU/VAL to confirm"
+                font.pixelSize: 12
+                font.family: "Segoe UI"
+                color: "#606060"
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 }

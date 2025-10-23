@@ -371,6 +371,12 @@ public:
     void startWindageProcedure();
     
     /**
+     * @brief Captures the wind direction based on current gimbal azimuth.
+     * @param currentAzimuthDegrees The current gimbal azimuth in degrees.
+     */
+    void captureWindageDirection(float currentAzimuthDegrees);
+
+    /**
      * @brief Sets the wind speed for windage calculations.
      * @param knots Wind speed in knots.
      */
@@ -458,7 +464,7 @@ signals:
      * @param active True if windage mode is active, false otherwise.
      * @param speed Current wind speed in knots.
      */
-    void windageStateChanged(bool active, float speed);
+    void windageStateChanged(bool active, float speed, float direction);
     
     /**
      * @brief Emitted when lead angle compensation state changes.

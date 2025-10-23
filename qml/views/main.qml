@@ -26,7 +26,7 @@ Window {
 
         // Timer to refresh video feed
         Timer {
-            interval: 33 // ~30 FPS (adjust based on your camera framerate)
+            interval: 33 // ~30 FPS (adjust based on camera framerate)
             running: true
             repeat: true
             onTriggered: {
@@ -57,27 +57,37 @@ Window {
     // === MAIN MENU ===
     MainMenu {
         id: mainMenu
-        anchors.centerIn: parent
         viewModel: mainMenuViewModel
         osdViewModel: osdViewModelInstance
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: 150
+        anchors.leftMargin: 10
         z: 100
     }
 
     // === RETICLE MENU ===
     MainMenu {
         id: reticleMenu
-        anchors.centerIn: parent
         viewModel: reticleMenuViewModel
-        osdViewModel: osdViewModelInstance
+        height: 300
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: 150
+        anchors.leftMargin: 10
         z: 100
     }
 
     // === COLOR MENU ===
     MainMenu {
         id: colorMenu
-        anchors.centerIn: parent
         viewModel: colorMenuViewModel
         osdViewModel: osdViewModelInstance
+        height: 300
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: 150
+        anchors.leftMargin: 10
         z: 100
     }
 
@@ -85,6 +95,10 @@ Window {
     ZeroingOverlay {
         id: zeroingOverlay
         anchors.centerIn: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: 150
+        anchors.leftMargin: 10
         z: 100
     }
 
@@ -92,6 +106,10 @@ Window {
     WindageOverlay {
         id: windageOverlay
         anchors.centerIn: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: 150
+        anchors.leftMargin: 10
         z: 100
     }
 
@@ -102,6 +120,19 @@ Window {
 
         // ViewModels are accessible via context properties
         // Already bound in ZoneDefinitionOverlay.qml
+    }
+
+    SystemStatusOverlay{
+            id: systemStatusOverlay
+            //anchors.fill: parent
+            z: 100   // Above OSD
+
+    }
+
+    AboutDialog{
+        id: aboutDialog
+        anchors.fill: parent
+        z: 100   // Above OSD
     }
 
     // ========================================================================

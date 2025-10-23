@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include <opencv2/imgcodecs.hpp>
-
+#include <cuda_runtime.h>
 
 
 CameraVideoStreamDevice::CameraVideoStreamDevice(int cameraIndex,
@@ -320,6 +320,10 @@ void CameraVideoStreamDevice::onSystemStateChanged(const SystemStateData &newSta
     m_currentAcquisitionBoxY_px = newState.acquisitionBoxY_px;
     m_currentAcquisitionBoxW_px = newState.acquisitionBoxW_px;
     m_currentAcquisitionBoxH_px = newState.acquisitionBoxH_px;
+
+    m_currentLeadAngleStatus = newState.currentLeadAngleStatus;  // ⭐ ADD
+    m_currentLeadAngleOffsetAz = newState.leadAngleOffsetAz;     // ⭐ ADD
+    m_currentLeadAngleOffsetEl = newState.leadAngleOffsetEl;
 }
 
 
@@ -479,6 +483,30 @@ GstFlowReturn CameraVideoStreamDevice::handleNewSample(GstAppSink *sink)
 // --- VPI Handling --- (No changes needed based on errors)
 bool CameraVideoStreamDevice::initializeVPI()
 {
+    // CUDA device check and reset before VPI initialization
+    cudaError_t cudaStatus = cudaSetDevice(0);
+    if (cudaStatus != cudaSuccess) {
+        qWarning() << "Cam" << m_cameraIndex << ": CUDA device unavailable:"
+                   << cudaGetErrorString(cudaStatus);
+
+        // Try to reset the device
+        cudaStatus = cudaDeviceReset();
+        if (cudaStatus != cudaSuccess) {
+            qCritical() << "Cam" << m_cameraIndex << ": Failed to reset CUDA device:"
+                        << cudaGetErrorString(cudaStatus);
+            return false;
+        }
+
+        // Retry setting device
+        cudaStatus = cudaSetDevice(0);
+        if (cudaStatus != cudaSuccess) {
+            qCritical() << "Cam" << m_cameraIndex << ": CUDA device still unavailable after reset";
+            return false;
+        }
+    }
+
+    qInfo() << "Cam" << m_cameraIndex << ": CUDA device initialized successfully";
+
     try {
         CHECK_VPI_STATUS(vpiStreamCreate(0, &m_vpiStream));
         CHECK_VPI_STATUS(vpiImageCreate(m_outputWidth, m_outputHeight, VPI_IMAGE_FORMAT_NV12_ER, 0, &m_vpiFrameNV12));
@@ -519,7 +547,15 @@ void CameraVideoStreamDevice::cleanupVPI()
     VPI_SAFE_DESTROY(vpiPayloadDestroy, m_cropScalePayload);
     VPI_SAFE_DESTROY(vpiImageDestroy, m_vpiFrameNV12);
     VPI_SAFE_DESTROY(vpiStreamDestroy, m_vpiStream);
-    VPI_SAFE_DESTROY(vpiArrayDestroy, m_vpiConfidenceScores); 
+    VPI_SAFE_DESTROY(vpiArrayDestroy, m_vpiConfidenceScores);
+
+    // CUDA context cleanup
+    cudaError_t cudaStatus = cudaDeviceSynchronize();
+    if (cudaStatus != cudaSuccess) {
+        qWarning() << "Cam" << m_cameraIndex << ": CUDA sync failed:"
+                   << cudaGetErrorString(cudaStatus);
+    }
+
     qInfo() << "Cam" << m_cameraIndex << ": Finished cleaning VPI objects.";
 }
 
@@ -783,6 +819,9 @@ bool CameraVideoStreamDevice::processFrame(GstBuffer *buffer)
         data.acquisitionBoxW_px = m_currentAcquisitionBoxW_px  ;
         data.acquisitionBoxH_px = m_currentAcquisitionBoxH_px  ;
         data.trackerHasValidTarget = true;
+        data.leadAngleStatus = m_currentLeadAngleStatus;           // ⭐ ADD
+        data.leadAngleOffsetAz_deg = m_currentLeadAngleOffsetAz;  // ⭐ ADD
+        data.leadAngleOffsetEl_deg = m_currentLeadAngleOffsetEl;  // ⭐ ADD
         // 7. Emit FrameData
         if (!data.baseImage.isNull()) emit frameDataReady(data);
 

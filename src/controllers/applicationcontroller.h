@@ -3,14 +3,23 @@
 
 #include <QObject>
 
+// Forward declarations
 class MainMenuController;
 class ReticleMenuController;
 class ColorMenuController;
 class ZeroingController;
 class WindageController;
 class ZoneDefinitionController;
+class SystemStatusController;
+class AboutController;
 class SystemStateModel;
 
+/**
+ * @brief ApplicationController - Central orchestrator for all menu controllers
+ *
+ * This controller manages the lifecycle and transitions between different
+ * menu screens and procedures in the application.
+ */
 class ApplicationController : public QObject
 {
     Q_OBJECT
@@ -25,8 +34,11 @@ public:
     void setZeroingController(ZeroingController* controller);
     void setWindageController(WindageController* controller);
     void setZoneDefinitionController(ZoneDefinitionController* controller);
+    void setSystemStatusController(SystemStatusController* controller);
+    void setAboutController(AboutController* controller);
     void setSystemStateModel(SystemStateModel* model);
 
+    // Initialization
     void initialize();
 
     // Menu state enum
@@ -49,7 +61,6 @@ public slots:
     void onMenuValButtonPressed();
     void onUpButtonPressed();
     void onDownButtonPressed();
-
     void showMainMenu();
 
 private slots:
@@ -73,6 +84,9 @@ private slots:
     void handleZeroingFinished();
     void handleWindageFinished();
     void handleZoneDefinitionFinished();
+    void handleSystemStatusFinished();
+    void handleAboutFinished();
+
     void handleReturnToMainMenu();
 
 private:
@@ -94,6 +108,8 @@ private:
     ZeroingController* m_zeroingController;
     WindageController* m_windageController;
     ZoneDefinitionController* m_zoneDefinitionController;
+    SystemStatusController* m_systemStatusController;
+    AboutController* m_aboutController;
     SystemStateModel* m_systemStateModel;
 };
 
