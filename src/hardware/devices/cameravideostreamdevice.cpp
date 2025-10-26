@@ -284,6 +284,17 @@ void CameraVideoStreamDevice::onSystemStateChanged(const SystemStateData &newSta
     m_stabEnabled = newState.enableStabilization;
     m_currentAzimuth = newState.gimbalAz;         // Assuming gimbalAz is the display value
     m_currentElevation = newState.gimbalEl;       // Assuming gimbalEl is the display value
+    m_imuConnected = newState.imuConnected;
+    m_imuRollDeg = newState.imuRollDeg;
+    m_imuPitchDeg = newState.imuPitchDeg;
+    m_imuYawDeg = newState.imuYawDeg;       // Vehicle heading
+    m_imuTemp = newState.imuTemp;
+    m_gyroX = newState.GyroX;
+    m_gyroY = newState.GyroY;
+    m_gyroZ = newState.GyroZ;
+    m_accelX = newState.AccelX;
+    m_accelY = newState.AccelY;
+    m_accelZ = newState.AccelZ;
     m_lrfDistance = newState.lrfDistance;
     m_sysCharged = newState.ammoLoaded; // Map SystemStateData fields to your OSD needs
     m_sysArmed = newState.gunArmed;
@@ -787,6 +798,17 @@ bool CameraVideoStreamDevice::processFrame(GstBuffer *buffer)
         data.stabEnabled = m_stabEnabled;
         data.azimuth = m_currentAzimuth;
         data.elevation = m_currentElevation;
+        data.imuConnected = m_imuConnected;
+        data.imuRollDeg = m_imuRollDeg;
+        data.imuPitchDeg = m_imuPitchDeg;
+        data.imuYawDeg = m_imuYawDeg;           // Vehicle heading for azimuth calculation
+        data.imuTemp = m_imuTemp;
+        data.gyroX = m_gyroX;
+        data.gyroY = m_gyroY;
+        data.gyroZ = m_gyroZ;
+        data.accelX = m_accelX;
+        data.accelY = m_accelY;
+        data.accelZ = m_accelZ;
 
         data.speed = m_speed;
         data.lrfDistance = m_lrfDistance;

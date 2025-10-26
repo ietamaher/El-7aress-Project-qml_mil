@@ -25,7 +25,6 @@ void NightCameraControlDevice::onConnectionEstablished()
     // Update data state
     NightCameraData newData = m_currentData;
     newData.isConnected = true;
-    newData.errorState = false;
     updateNightCameraData(newData);
 
     // Initialize status check timer
@@ -49,7 +48,6 @@ void NightCameraControlDevice::onConnectionLost()
     // Update data state
     NightCameraData newData = m_currentData;
     newData.isConnected = false;
-    newData.errorState = true;
     updateNightCameraData(newData);
 
     emit statusChanged(false);
@@ -325,6 +323,6 @@ void NightCameraControlDevice::handleStatusError(quint8 statusByte) {
     logError(errorMessage);
 
     NightCameraData newData = m_currentData;
-    newData.errorState = true;
+    newData.errorState = statusByte;
     updateNightCameraData(newData);
 }

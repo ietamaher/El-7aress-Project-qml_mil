@@ -141,6 +141,47 @@ void OsdViewModel::updateElevation(float elevation)
     }
 }
 
+void OsdViewModel::updateImuData(bool connected, double yaw, double pitch, double roll, double temp)
+    {
+        bool changed = false;
+
+        if (m_imuConnected != connected) {
+            m_imuConnected = connected;
+            emit imuConnectedChanged();
+            changed = true;
+        }
+
+        if (!qFuzzyCompare(m_vehicleHeading, yaw)) {
+            m_vehicleHeading = yaw;
+            emit vehicleHeadingChanged();
+            changed = true;
+        }
+
+        if (!qFuzzyCompare(m_vehicleRoll, roll)) {
+            m_vehicleRoll = roll;
+            emit vehicleRollChanged();
+            changed = true;
+        }
+
+        if (!qFuzzyCompare(m_vehiclePitch, pitch)) {
+            m_vehiclePitch = pitch;
+            emit vehiclePitchChanged();
+            changed = true;
+        }
+
+        if (!qFuzzyCompare(m_imuTemperature, temp)) {
+            m_imuTemperature = temp;
+            emit imuTemperatureChanged();
+            changed = true;
+        }
+
+        if (changed) {
+            qDebug() << "OsdViewModel: IMU updated - Heading:" << yaw
+                     << "Pitch:" << pitch << "Roll:" << roll
+                     << "Connected:" << connected;
+        }
+    }
+
 void OsdViewModel::updateSystemStatus(bool charged, bool armed, bool ready)
 {
     m_sysCharged = charged;

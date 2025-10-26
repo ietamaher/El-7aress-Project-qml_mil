@@ -113,6 +113,13 @@ void SystemStatusViewModel::updateAzimuthServo(bool connected, float position, f
         m_azFault = fault;
         emit azFaultChanged();
     }
+
+    QString statusText = connected ? (fault ? "⚠ FAULT" : "✓ OK") : "N/A";
+    
+    if (m_azStatusText != statusText) {
+        m_azStatusText = statusText;
+        emit azStatusTextChanged();
+    }
 }
 
 // ============================================================================
@@ -161,6 +168,13 @@ void SystemStatusViewModel::updateElevationServo(bool connected, float position,
         m_elFault = fault;
         emit elFaultChanged();
     }
+
+    QString statusText = connected ? (fault ? "⚠ FAULT" : "✓ OK") : "N/A";
+    
+    if (m_azStatusText != statusText) {
+        m_azStatusText = statusText;
+        emit azStatusTextChanged();
+    }
 }
 
 // ============================================================================
@@ -196,6 +210,13 @@ void SystemStatusViewModel::updateImu(bool connected, double roll, double pitch,
     if (m_imuTempText != newTemp) {
         m_imuTempText = newTemp;
         emit imuTempTextChanged();
+    }
+
+    QString statusText = connected ? "✓ OK" : "N/A";
+    
+    if (m_imuStatusText != statusText) {
+        m_imuStatusText = statusText;
+        emit imuStatusTextChanged();
     }
 }
 
@@ -234,13 +255,23 @@ void SystemStatusViewModel::updateLrf(bool connected, float distance, float temp
         emit lrfFaultChanged();
     }
 
-    // Build fault text
-    QStringList faults;
-    if (noEcho) faults.append("No Echo");
-    if (laserNotOut) faults.append("Laser Not Out");
-    if (overTemp) faults.append("Over Temp");
 
-    QString newFaultText = faults.isEmpty() ? "No Faults" : faults.join(", ");
+    QString newFaultText;
+    if (connected) {
+        if (!fault && !noEcho && !laserNotOut && !overTemp) {
+            newFaultText = "✓ OK";
+        } else {
+            QStringList faults;
+            if (fault) faults.append("General Fault");
+            if (noEcho) faults.append("No Echo");
+            if (laserNotOut) faults.append("Laser Not Out");
+            if (overTemp) faults.append("Over Temp");
+            newFaultText = "⚠ " + faults.join(", ");
+        }
+    } else {
+        newFaultText = "N/A";
+    }
+
     if (m_lrfFaultText != newFaultText) {
         m_lrfFaultText = newFaultText;
         emit lrfFaultTextChanged();
@@ -252,7 +283,7 @@ void SystemStatusViewModel::updateLrf(bool connected, float distance, float temp
 // ============================================================================
 void SystemStatusViewModel::updateDayCamera(bool connected, bool isActive, float fov,
                                             quint16 zoom, quint16 focus,
-                                            bool autofocus, bool error)
+                                            bool autofocus, bool error, quint8 errorCode)
 {
     if (m_dayCamConnected != connected) {
         m_dayCamConnected = connected;
@@ -291,6 +322,11 @@ void SystemStatusViewModel::updateDayCamera(bool connected, bool isActive, float
         m_dayCamError = error;
         emit dayCamErrorChanged();
     }
+    QString newStatusText = connected ? (error ? getDayCameraErrorDescription(errorCode) : "✓ OK") : "N/A";
+    if (m_dayCamStatusText != newStatusText) {
+        m_dayCamStatusText = newStatusText;
+        emit dayCamStatusTextChanged();
+    }
 }
 
 // ============================================================================
@@ -298,7 +334,7 @@ void SystemStatusViewModel::updateDayCamera(bool connected, bool isActive, float
 // ============================================================================
 void SystemStatusViewModel::updateNightCamera(bool connected, bool isActive, float fov,
                                               quint8 digitalZoom, bool ffcInProgress,
-                                              bool error)
+                                              bool error, quint8 errorCode, quint16 videoMode)
 {
     if (m_nightCamConnected != connected) {
         m_nightCamConnected = connected;
@@ -322,6 +358,12 @@ void SystemStatusViewModel::updateNightCamera(bool connected, bool isActive, flo
         emit nightCamZoomTextChanged();
     }
 
+    QString newVideoMode = QString("LUT %1").arg(videoMode);
+    if (m_nightCamVideoModeText != newVideoMode) {
+        m_nightCamVideoModeText = newVideoMode;
+        emit nightCamVideoModeTextChanged();
+    }
+
     if (m_nightCamFfcInProgress != ffcInProgress) {
         m_nightCamFfcInProgress = ffcInProgress;
         emit nightCamFfcInProgressChanged();
@@ -330,6 +372,12 @@ void SystemStatusViewModel::updateNightCamera(bool connected, bool isActive, flo
     if (m_nightCamError != error) {
         m_nightCamError = error;
         emit nightCamErrorChanged();
+    }
+
+    QString newStatusText = connected ? (error ? getNightCameraErrorDescription(errorCode) : "✓ OK") : "N/A";
+    if (m_nightCamStatusText != newStatusText) {
+        m_nightCamStatusText = newStatusText;
+        emit nightCamStatusTextChanged();
     }
 }
 
@@ -358,6 +406,19 @@ void SystemStatusViewModel::updatePlcStatus(bool plc21Conn, bool plc42Conn,
         m_gunArmed = gunArm;
         emit gunArmedChanged();
     }
+    QString plc21Status = plc21Conn ? "✓ OK" : "N/A";
+    QString plc42Status = plc42Conn ? "✓ OK" : "N/A";
+    
+    if (m_plc21StatusText != plc21Status) {
+        m_plc21StatusText = plc21Status;
+        emit plc21StatusTextChanged();
+    }
+    
+    if (m_plc42StatusText != plc42Status) {
+        m_plc42StatusText = plc42Status;
+        emit plc42StatusTextChanged();
+    }
+        
 }
 
 // ===========================================================================
@@ -411,6 +472,20 @@ void SystemStatusViewModel::updateServoActuator(bool connected, double position,
         m_actuatorFault = fault;
         emit actuatorFaultChanged();
     }
+
+    QString statusText;
+    if (connected) {
+        if (motorOff) statusText = "⚠ MOTOR OFF";
+        else if (fault) statusText = "⚠ FAULT";
+        else statusText = "✓ OK";
+    } else {
+        statusText = "N/A";
+    }
+    
+    if (m_actuatorStatusText != statusText) {
+        m_actuatorStatusText = statusText;
+        emit actuatorStatusTextChanged();
+    }
 }
 
 // ============================================================================
@@ -427,5 +502,36 @@ void SystemStatusViewModel::updateAlarms(const QStringList& alarms)
             m_hasAlarms = newHasAlarms;
             emit hasAlarmsChanged();
         }
+    }
+}
+
+
+QString SystemStatusViewModel::getNightCameraErrorDescription(quint8 errorCode) const
+{
+    switch (errorCode) {
+    case 0x01: return "⚠ Camera Busy";
+    case 0x02: return "⚠ Not Ready";
+    case 0x03: return "⚠ Data Out of Range";
+    case 0x04: return "⚠ Checksum Error";
+    case 0x05: return "⚠ Undefined Process";
+    case 0x06: return "⚠ Undefined Function";
+    case 0x07: return "⚠ Timeout";
+    case 0x09: return "⚠ Byte Count Mismatch";
+    case 0x0A: return "⚠ Feature Not Enabled";
+    default: return QString("⚠ Error 0x%1").arg(errorCode, 2, 16, QChar('0')).toUpper();
+    }
+}
+
+QString SystemStatusViewModel::getDayCameraErrorDescription(quint8 errorCode) const
+{
+    // Add VISCA-specific error codes
+    switch (errorCode) {
+    case 0x01: return "⚠ Message Length Error";
+    case 0x02: return "⚠ Syntax Error";
+    case 0x03: return "⚠ Command Buffer Full";
+    case 0x04: return "⚠ Command Canceled";
+    case 0x05: return "⚠ No Socket";
+    case 0x41: return "⚠ Command Not Executable";
+    default: return QString("⚠ Error 0x%1").arg(errorCode, 2, 16, QChar('0')).toUpper();
     }
 }

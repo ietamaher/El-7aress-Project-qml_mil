@@ -37,19 +37,19 @@ void OsdController::initialize()
         return;
     }
 
-    // =========================================================================
-    // PHASE 1: Connect to SystemStateModel (Active NOW)
-    // =========================================================================
-    /*connect(m_stateModel, &SystemStateModel::dataChanged,
-            this, &OsdController::onSystemStateChanged);*/
+    // ⭐ Initialize active camera from state
+    const auto& initialData = m_stateModel->data();
+    m_activeCameraIndex = initialData.activeCameraIsDay ? 0 : 1;
+
+    // Connect to state changes to track camera switching
+    connect(m_stateModel, &SystemStateModel::dataChanged,
+            this, &OsdController::onSystemStateChanged);
 
     // Connect to color changes
     connect(m_stateModel, &SystemStateModel::colorStyleChanged,
             this, &OsdController::onColorStyleChanged);
 
     // Set initial state
-    const auto& initialData = m_stateModel->data();
-    //updateViewModelFromSystemState(initialData);
     m_viewModel->setAccentColor(initialData.colorStyle);
 
     qDebug() << "OsdController initialized successfully";
@@ -74,10 +74,28 @@ void OsdController::initialize()
 }
 
 
+void OsdController::onSystemStateChanged(const SystemStateData& data)
+{
+    // Update active camera index when it changes
+    int newActiveCameraIndex = data.activeCameraIsDay ? 0 : 1;
+
+    if (m_activeCameraIndex != newActiveCameraIndex) {
+        m_activeCameraIndex = newActiveCameraIndex;
+        qDebug() << "OsdController: Active camera switched to"
+                 << (m_activeCameraIndex == 0 ? "DAY" : "THERMAL");
+    }
+}
+
 
 void OsdController::onFrameDataReady(const FrameData& data)
 {
     if (!m_viewModel) return;
+
+    // ⭐ CRITICAL FIX: Only process frames from the ACTIVE camera!
+    if (data.cameraIndex != m_activeCameraIndex) {
+        // Ignore frames from inactive camera
+        return;
+    }
 
     // === BASIC OSD DATA ===
     m_viewModel->updateMode(data.currentOpMode);
@@ -85,6 +103,13 @@ void OsdController::onFrameDataReady(const FrameData& data)
     m_viewModel->updateStabilization(data.stabEnabled);
     m_viewModel->updateAzimuth(data.azimuth);
     m_viewModel->updateElevation(data.elevation);
+    m_viewModel->updateImuData(
+        data.imuConnected,
+        data.imuYawDeg,      // Vehicle heading
+        data.imuPitchDeg,
+        data.imuRollDeg,
+        data.imuTemp
+    );
     m_viewModel->updateSpeed(data.speed);
     m_viewModel->updateFov(data.cameraFOV);
 

@@ -55,6 +55,22 @@ struct FrameData {
     bool stabEnabled = false;
     float azimuth = 0.0f;
     float elevation = 0.0f;
+
+    bool imuConnected = false;        // IMU connection status
+    double imuRollDeg;              // Roll angle in degrees
+    double imuPitchDeg;             // Pitch angle in degrees
+    double imuYawDeg;               // Yaw/Heading angle in degrees (0-360, 0=North)
+    double imuTemp;                 // IMU temperature in Celsius
+    
+    // Gyro rates (optional for OSD, but available if needed)
+    double gyroX;                   // deg/s
+    double gyroY;                   // deg/s
+    double gyroZ;                   // deg/s
+    
+    // Accelerometer (optional for OSD)
+    double accelX;                  // G
+    double accelY;                  // G
+    double accelZ;                  // G
     float cameraFOV = 0.0f;
     float speed = 0.0f;
     float lrfDistance = 0.0f;
@@ -225,6 +241,15 @@ private:
     bool m_stabEnabled;
     float m_currentAzimuth;
     float m_currentElevation;
+
+    bool m_imuConnected;
+    double m_imuRollDeg;
+    double m_imuPitchDeg;
+    double m_imuYawDeg;      // Vehicle heading (0-360°, 0=North)
+    double m_imuTemp;
+    double m_gyroX, m_gyroY, m_gyroZ;
+    double m_accelX, m_accelY, m_accelZ;    
+
     float m_cameraFOV;
     float m_lrfDistance;
 

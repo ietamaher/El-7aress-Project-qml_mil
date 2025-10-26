@@ -9,11 +9,11 @@
     "sourceWidth": 1280,
     "sourceHeight": 720,
     "dayCamera": {
-      "devicePath": "/dev/video2",
+      "devicePath": "/dev/video0",
       "controlPort": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if00"
     },
     "nightCamera": {
-      "devicePath": "/dev/video0",
+      "devicePath": "/dev/video2",
       "controlPort": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_56D1123075-if00"
     }
   },

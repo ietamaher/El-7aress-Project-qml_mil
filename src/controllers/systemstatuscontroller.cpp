@@ -126,7 +126,8 @@ void SystemStatusController::onSystemStateChanged(const SystemStateData& data)
         data.dayZoomPosition,
         data.dayFocusPosition,
         data.dayAutofocusEnabled,
-        data.dayCameraError
+        data.dayCameraError,
+        data.dayCameraStatus 
         );
 
     // Update Night Camera
@@ -136,7 +137,9 @@ void SystemStatusController::onSystemStateChanged(const SystemStateData& data)
         data.nightCurrentHFOV,
         data.nightDigitalZoomLevel,
         data.nightFfcInProgress,
-        data.nightCameraError
+        data.nightCameraError,
+        data.nightCameraStatus,
+        data.nightVideoMode
         );
 
     // Update PLC Status

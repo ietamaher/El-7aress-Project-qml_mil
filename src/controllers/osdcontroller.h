@@ -33,7 +33,7 @@ public:
 
 public slots:
     // PHASE 1: Direct from SystemStateModel (Active NOW)
-    //void onSystemStateChanged(const SystemStateData& data);
+    void onSystemStateChanged(const SystemStateData& data);
 
     // PHASE 2: From CameraVideoStreamDevice (Uncomment when ready)
     void onFrameDataReady(const FrameData& data);
@@ -48,6 +48,8 @@ private:
     // Dependencies (injected)
     OsdViewModel* m_viewModel;
     SystemStateModel* m_stateModel;
+
+    int m_activeCameraIndex;
 };
 
 #endif // OSDCONTROLLER_H

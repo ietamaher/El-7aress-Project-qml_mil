@@ -207,8 +207,13 @@ Item {
         width: azIndicatorRadius * 2
         height: azIndicatorRadius * 2
 
-        azimuth: viewModel ? viewModel.azimuth : 0
+        // === PROPERTIES ===
+        azimuth: viewModel ? viewModel.azimuth : 0              // Gimbal azimuth (relative)
+        vehicleHeading: viewModel ? viewModel.vehicleHeading : 0 // ⭐ IMU yaw (vehicle heading)
+        imuConnected: viewModel ? viewModel.imuConnected : false // ⭐ IMU connection status
+
         color: osdRoot.accentColor
+        relativeColor: "yellow"  // Color for vehicle reference line
     }
 
     // ========================================================================

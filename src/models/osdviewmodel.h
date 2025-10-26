@@ -27,6 +27,11 @@ class OsdViewModel : public QObject
     Q_PROPERTY(float azimuth READ azimuth NOTIFY azimuthChanged)
     Q_PROPERTY(float elevation READ elevation NOTIFY elevationChanged)
 
+    Q_PROPERTY(bool imuConnected READ imuConnected NOTIFY imuConnectedChanged)
+    Q_PROPERTY(double vehicleHeading READ vehicleHeading NOTIFY vehicleHeadingChanged)
+    Q_PROPERTY(double vehicleRoll READ vehicleRoll NOTIFY vehicleRollChanged)
+    Q_PROPERTY(double vehiclePitch READ vehiclePitch NOTIFY vehiclePitchChanged)
+    Q_PROPERTY(double imuTemperature READ imuTemperature NOTIFY imuTemperatureChanged)
     // ========================================================================
     // SYSTEM STATUS
     // ========================================================================
@@ -98,6 +103,12 @@ public:
     float azimuth() const { return m_azimuth; }
     float elevation() const { return m_elevation; }
 
+    bool imuConnected() const { return m_imuConnected; }
+    double vehicleHeading() const { return m_vehicleHeading; }
+    double vehicleRoll() const { return m_vehicleRoll; }
+    double vehiclePitch() const { return m_vehiclePitch; }
+    double imuTemperature() const { return m_imuTemperature; }
+
     QString statusText() const { return m_statusText; }
     QString rateText() const { return m_rateText; }
     QString lrfText() const { return m_lrfText; }
@@ -148,6 +159,7 @@ public slots:
 
     void updateAzimuth(float azimuth);
     void updateElevation(float elevation);
+    void updateImuData(bool connected, double yaw, double pitch, double roll, double temp);
 
     void updateSystemStatus(bool charged, bool armed, bool ready);
     void updateFiringMode(FireMode mode);
@@ -184,6 +196,13 @@ signals:
 
     void azimuthChanged();
     void elevationChanged();
+
+    // === IMU SIGNALS ===
+    void imuConnectedChanged();
+    void vehicleHeadingChanged();
+    void vehicleRollChanged();
+    void vehiclePitchChanged();
+    void imuTemperatureChanged();
 
     void statusTextChanged();
     void rateTextChanged();
@@ -235,6 +254,13 @@ private:
     float m_azimuth;
     float m_elevation;
 
+     bool m_imuConnected = false;
+    double m_vehicleHeading = 0.0;    // Yaw/Heading (0-360°)
+    double m_vehicleRoll = 0.0;       // Roll angle
+    double m_vehiclePitch = 0.0;      // Pitch angle
+    double m_imuTemperature = 0.0;    // IMU temp
+    
+    
     QString m_statusText;
     QString m_rateText;
     QString m_lrfText;

@@ -7,12 +7,13 @@
 // Structure to hold camera data
 struct NightCameraData {
     bool isConnected = false;
-    bool errorState = false;
+    quint8 errorState = 0x00;
     bool ffcInProgress = false;
     bool digitalZoomEnabled = false;
     quint8 digitalZoomLevel = 0;
     double currentHFOV = 10.4;
     quint16 videoMode = 0;
+    quint8 lut = 0;
     quint8 cameraStatus = 0;
 
     bool operator==(const NightCameraData &other) const {

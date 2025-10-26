@@ -351,10 +351,11 @@ struct SystemStateData {
     double nightZoomPosition = 0.0;     ///< Night camera zoom position (0-1 normalized)
     double nightCurrentHFOV = 8.0;      ///< Night camera current horizontal field of view in degrees
     bool nightCameraConnected = false;  ///< Night camera connection status
-    bool nightCameraError = false;      ///< Night camera error status
+    quint8 nightCameraError = false;      ///< Night camera error status
     quint8 nightCameraStatus = 0;       ///< Night camera detailed status code
     quint8 nightDigitalZoomLevel = 1;   ///< Night camera digital zoom level (FIXED TYPE: was bool, now quint8)
     bool nightFfcInProgress = false;    ///< Night camera FFC (Flat Field Correction) in progress status
+    quint16 nightVideoMode = 0;         ///< Night camera video mode (e.g., 0=Normal, 1=Low Light, etc.)
 
     // Camera Control
     bool activeCameraIsDay = false;     ///< True if day camera is active, false if night camera

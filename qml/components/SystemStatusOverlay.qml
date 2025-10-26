@@ -108,11 +108,14 @@ Rectangle {
                             StatusRow { label: "Driver:"; value: viewModel ? viewModel.azDriverTempText : "N/A" }
 
                             Text {
-                                text: viewModel && viewModel.azFault ? "⚠ FAULT" : "✓ OK"
+                                text: viewModel ? viewModel.azStatusText : "N/A"
                                 font.pixelSize: 11
                                 font.bold: true
                                 font.family: "Segoe UI"
-                                color: viewModel && viewModel.azFault ? "#FF6B6B" : accentColor
+                                color: {
+                                    if (!viewModel || !viewModel.azConnected) return "#808080"
+                                    return viewModel.azFault ? "#FF6B6B" : accentColor
+                                }
                                 topPadding: 2
                             }
                         }
@@ -137,11 +140,14 @@ Rectangle {
                             StatusRow { label: "Driver:"; value: viewModel ? viewModel.elDriverTempText : "N/A" }
 
                             Text {
-                                text: viewModel && viewModel.elFault ? "⚠ FAULT" : "✓ OK"
+                                text: viewModel ? viewModel.elStatusText : "N/A"
                                 font.pixelSize: 11
                                 font.bold: true
                                 font.family: "Segoe UI"
-                                color: viewModel && viewModel.elFault ? "#FF6B6B" : accentColor
+                                color: {
+                                    if (!viewModel || !viewModel.elConnected) return "#808080"
+                                    return viewModel.azFault ? "#FF6B6B" : accentColor
+                                }
                                 topPadding: 2
                             }
                         }
@@ -192,7 +198,7 @@ Rectangle {
                     DeviceCard {
                         title: "Control Systems"
                         width: parent.width
-                        connected: viewModel ? (viewModel.plc21Connected && viewModel.plc42Connected) : false
+                        connected: viewModel ? (viewModel.plc21Connected || viewModel.plc42Connected) : false
                         hasError: false
                         accent: accentColor
 
@@ -202,12 +208,12 @@ Rectangle {
 
                             StatusRow {
                                 label: "PLC21:"
-                                value: viewModel && viewModel.plc21Connected ? "Connected" : "Disconnected"
+                                value: viewModel ? viewModel.plc21StatusText : "N/A" // ✅ Use status text
                                 valueColor: viewModel && viewModel.plc21Connected ? accentColor : "#FF6B6B"
                             }
                             StatusRow {
                                 label: "PLC42:"
-                                value: viewModel && viewModel.plc42Connected ? "Connected" : "Disconnected"
+                                value: viewModel ? viewModel.plc42StatusText : "N/A" // ✅ Use status text
                                 valueColor: viewModel && viewModel.plc42Connected ? accentColor : "#FF6B6B"
                             }
                             StatusRow {
@@ -238,6 +244,15 @@ Rectangle {
                             StatusRow { label: "Pitch:"; value: viewModel ? viewModel.imuPitchText : "N/A" }
                             StatusRow { label: "Yaw:"; value: viewModel ? viewModel.imuYawText : "N/A" }
                             StatusRow { label: "Temp:"; value: viewModel ? viewModel.imuTempText : "N/A" }
+
+                            Text {
+                                text: viewModel ? viewModel.imuStatusText : "N/A"
+                                font.pixelSize: 11
+                                font.bold: true
+                                font.family: "Segoe UI"
+                                color: viewModel && viewModel.imuConnected ? accentColor : "#808080"
+                                topPadding: 2
+                            }
                         }
                     }
 
@@ -261,7 +276,10 @@ Rectangle {
                                 text: viewModel ? viewModel.lrfFaultText : "N/A"
                                 font.pixelSize: 10
                                 font.family: "Segoe UI"
-                                color: viewModel && viewModel.lrfFault ? "#FF6B6B" : accentColor
+                                color: {
+                                    if (!viewModel || !viewModel.lrfConnected) return "#808080"
+                                    return viewModel.lrfFault ? "#FF6B6B" : accentColor
+                                }
                                 topPadding: 2
                                 wrapMode: Text.WordWrap
                                 width: parent.width
@@ -303,12 +321,16 @@ Rectangle {
                             }
 
                             Text {
-                                text: viewModel && viewModel.dayCamError ? "⚠ ERROR" : "✓ OK"
-                                font.pixelSize: 11
-                                font.bold: true
+                                text: viewModel ? viewModel.dayCamStatusText : "N/A"
+                                font.pixelSize: 10
                                 font.family: "Segoe UI"
-                                color: viewModel && viewModel.dayCamError ? "#FF6B6B" : accentColor
+                                color: {
+                                    if (!viewModel || !viewModel.dayCamConnected) return "#808080"
+                                    return viewModel.dayCamError ? "#FF6B6B" : accentColor
+                                }
                                 topPadding: 2
+                                wrapMode: Text.WordWrap
+                                width: parent.width
                             }
                         }
                     }
@@ -328,22 +350,29 @@ Rectangle {
 
                             StatusRow { label: "FOV:"; value: viewModel ? viewModel.nightCamFovText : "N/A" }
                             StatusRow { label: "Zoom:"; value: viewModel ? viewModel.nightCamZoomText : "N/A" }
+                            StatusRow { label: "LUT:"; value: viewModel ? viewModel.nightCamVideoModeText : "N/A" } // ✅ NEW
                             StatusRow {
                                 label: "FFC:"
                                 value: viewModel && viewModel.nightCamFfcInProgress ? "IN PROGRESS" : "IDLE"
                                 valueColor: viewModel && viewModel.nightCamFfcInProgress ? "#FFA500" : accentColor
                             }
 
+                            // ✅ Use descriptive status text
                             Text {
-                                text: viewModel && viewModel.nightCamError ? "⚠ ERROR" : "✓ OK"
-                                font.pixelSize: 11
-                                font.bold: true
+                                text: viewModel ? viewModel.nightCamStatusText : "N/A"
+                                font.pixelSize: 10
                                 font.family: "Segoe UI"
-                                color: viewModel && viewModel.nightCamError ? "#FF6B6B" : accentColor
+                                color: {
+                                    if (!viewModel || !viewModel.nightCamConnected) return "#808080"
+                                    return viewModel.nightCamError ? "#FF6B6B" : accentColor
+                                }
                                 topPadding: 2
+                                wrapMode: Text.WordWrap
+                                width: parent.width
                             }
                         }
                     }
+
 
                     // --- Alarms Section ---
                     Rectangle {
@@ -490,14 +519,56 @@ Rectangle {
                     anchors.rightMargin: 8
                     spacing: 6
 
-                    // Connection indicator
+                    // ✅ ANIMATED Connection indicator
                     Rectangle {
+                        id: connectionDot
                         width: 8
                         height: 8
                         radius: 4
                         color: connected ? accent : "#606060"
                         anchors.verticalCenter: parent.verticalCenter
+
+                        // ✅ Pulse animation when connected
+                        SequentialAnimation on opacity {
+                            running: connected
+                            loops: Animation.Infinite
+
+                            NumberAnimation {
+                                from: 1.0
+                                to: 0.3
+                                duration: 800
+                                easing.type: Easing.InOutQuad
+                            }
+                            NumberAnimation {
+                                from: 0.3
+                                to: 1.0
+                                duration: 800
+                                easing.type: Easing.InOutQuad
+                            }
+                        }
+
+                        // ✅ Scale animation when connected
+                        SequentialAnimation on scale {
+                            running: connected
+                            loops: Animation.Infinite
+
+                            NumberAnimation {
+                                from: 1.0
+                                to: 1.3
+                                duration: 800
+                                easing.type: Easing.InOutQuad
+                            }
+                            NumberAnimation {
+                                from: 1.3
+                                to: 1.0
+                                duration: 800
+                                easing.type: Easing.InOutQuad
+                            }
+                        }
                     }
+
+
+
 
                     Text {
                         text: card.title
