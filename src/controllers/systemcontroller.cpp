@@ -161,11 +161,11 @@ void SystemController::initializeHardware()
     // 5. Create Hardware Devices using MIL-STD dependency injection
 
     // Day Camera (Pelco-D via Serial)
-    m_dayCamControl = new DayCameraControlDevice(this);
+    m_dayCamControl = new DayCameraControlDevice("dayCamera", this);
     m_dayCamControl->setDependencies(m_dayCameraTransport, m_dayCameraParser);
 
     // IMU (Modbus RTU)
-    m_gyroDevice = new ImuDevice(this);
+    m_gyroDevice = new ImuDevice("imu", this);
     m_gyroDevice->setDependencies(m_imuTransport, m_imuParser);
 
     // Joystick (SDL2 - no transport needed)
@@ -175,29 +175,29 @@ void SystemController::initializeHardware()
     // Lens (unchanged - not refactored yet)
     m_lensDevice = new LensDevice(this);
 
-    // LRF (unchanged - uses existing architecture)
+    // LRF (uses existing MIL-STD architecture)
     m_lrfDevice = new LRFDevice(this);
 
     // Night Camera (TAU2 via Serial)
-    m_nightCamControl = new NightCameraControlDevice(this);
+    m_nightCamControl = new NightCameraControlDevice("nightCamera", this);
     m_nightCamControl->setDependencies(m_nightCameraTransport, m_nightCameraParser);
 
     // PLC21 (Modbus RTU)
-    m_plc21Device = new Plc21Device(this);
+    m_plc21Device = new Plc21Device("plc21", this);
     m_plc21Device->setDependencies(m_plc21Transport, m_plc21Parser);
 
     // PLC42 (Modbus RTU)
-    m_plc42Device = new Plc42Device(this);
+    m_plc42Device = new Plc42Device("plc42", this);
     m_plc42Device->setDependencies(m_plc42Transport, m_plc42Parser);
 
-    // Servo Actuator (unchanged - uses existing architecture)
+    // Servo Actuator (uses existing MIL-STD architecture)
     m_servoActuatorDevice = new ServoActuatorDevice("servoActuator", this);
 
-    // Servo devices with configuration (unchanged - uses existing architecture)
+    // Servo devices with MIL-STD architecture
     m_servoAzThread = new QThread(this);
-    m_servoAzDevice = new ServoDriverDevice(servoAzConf.name, servoAzConf.port, servoAzConf.baudRate, servoAzConf.slaveId, servoAzConf.parity, nullptr);
+    m_servoAzDevice = new ServoDriverDevice(servoAzConf.name, nullptr);
     m_servoElThread = new QThread(this);
-    m_servoElDevice = new ServoDriverDevice(servoElConf.name, servoElConf.port, servoElConf.baudRate, servoElConf.slaveId, servoElConf.parity, nullptr);
+    m_servoElDevice = new ServoDriverDevice(servoElConf.name, nullptr);
 
     // Video processors with configuration
     m_dayVideoProcessor = new CameraVideoStreamDevice(0, videoConf.dayDevicePath, videoConf.sourceWidth, videoConf.sourceHeight, m_systemStateModel, nullptr);
@@ -356,7 +356,7 @@ void SystemController::startSystem()
     QJsonObject imuTransportConfig;
     imuTransportConfig["port"] = imuConf.port;
     imuTransportConfig["baudRate"] = imuConf.baudRate;
-    imuTransportConfig["parity"] = static_cast<int>(imuConf.parity);
+    imuTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);  // IMU uses no parity
     imuTransportConfig["slaveId"] = imuConf.slaveId;
     m_imuTransport->open(imuTransportConfig);
 
@@ -402,14 +402,15 @@ void SystemController::startSystem()
 
     qInfo() << "  ✓ MIL-STD devices initialized";
 
-    // 3. Open legacy device connections (not yet refactored)
-    m_lrfDevice->openSerialPort(lrfConf.port);
-    m_servoActuatorDevice->openSerialPort(actuatorConf.port);
+    // 3. Initialize other refactored devices (LRF, ServoActuator, ServoDriver)
+    // Note: These were already refactored in earlier work
+    m_lrfDevice->initialize();
+    m_servoActuatorDevice->initialize();
 
-    if (m_servoAzDevice) m_servoAzDevice->connectDevice();
-    if (m_servoElDevice) m_servoElDevice->connectDevice();
+    if (m_servoAzDevice) m_servoAzDevice->initialize();
+    if (m_servoElDevice) m_servoElDevice->initialize();
 
-    qInfo() << "  ✓ Legacy device connections opened";
+    qInfo() << "  ✓ All refactored devices initialized";
 
     // 4. Configure camera defaults
     m_dayCamControl->zoomOut();
@@ -583,8 +584,13 @@ void SystemController::connectDevicesToModels()
     connect(m_lensDevice, &LensDevice::lensDataChanged,
             m_lensModel, &LensDataModel::updateData);
 
+    // LRFDevice uses shared_ptr, need to dereference for model
     connect(m_lrfDevice, &LRFDevice::lrfDataChanged,
-            m_lrfModel, &LrfDataModel::updateData);
+            m_lrfModel, [this](std::shared_ptr<const LrfData> data) {
+                if (data) {
+                    m_lrfModel->updateData(*data);
+                }
+            });
 
     connect(m_nightCamControl, &NightCameraControlDevice::nightCameraDataChanged,
             m_nightCamControlModel, &NightCameraDataModel::updateData);
