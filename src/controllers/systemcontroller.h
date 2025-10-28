@@ -28,6 +28,8 @@ class NightCameraProtocolParser;
 class JoystickProtocolParser;
 class Plc21ProtocolParser;
 class Plc42ProtocolParser;
+class ServoDriverProtocolParser;
+class ServoActuatorProtocolParser;
 
 // Forward declarations - Data Models
 class DayCameraDataModel;
@@ -101,6 +103,9 @@ private:
     SerialPortTransport* m_nightCameraTransport = nullptr;
     ModbusTransport* m_plc21Transport = nullptr;
     ModbusTransport* m_plc42Transport = nullptr;
+    ModbusTransport* m_servoAzTransport = nullptr;
+    ModbusTransport* m_servoElTransport = nullptr;
+    SerialPortTransport* m_servoActuatorTransport = nullptr;
 
     // === PROTOCOL PARSERS ===
     ImuProtocolParser* m_imuParser = nullptr;
@@ -109,6 +114,9 @@ private:
     JoystickProtocolParser* m_joystickParser = nullptr;
     Plc21ProtocolParser* m_plc21Parser = nullptr;
     Plc42ProtocolParser* m_plc42Parser = nullptr;
+    ServoDriverProtocolParser* m_servoAzParser = nullptr;
+    ServoDriverProtocolParser* m_servoElParser = nullptr;
+    ServoActuatorProtocolParser* m_servoActuatorParser = nullptr;
 
     // === HARDWARE DEVICES ===
     DayCameraControlDevice* m_dayCamControl = nullptr;

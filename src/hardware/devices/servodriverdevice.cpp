@@ -183,13 +183,12 @@ void ServoDriverDevice::processMessage(const Message& message) {
         
     } else if (message.typeId() == Message::Type::ServoDriverAlarmType) {
         auto const* alarmMsg = static_cast<const ServoDriverAlarmMessage*>(&message);
-        
-        // Update alarm status
+
+        // Update alarm status - alarm code is emitted via signal, not stored in data
         auto newData = std::make_shared<ServoDriverData>(*data());
         newData->fault = true;
-        newData->alarmCode = alarmMsg->alarmCode();
         updateData(newData);
-        
+
         emit alarmDetected(alarmMsg->alarmCode(), alarmMsg->description());
         emit servoDataChanged(*newData);
         

@@ -22,6 +22,8 @@
 #include "hardware/protocols/JoystickProtocolParser.h"
 #include "hardware/protocols/Plc21ProtocolParser.h"
 #include "hardware/protocols/Plc42ProtocolParser.h"
+#include "hardware/protocols/ServoDriverProtocolParser.h"
+#include "hardware/protocols/ServoActuatorProtocolParser.h"
 
 // Data Models
 #include "models/domain/gyrodatamodel.h"
@@ -147,6 +149,9 @@ void SystemController::initializeHardware()
     m_nightCameraTransport = new SerialPortTransport(this);
     m_plc21Transport = new ModbusTransport(this);
     m_plc42Transport = new ModbusTransport(this);
+    m_servoAzTransport = new ModbusTransport(this);
+    m_servoElTransport = new ModbusTransport(this);
+    m_servoActuatorTransport = new SerialPortTransport(this);
     qInfo() << "  ✓ Transport layer created";
 
     // 4. Create Protocol Parsers (MIL-STD Architecture)
@@ -156,6 +161,9 @@ void SystemController::initializeHardware()
     m_joystickParser = new JoystickProtocolParser(this);
     m_plc21Parser = new Plc21ProtocolParser(this);
     m_plc42Parser = new Plc42ProtocolParser(this);
+    m_servoAzParser = new ServoDriverProtocolParser(this);
+    m_servoElParser = new ServoDriverProtocolParser(this);
+    m_servoActuatorParser = new ServoActuatorProtocolParser(this);
     qInfo() << "  ✓ Protocol parsers created";
 
     // 5. Create Hardware Devices using MIL-STD dependency injection
@@ -190,14 +198,18 @@ void SystemController::initializeHardware()
     m_plc42Device = new Plc42Device("plc42", this);
     m_plc42Device->setDependencies(m_plc42Transport, m_plc42Parser);
 
-    // Servo Actuator (uses existing MIL-STD architecture)
+    // Servo Actuator (Serial ASCII protocol)
     m_servoActuatorDevice = new ServoActuatorDevice("servoActuator", this);
+    m_servoActuatorDevice->setDependencies(m_servoActuatorTransport, m_servoActuatorParser);
 
-    // Servo devices with MIL-STD architecture
+    // Servo Driver devices (Modbus RTU) with MIL-STD architecture
     m_servoAzThread = new QThread(this);
     m_servoAzDevice = new ServoDriverDevice(servoAzConf.name, nullptr);
+    m_servoAzDevice->setDependencies(m_servoAzTransport, m_servoAzParser);
+
     m_servoElThread = new QThread(this);
     m_servoElDevice = new ServoDriverDevice(servoElConf.name, nullptr);
+    m_servoElDevice->setDependencies(m_servoElTransport, m_servoElParser);
 
     // Video processors with configuration
     m_dayVideoProcessor = new CameraVideoStreamDevice(0, videoConf.dayDevicePath, videoConf.sourceWidth, videoConf.sourceHeight, m_systemStateModel, nullptr);
@@ -349,6 +361,8 @@ void SystemController::startSystem()
     const auto& plc21Conf = DeviceConfiguration::plc21();
     const auto& plc42Conf = DeviceConfiguration::plc42();
     const auto& actuatorConf = DeviceConfiguration::actuator();
+    const auto& servoAzConf = DeviceConfiguration::servoAz();
+    const auto& servoElConf = DeviceConfiguration::servoEl();
 
     // 1. Configure and open Transport connections (MIL-STD Architecture)
 
@@ -390,27 +404,45 @@ void SystemController::startSystem()
     plc42TransportConfig["slaveId"] = plc42Conf.slaveId;
     m_plc42Transport->open(plc42TransportConfig);
 
+    // Servo Azimuth Transport (Modbus RTU)
+    QJsonObject servoAzTransportConfig;
+    servoAzTransportConfig["port"] = servoAzConf.port;
+    servoAzTransportConfig["baudRate"] = servoAzConf.baudRate;
+    servoAzTransportConfig["parity"] = static_cast<int>(servoAzConf.parity);
+    servoAzTransportConfig["slaveId"] = servoAzConf.slaveId;
+    m_servoAzTransport->open(servoAzTransportConfig);
+
+    // Servo Elevation Transport (Modbus RTU)
+    QJsonObject servoElTransportConfig;
+    servoElTransportConfig["port"] = servoElConf.port;
+    servoElTransportConfig["baudRate"] = servoElConf.baudRate;
+    servoElTransportConfig["parity"] = static_cast<int>(servoElConf.parity);
+    servoElTransportConfig["slaveId"] = servoElConf.slaveId;
+    m_servoElTransport->open(servoElTransportConfig);
+
+    // Servo Actuator Transport (Serial)
+    QJsonObject servoActuatorTransportConfig;
+    servoActuatorTransportConfig["port"] = actuatorConf.port;
+    servoActuatorTransportConfig["baudRate"] = actuatorConf.baudRate;
+    servoActuatorTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
+    m_servoActuatorTransport->open(servoActuatorTransportConfig);
+
     qInfo() << "  ✓ Transport connections opened";
 
-    // 2. Initialize MIL-STD refactored devices
+    // 2. Initialize all MIL-STD refactored devices
     m_dayCamControl->initialize();
     m_gyroDevice->initialize();
     m_joystickDevice->initialize();
     m_nightCamControl->initialize();
     m_plc21Device->initialize();
     m_plc42Device->initialize();
-
-    qInfo() << "  ✓ MIL-STD devices initialized";
-
-    // 3. Initialize other refactored devices (LRF, ServoActuator, ServoDriver)
-    // Note: These were already refactored in earlier work
     m_lrfDevice->initialize();
     m_servoActuatorDevice->initialize();
 
     if (m_servoAzDevice) m_servoAzDevice->initialize();
     if (m_servoElDevice) m_servoElDevice->initialize();
 
-    qInfo() << "  ✓ All refactored devices initialized";
+    qInfo() << "  ✓ All MIL-STD devices initialized";
 
     // 4. Configure camera defaults
     m_dayCamControl->zoomOut();
