@@ -1,280 +1,261 @@
 #include "plc21device.h"
-#include <QSerialPort>
-#include <QVariant>
+#include "../interfaces/Transport.h"
+#include "../protocols/Plc21ProtocolParser.h"
+#include "../messages/Plc21Message.h"
+#include <QModbusRtuSerialClient>
+#include <QModbusDataUnit>
+#include <QModbusReply>
 #include <QDebug>
-#include <QMutexLocker>
-#include <QtMath>
 
-// Constructor: Initializes using base class constructor
-Plc21Device::Plc21Device(const QString &device,
-                         int baudRate,
-                         int slaveId,
-                         QSerialPort::Parity parity,
-                         QObject *parent)
-    : ModbusDeviceBase(device, baudRate, slaveId, parity, parent)
+Plc21Device::Plc21Device(const QString& identifier, QObject* parent)
+    : TemplatedDevice<Plc21PanelData>(parent),
+      m_identifier(identifier),
+      m_pollTimer(new QTimer(this))
 {
-    // Set PLC-specific poll interval (50ms instead of default 100ms)
-    setPollInterval(50);
-
-    // Connect to base class signals
-    connect(this, &ModbusDeviceBase::connectionStateChanged,
-            this, &Plc21Device::onConnectionStateChanged);
+    connect(m_pollTimer, &QTimer::timeout, this, &Plc21Device::pollTimerTimeout);
 }
 
-// Destructor: Base class handles disconnection
-Plc21Device::~Plc21Device()
-{
-    // No specific cleanup needed, base class destructor will handle it
+Plc21Device::~Plc21Device() {
+    m_pollTimer->stop();
 }
 
-// Override the pure virtual readData method from base class
-void Plc21Device::readData()
-{
-    if (!isConnected())
+void Plc21Device::setDependencies(Transport* transport,
+                                   Plc21ProtocolParser* parser) {
+    m_transport = transport;
+    m_parser = parser;
+
+    // Parent them to this device for lifetime management
+    m_transport->setParent(this);
+    m_parser->setParent(this);
+
+    // Connect transport signals
+    connect(m_transport, &Transport::connectionStateChanged,
+            this, [this](bool connected) {
+        auto newData = std::make_shared<Plc21PanelData>(*data());
+        newData->isConnected = connected;
+        updateData(newData);
+        emit panelDataChanged(*newData);
+    });
+}
+
+bool Plc21Device::initialize() {
+    setState(DeviceState::Initializing);
+
+    if (!m_transport || !m_parser) {
+        qCritical() << m_identifier << "missing dependencies!";
+        setState(DeviceState::Error);
+        return false;
+    }
+
+    // Get configuration from device property
+    QJsonObject config = property("config").toJsonObject();
+    int pollInterval = config["pollIntervalMs"].toInt(50);
+
+    qDebug() << m_identifier << "initializing with poll interval:" << pollInterval << "ms";
+
+    // Open transport
+    if (m_transport->open(config)) {
+        setState(DeviceState::Online);
+
+        // Start polling
+        m_pollTimer->start(pollInterval);
+
+        qDebug() << m_identifier << "initialized successfully";
+        return true;
+    }
+
+    qCritical() << m_identifier << "failed to initialize transport";
+    setState(DeviceState::Error);
+    return false;
+}
+
+void Plc21Device::shutdown() {
+    m_pollTimer->stop();
+
+    if (m_transport) {
+        QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
+    }
+
+    setState(DeviceState::Offline);
+}
+
+void Plc21Device::pollTimerTimeout() {
+    // Read digital inputs (discrete inputs)
+    sendReadRequest(Plc21Registers::DIGITAL_INPUTS_START_ADDR,
+                    Plc21Registers::DIGITAL_INPUTS_COUNT,
+                    true);
+
+    // Read analog inputs (holding registers)
+    sendReadRequest(Plc21Registers::ANALOG_INPUTS_START_ADDR,
+                    Plc21Registers::ANALOG_INPUTS_COUNT,
+                    false);
+}
+
+void Plc21Device::sendReadRequest(int startAddress, int count, bool isDiscreteInputs) {
+    if (state() != DeviceState::Online || !m_transport) return;
+
+    // Cast to ModbusTransport to access Modbus-specific methods
+    auto modbusTransport = qobject_cast<QModbusRtuSerialClient*>(
+        m_transport->property("client").value<QObject*>());
+
+    if (!modbusTransport) return;
+
+    QModbusDataUnit::RegisterType regType = isDiscreteInputs ?
+        QModbusDataUnit::DiscreteInputs : QModbusDataUnit::HoldingRegisters;
+
+    QModbusDataUnit readUnit(regType, startAddress, count);
+
+    QModbusReply* reply = nullptr;
+    QMetaObject::invokeMethod(m_transport, "sendReadRequest",
+                              Qt::DirectConnection,
+                              Q_RETURN_ARG(QModbusReply*, reply),
+                              Q_ARG(QModbusDataUnit, readUnit));
+
+    if (reply) {
+        connect(reply, &QModbusReply::finished, this, [this, reply]() {
+            onModbusReplyReady(reply);
+        });
+    }
+}
+
+void Plc21Device::onModbusReplyReady(QModbusReply* reply) {
+    if (!reply || !m_parser) {
+        if (reply) reply->deleteLater();
         return;
-
-    // Read Digital Inputs
-    readDigitalInputs();
-
-    // Read Analog Inputs
-    readAnalogInputs();
-}
-
-// Override the virtual onDataReadComplete method from base class
-void Plc21Device::onDataReadComplete()
-{
-    // This is called when connection state changes
-    // Update panel data connection status
-    Plc21PanelData newData = m_currentPanelData;
-    newData.isConnected = isConnected();
-    updatePanelData(newData);
-}
-
-void Plc21Device::onWriteComplete()
-{
-    // This method can be used to handle post-write operations if needed
-    // Currently, it does nothing but can be extended in the future
-}
-
-// Read digital inputs using base class method
-void Plc21Device::readDigitalInputs()
-{
-    QModbusDataUnit readUnit(QModbusDataUnit::DiscreteInputs,
-                             DIGITAL_INPUTS_START_ADDRESS,
-                             DIGITAL_INPUTS_COUNT);
-
-    if (auto *reply = sendReadRequest(readUnit)) {
-        //connect(reply, &QModbusReply::finished,  this, &Plc21Device::onDigitalInputsReadReady);
-        connectReplyFinished(reply, [this](QModbusReply* r){ onDigitalInputsReadReady(r); });
-
     }
-}
-
-// Read analog inputs using base class method
-void Plc21Device::readAnalogInputs()
-{
-    QModbusDataUnit readUnit(QModbusDataUnit::HoldingRegisters,
-                             ANALOG_INPUTS_START_ADDRESS,
-                             ANALOG_INPUTS_COUNT);
-
-    if (auto *reply = sendReadRequest(readUnit)) {
-        //connect(reply, &QModbusReply::finished,  this, &Plc21Device::onAnalogInputsReadReady);
-        connectReplyFinished(reply, [this](QModbusReply* r){ onAnalogInputsReadReady(r); });
-    }
-}
-
-// Handle connection state changes from base class
-void Plc21Device::onConnectionStateChanged(bool connected)
-{
-    if (connected) {
-        logMessage("PLC Modbus connection established.");
-        resetReconnectionAttempts();
-    } else {
-        logMessage("PLC Modbus device disconnected.");
-    }
-
-    // Update panel data
-    Plc21PanelData newData = m_currentPanelData;
-    newData.isConnected = connected;
-    updatePanelData(newData);
-}
-
-// Handles the response for digital input read requests
-void Plc21Device::onDigitalInputsReadReady(QModbusReply *reply)
-{
-    if (!reply)
-        return;
-
-    stopTimeoutTimer(); // Stop timeout timer from base class
-
-    QMutexLocker locker(&m_mutex);
-    if (reply->error() == QModbusDevice::NoError) {
-        const QModbusDataUnit unit = reply->result();
-        QVector<bool> rawDigital;
-        for (int i = 0; i < unit.valueCount(); ++i)
-            rawDigital.append(unit.value(i) != 0);
-        m_digitalInputs = rawDigital;
-
-        Plc21PanelData newData = m_currentPanelData;
-        // Update individual digital input fields based on their respective indices
-        if (unit.valueCount() > 0) {
-            newData.authorizeSw = (unit.value(0) != 0);
-        }
-        if (unit.valueCount() > 1) {
-            newData.menuValSw = (unit.value(1) != 0);
-        }
-        if (unit.valueCount() > 2) {
-            newData.menuDownSW = (unit.value(2) != 0);
-        }
-        if (unit.valueCount() > 3) {
-            newData.menuUpSW = (unit.value(3) != 0);
-        }
-        if (unit.valueCount() > 4) {
-            newData.switchCameraSW = (unit.value(4) != 0);
-        }
-        if (unit.valueCount() > 5) {
-            newData.enableStabilizationSW = (unit.value(5) != 0);
-        }
-        if (unit.valueCount() > 6) {
-            newData.homePositionSW = (unit.value(6) != 0);
-        }
-        if (unit.valueCount() > 8) {
-            newData.loadAmmunitionSW = (unit.value(8) != 0);
-        }
-        if (unit.valueCount() > 9) {
-            newData.armGunSW = (unit.value(9) != 0);
-        }
-        if (unit.valueCount() > 10) {
-            newData.enableStationSW = (unit.value(10) != 0);
-        }
-
-        newData.isConnected = true;
-        updatePanelData(newData);
-    } else {
-        logError(QString("Digital inputs response error: %1").arg(reply->errorString()));
-
-        // Mark as disconnected on error
-        Plc21PanelData newData = m_currentPanelData;
-        newData.isConnected = false;
-        updatePanelData(newData);
-    }
-
-    //reply->deleteLater();
-}
-
-// Handles the response for analog input read requests
-void Plc21Device::onAnalogInputsReadReady(QModbusReply *reply)
-{
-    if (!reply)
-        return;
-
-    stopTimeoutTimer(); // Stop timeout timer from base class
-
-    QMutexLocker locker(&m_mutex);
-    if (reply->error() == QModbusDevice::NoError) {
-        const QModbusDataUnit unit = reply->result();
-        QVector<uint16_t> rawAnalog;
-        for (int i = 0; i < unit.valueCount(); ++i)
-            rawAnalog.append(unit.value(i));
-        m_analogInputs = rawAnalog;
-
-        Plc21PanelData newData = m_currentPanelData;
-        // Update individual analog input fields based on their respective indices
-        if (unit.valueCount() > 0) {
-            newData.fireMode = unit.value(0);
-        }
-        if (unit.valueCount() > 1) {
-            newData.speedSW = unit.value(1);
-        }
-        if (unit.valueCount() > 2) {
-            newData.panelTemperature = unit.value(2);
-        }
-
-        newData.isConnected = true;
-        updatePanelData(newData);
-    } else {
-        logError(QString("Analog inputs response error: %1").arg(reply->errorString()));
-
-        // Mark as disconnected on error
-        Plc21PanelData newData = m_currentPanelData;
-        newData.isConnected = false;
-        updatePanelData(newData);
-    }
-
-    reply->deleteLater();
-}
-
-// Writes the cached digital output values to the PLC
-void Plc21Device::writeData()
-{
-    if (!isConnected())
-        return;
-
-    QMutexLocker locker(&m_mutex);
-    QVector<bool> coilValues;
-    // Ensure we don't write more coils than defined by DIGITAL_OUTPUTS_COUNT
-    for (int i = 0; i < m_digitalOutputs.size() && i < DIGITAL_OUTPUTS_COUNT; ++i) {
-        coilValues.append(m_digitalOutputs.at(i));
-    }
-
-    QModbusDataUnit writeUnit(QModbusDataUnit::Coils,
-                              DIGITAL_OUTPUTS_START_ADDRESS,
-                              coilValues.size());
-    for (int i = 0; i < coilValues.size(); ++i) {
-        writeUnit.setValue(i, coilValues.at(i));
-    }
-
-    if (auto *reply = sendWriteRequest(writeUnit)) {
-        //connect(reply, &QModbusReply::finished,  this, &Plc21Device::onWriteReady);
-        connectReplyFinished(reply, [this](QModbusReply* r){ onWriteReady(r); });
-    }
-}
-
-// Handles the response for write requests
-void Plc21Device::onWriteReady(QModbusReply *reply)
-{
-    if (!reply)
-        return;
- 
 
     if (reply->error() != QModbusDevice::NoError) {
-        logError(QString("Write response error: %1").arg(reply->errorString()));
-    } else {
-        logMessage("Write to PLC completed successfully.");
+        qWarning() << m_identifier << "Modbus error:" << reply->errorString();
+        auto newData = std::make_shared<Plc21PanelData>(*data());
+        newData->isConnected = false;
+        updateData(newData);
+        emit panelDataChanged(*newData);
+        reply->deleteLater();
+        return;
     }
 
+    // Parse the reply into messages
+    auto messages = m_parser->parse(reply);
     reply->deleteLater();
-}
 
-// Returns the current digital input values
-QVector<bool> Plc21Device::digitalInputs() const
-{
-    QMutexLocker locker(&m_mutex);
-    return m_digitalInputs;
-}
-
-// Returns the current analog input values
-QVector<uint16_t> Plc21Device::analogInputs() const
-{
-    QMutexLocker locker(&m_mutex);
-    return m_analogInputs;
-}
-
-// Sets the digital output values and triggers a write operation
-void Plc21Device::setDigitalOutputs(const QVector<bool> &outputs)
-{
-    {
-        QMutexLocker locker(&m_mutex);
-        m_digitalOutputs = outputs;
+    // Process each message
+    for (const auto& msg : messages) {
+        if (msg) {
+            processMessage(*msg);
+        }
     }
-    writeData(); // Trigger write immediately
 }
 
-// Updates the internal panel data and emits a signal if data has changed
-void Plc21Device::updatePanelData(const Plc21PanelData &newData)
-{
-    if (newData != m_currentPanelData) {
-        m_currentPanelData = newData;
-        emit panelDataChanged(m_currentPanelData);
+void Plc21Device::processMessage(const Message& message) {
+    if (message.typeId() == Message::Type::Plc21DataType) {
+        auto const* dataMsg = static_cast<const Plc21DataMessage*>(&message);
+        mergePartialData(dataMsg->data());
     }
+}
+
+void Plc21Device::mergePartialData(const Plc21PanelData& partialData) {
+    auto currentData = data();
+    auto newData = std::make_shared<Plc21PanelData>(*currentData);
+    newData->isConnected = true;
+
+    bool dataChanged = false;
+
+    // Merge digital inputs (always update if they're part of the partial data)
+    // Since the parser sets default values, we need a smarter merge strategy
+    // For now, we'll assume any non-default value in partialData should be merged
+
+    // Digital inputs - always merge (parser provides full set)
+    if (partialData.armGunSW != currentData->armGunSW ||
+        partialData.loadAmmunitionSW != currentData->loadAmmunitionSW ||
+        partialData.enableStationSW != currentData->enableStationSW ||
+        partialData.homePositionSW != currentData->homePositionSW ||
+        partialData.enableStabilizationSW != currentData->enableStabilizationSW ||
+        partialData.authorizeSw != currentData->authorizeSw ||
+        partialData.switchCameraSW != currentData->switchCameraSW ||
+        partialData.menuUpSW != currentData->menuUpSW ||
+        partialData.menuDownSW != currentData->menuDownSW ||
+        partialData.menuValSw != currentData->menuValSw) {
+
+        newData->armGunSW = partialData.armGunSW;
+        newData->loadAmmunitionSW = partialData.loadAmmunitionSW;
+        newData->enableStationSW = partialData.enableStationSW;
+        newData->homePositionSW = partialData.homePositionSW;
+        newData->enableStabilizationSW = partialData.enableStabilizationSW;
+        newData->authorizeSw = partialData.authorizeSw;
+        newData->switchCameraSW = partialData.switchCameraSW;
+        newData->menuUpSW = partialData.menuUpSW;
+        newData->menuDownSW = partialData.menuDownSW;
+        newData->menuValSw = partialData.menuValSw;
+        dataChanged = true;
+    }
+
+    // Analog inputs - merge if different
+    if (partialData.speedSW != currentData->speedSW ||
+        partialData.fireMode != currentData->fireMode ||
+        partialData.panelTemperature != currentData->panelTemperature) {
+
+        newData->speedSW = partialData.speedSW;
+        newData->fireMode = partialData.fireMode;
+        newData->panelTemperature = partialData.panelTemperature;
+        dataChanged = true;
+    }
+
+    if (dataChanged) {
+        updateData(newData);
+        emit panelDataChanged(*newData);
+    }
+}
+
+//================================================================================
+// PUBLIC API - OUTPUT CONTROL
+//================================================================================
+
+void Plc21Device::setDigitalOutputs(const QVector<bool>& outputs) {
+    m_digitalOutputs = outputs;
+    sendWriteRequest(Plc21Registers::DIGITAL_OUTPUTS_START_ADDR, outputs);
+}
+
+void Plc21Device::writeDigitalOutput(int index, bool value) {
+    if (index < 0 || index >= Plc21Registers::DIGITAL_OUTPUTS_COUNT) {
+        qWarning() << m_identifier << "Invalid output index:" << index;
+        return;
+    }
+
+    // Ensure vector has enough elements
+    while (m_digitalOutputs.size() <= index) {
+        m_digitalOutputs.append(false);
+    }
+
+    m_digitalOutputs[index] = value;
+    sendWriteRequest(Plc21Registers::DIGITAL_OUTPUTS_START_ADDR, m_digitalOutputs);
+}
+
+void Plc21Device::sendWriteRequest(int startAddress, const QVector<bool>& values) {
+    if (state() != DeviceState::Online || !m_transport) return;
+
+    QModbusDataUnit writeUnit(QModbusDataUnit::Coils, startAddress, values.size());
+    for (int i = 0; i < values.size(); ++i) {
+        writeUnit.setValue(i, values[i] ? 1 : 0);
+    }
+
+    QModbusReply* reply = nullptr;
+    QMetaObject::invokeMethod(m_transport, "sendWriteRequest",
+                              Qt::DirectConnection,
+                              Q_RETURN_ARG(QModbusReply*, reply),
+                              Q_ARG(QModbusDataUnit, writeUnit));
+
+    if (reply) {
+        connect(reply, &QModbusReply::finished, this, [this, reply]() {
+            bool success = (reply->error() == QModbusDevice::NoError);
+            if (!success) {
+                qWarning() << m_identifier << "Write error:" << reply->errorString();
+            }
+            emit digitalOutputWritten(success);
+            reply->deleteLater();
+        });
+    }
+}
+
+void Plc21Device::setPollInterval(int intervalMs) {
+    m_pollTimer->setInterval(intervalMs);
 }

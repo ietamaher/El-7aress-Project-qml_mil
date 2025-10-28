@@ -17,11 +17,14 @@ public:
         ServoActuatorAckType,
         ServoActuatorNackType,
         ServoActuatorCriticalFaultType,
+        // PLC devices (Modbus)
+        Plc21DataType,
+        Plc42DataType,
         // Other devices (keep existing from MIL-STD)
         RadarPlotType,
         LrfDataType,
         LrfInfoType
-        
+
     };
     
     virtual ~Message() = default;
