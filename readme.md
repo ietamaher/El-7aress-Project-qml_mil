@@ -86,13 +86,45 @@ markdown# El 7arress RCWS - Remote Controlled Weapon Station
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### MIL-STD Hardware Architecture (NEW)
+
+The device layer follows **MIL-STD** (Military Standard) architecture patterns with three-layer separation:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Device Layer (ImuDevice, Plc21Device, etc.)           │
+│  - Business logic & state management                    │
+│  - Thread-safe data access (TemplatedDevice<TData>)    │
+└─────────────────────────────────────────────────────────┘
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│  Protocol Layer (ImuProtocolParser, etc.)               │
+│  - Parse raw bytes into Messages                        │
+│  - Protocol-specific logic (CRC, checksums)             │
+└─────────────────────────────────────────────────────────┘
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│  Transport Layer (ModbusTransport, SerialPortTransport) │
+│  - Raw I/O operations & connection management           │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Benefits:**
+- ✅ **Separation of Concerns**: Device/Protocol/Transport are independent
+- ✅ **Testability**: Mock transports/parsers for unit tests
+- ✅ **Maintainability**: Protocol changes isolated in parsers
+- ✅ **Thread Safety**: Built-in via TemplatedDevice pattern
+
+**See**: `documentation/HARDWARE_ARCHITECTURE.md` for complete details
+
 ### Design Patterns Used
 
 - **MVVM (Model-View-ViewModel)**: Clean separation of UI and business logic
 - **Observer Pattern**: Qt signals/slots for event-driven communication
-- **Dependency Injection**: Controllers receive dependencies via setters
+- **Dependency Injection**: Devices receive Transport & Parser dependencies
 - **Repository Pattern**: Device classes encapsulate hardware access
 - **State Machine**: Tracking phases (Acquisition → Lock Pending → Active Lock → Firing)
+- **Template Pattern**: TemplatedDevice<TData> for thread-safe data access
 
 ---
 

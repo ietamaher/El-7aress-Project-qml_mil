@@ -1,20 +1,19 @@
 #pragma once
 
-#include <QObject>
 #include <SDL2/SDL.h>
 #include "../interfaces/ProtocolParser.h"
 #include "../data/DataTypes.h"
 
 /**
  * @brief Protocol parser for SDL2 joystick events
- * 
+ *
  * This parser interprets SDL joystick events and maintains a JoystickData
  * structure representing the current state of all joystick inputs.
- * 
+ *
  * Note: SDL2 already handles the low-level USB HID protocol, so this
  * parser's job is to normalize and aggregate SDL events into our data model.
  */
-class JoystickProtocolParser : public QObject, public ProtocolParser {
+class JoystickProtocolParser : public ProtocolParser {
     Q_OBJECT
 public:
     explicit JoystickProtocolParser(QObject* parent = nullptr);
