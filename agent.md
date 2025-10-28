@@ -280,3 +280,119 @@ The project was reorganized to follow Qt/QML best practices, improving maintaina
 *   **Other C++ Files:** All `#include` statements were updated to use relative paths (e.g., `../services/servicemanager.h` from within a controller).
 *   **`qml/views/main.qml`:**
     *   Import statements were added for the `components` and `views` directories to make dependencies explicit: `import "qrc:/qml/components"` and `import "qrc:/qml/views"`.
+
+---
+
+## MIL-STD Hardware Architecture Refactoring (January 2025)
+
+### Overview
+
+All hardware devices have been refactored to follow **MIL-STD** (Military Standard) architecture patterns, implementing a three-layer design for separation of concerns.
+
+### Architecture Layers
+
+1. **Device Layer** - Business logic and state management
+   - Inherits from `TemplatedDevice<TData>` for thread-safe data access
+   - Manages device state and command sequencing
+   - Emits signals for UI/controller updates
+
+2. **Protocol Layer** - Protocol-specific parsing and encoding
+   - Implements `ProtocolParser` interface
+   - Parses raw bytes into typed `Message` objects
+   - Handles checksums, CRC, framing, etc.
+
+3. **Transport Layer** - Physical communication
+   - Implements `Transport` interface
+   - Manages connection lifecycle
+   - Provides raw I/O operations
+
+### Refactored Devices
+
+| Device | Status | Transport | Protocol |
+|--------|--------|-----------|----------|
+| IMU (SST810) | ✅ Complete | ModbusTransport | Modbus RTU (32-bit floats) |
+| PLC21 | ✅ Complete | ModbusTransport | Modbus RTU |
+| PLC42 | ✅ Complete | ModbusTransport | Modbus RTU |
+| Day Camera (Sony) | ✅ Complete | SerialPortTransport | Pelco-D |
+| Night Camera (FLIR) | ✅ Complete | SerialPortTransport | TAU2 (CRC-16) |
+| Joystick (HOTAS) | ✅ Complete | N/A (SDL2) | SDL Events |
+| Servo Az/El | ✅ Complete | ModbusTransport | Modbus RTU |
+| Servo Actuator | ✅ Complete | SerialPortTransport | ASCII Commands |
+| LRF | ✅ Complete | SerialPortTransport | Binary Protocol |
+| Radar | ✅ Complete | SerialPortTransport | NMEA 0183 |
+
+### Key Files Added/Modified
+
+**New Files:**
+- `src/hardware/communication/modbustransport.h/.cpp`
+- `src/hardware/communication/serialporttransport.h/.cpp`
+- `src/hardware/interfaces/ProtocolParser.h`
+- `src/hardware/interfaces/Transport.h`
+- `src/hardware/interfaces/Message.h`
+- `src/hardware/devices/TemplatedDevice.h`
+- `src/hardware/data/DataTypes.h` (consolidated data structures)
+- `src/hardware/protocols/*ProtocolParser.h/.cpp` (one per device)
+- `src/hardware/messages/*Message.h` (one per device)
+
+**Modified Files:**
+- All device files refactored: `*device.h/.cpp`
+- `src/controllers/systemcontroller.h/.cpp` - Dependency injection setup
+- `src/models/domain/systemstatemodel.cpp` - Updated for new data types
+
+### Design Benefits
+
+1. **Testability**: Transport and parsers can be mocked for unit testing
+2. **Maintainability**: Protocol changes isolated in parser classes
+3. **Consistency**: All devices follow the same pattern
+4. **Thread Safety**: TemplatedDevice provides automatic thread-safe access
+5. **Flexibility**: Easy to swap transports (e.g., test vs production)
+
+### Example: IMU Device
+
+```cpp
+// 1. Create transport and parser
+m_imuTransport = new ModbusTransport(this);
+m_imuParser = new ImuProtocolParser(this);
+
+// 2. Create device
+m_imuDevice = new ImuDevice("imu", this);
+
+// 3. Inject dependencies
+m_imuDevice->setDependencies(m_imuTransport, m_imuParser);
+
+// 4. Configure transport
+QJsonObject config;
+config["port"] = "/dev/ttyUSB0";
+config["baudRate"] = 115200;
+config["slaveId"] = 1;
+m_imuTransport->open(config);
+
+// 5. Initialize device
+m_imuDevice->initialize();
+```
+
+### Documentation
+
+See `documentation/HARDWARE_ARCHITECTURE.md` for complete implementation guide, including:
+- Step-by-step device implementation
+- Protocol parser examples
+- Best practices
+- Testing strategies
+- Integration guide
+
+### Migration Notes
+
+**Breaking Changes:**
+- Device constructors now require identifier parameter
+- Old constructor parameters (port, baudRate, etc.) moved to Transport configuration
+- Devices no longer have `connectDevice()` or `openSerialPort()` methods
+- All devices use `initialize()` method after dependency injection
+
+**Backward Compatibility:**
+- Public device APIs remain unchanged
+- Signals preserved for existing UI/controller code
+- SystemStateModel integration unchanged
+
+---
+
+*Last Updated: January 2025*
