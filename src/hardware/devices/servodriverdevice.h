@@ -87,18 +87,25 @@ private slots:
     void temperatureTimerTimeout();
     void onModbusReplyReady(QModbusReply* reply);
     void processMessage(const Message& message);
+    void onTransportDisconnected();
+    void onCommunicationWatchdogTimeout();
 
 private:
     void sendReadRequest(int startAddress, int count);
     void sendWriteRequest(int startAddress, const QVector<quint16>& values);
+    void resetCommunicationWatchdog();
+    void setConnectionState(bool connected);
 
     QString m_identifier;
     Transport* m_transport = nullptr;
     ServoDriverProtocolParser* m_parser = nullptr;
-    
+
     QTimer* m_pollTimer;
     QTimer* m_temperatureTimer;
+    QTimer* m_communicationWatchdog;
     bool m_temperatureEnabled = true;
+
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };
 
 #endif // SERVODRIVERDEVICE_H
