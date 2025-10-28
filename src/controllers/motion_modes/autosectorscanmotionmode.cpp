@@ -207,5 +207,5 @@ void AutoSectorScanMotionMode::update(GimbalController* controller) {
     // If you need a hard safety limit, you can re-apply it, but the logic above should suffice.
 
     // Pass the final desired world velocity to the base class.
-    sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity);
+    sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity, true);
 }

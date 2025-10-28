@@ -421,6 +421,7 @@ struct SystemStateData {
     bool isVehicleStationary = false;   ///< Flag indicating if the vehicle is stationary
     double previousAccelMagnitude = 0.0; ///< Previous accelerometer magnitude for delta calculation
     QDateTime stationaryStartTime;      ///< Timestamp when stationary conditions began
+    
     // =================================
     // LASER RANGE FINDER (LRF)
     // =================================
@@ -606,12 +607,18 @@ struct SystemStateData {
      * @brief Equality comparison operator for complete system state
      * @param other The other SystemStateData to compare with
      * @return True if all system state parameters are identical
+     * 
+     * NOTE: This operator now includes ALL member variables for complete state comparison
      */
     bool operator==(const SystemStateData& other) const {
-        return opMode == other.opMode && 
+        return 
+               // Operational State & Modes
+               opMode == other.opMode && 
                motionMode == other.motionMode && 
                previousOpMode == other.previousOpMode &&
                previousMotionMode == other.previousMotionMode &&
+               
+               // Display & UI Configuration
                reticleType == other.reticleType &&
                osdColorStyle == other.osdColorStyle &&
                colorStyle == other.colorStyle &&
@@ -619,6 +626,8 @@ struct SystemStateData {
                currentImageHeightPx == other.currentImageHeightPx &&
                qFuzzyCompare(reticleAimpointImageX_px, other.reticleAimpointImageX_px) &&
                qFuzzyCompare(reticleAimpointImageY_px, other.reticleAimpointImageY_px) &&
+               
+               // Zone Management
                areaZones == other.areaZones &&
                sectorScanZones == other.sectorScanZones &&
                targetReferencePoints == other.targetReferencePoints &&
@@ -628,39 +637,100 @@ struct SystemStateData {
                currentTRPScanName == other.currentTRPScanName &&
                isReticleInNoFireZone == other.isReticleInNoFireZone &&
                isReticleInNoTraverseZone == other.isReticleInNoTraverseZone &&
+               
+               // Camera Systems - Day Camera
                qFuzzyCompare(dayZoomPosition, other.dayZoomPosition) &&
                qFuzzyCompare(dayCurrentHFOV, other.dayCurrentHFOV) &&
                dayCameraConnected == other.dayCameraConnected &&
                dayCameraError == other.dayCameraError &&
                dayCameraStatus == other.dayCameraStatus &&
+               dayAutofocusEnabled == other.dayAutofocusEnabled &&
+               dayFocusPosition == other.dayFocusPosition &&
+               
+               // Camera Systems - Night Camera
                qFuzzyCompare(nightZoomPosition, other.nightZoomPosition) &&
                qFuzzyCompare(nightCurrentHFOV, other.nightCurrentHFOV) &&
                nightCameraConnected == other.nightCameraConnected &&
                nightCameraError == other.nightCameraError &&
                nightCameraStatus == other.nightCameraStatus &&
+               nightDigitalZoomLevel == other.nightDigitalZoomLevel &&
+               nightFfcInProgress == other.nightFfcInProgress &&
+               nightVideoMode == other.nightVideoMode &&
+               
+               // Camera Control
                activeCameraIsDay == other.activeCameraIsDay &&
+               
+               // Gimbal & Positioning System
                qFuzzyCompare(gimbalAz, other.gimbalAz) &&
                qFuzzyCompare(gimbalEl, other.gimbalEl) &&
+               
+               // Azimuth Servo
+               azServoConnected == other.azServoConnected &&
                qFuzzyCompare(azMotorTemp, other.azMotorTemp) &&
                qFuzzyCompare(azDriverTemp, other.azDriverTemp) &&
+               qFuzzyCompare(azRpm, other.azRpm) &&
+               qFuzzyCompare(azTorque, other.azTorque) &&
+               azFault == other.azFault &&
+               
+               // Elevation Servo
+               elServoConnected == other.elServoConnected &&
                qFuzzyCompare(elMotorTemp, other.elMotorTemp) &&
                qFuzzyCompare(elDriverTemp, other.elDriverTemp) &&
+               qFuzzyCompare(elRpm, other.elRpm) &&
+               qFuzzyCompare(elTorque, other.elTorque) &&
+               elFault == other.elFault &&
+               
+               // Reticle Position
                qFuzzyCompare(reticleAz, other.reticleAz) &&
                qFuzzyCompare(reticleEl, other.reticleEl) &&
+               
+               // Servo Actuator
+               actuatorConnected == other.actuatorConnected &&
                qFuzzyCompare(actuatorPosition, other.actuatorPosition) &&
+               qFuzzyCompare(actuatorVelocity, other.actuatorVelocity) &&
+               qFuzzyCompare(actuatorTemp, other.actuatorTemp) &&
+               qFuzzyCompare(actuatorBusVoltage, other.actuatorBusVoltage) &&
+               qFuzzyCompare(actuatorTorque, other.actuatorTorque) &&
+               actuatorMotorOff == other.actuatorMotorOff &&
+               actuatorFault == other.actuatorFault &&
+               
+               // Orientation & Stabilization
+               imuConnected == other.imuConnected &&
                qFuzzyCompare(imuRollDeg, other.imuRollDeg) &&
                qFuzzyCompare(imuPitchDeg, other.imuPitchDeg) &&
                qFuzzyCompare(imuYawDeg, other.imuYawDeg) &&
-                qFuzzyCompare(temperature, other.temperature) &&
-                AccelX == other.AccelX &&
-                AccelY == other.AccelY &&
-                AccelZ == other.AccelZ &&
-                GyroX == other.GyroX &&
-                GyroY == other.GyroY &&
-                GyroZ == other.GyroZ &&
-               enableStabilization == other.enableStabilization &&
+               qFuzzyCompare(imuTemp, other.imuTemp) &&
+               qFuzzyCompare(GyroX, other.GyroX) &&
+               qFuzzyCompare(GyroY, other.GyroY) &&
+               qFuzzyCompare(GyroZ, other.GyroZ) &&
+               qFuzzyCompare(AccelX, other.AccelX) &&
+               qFuzzyCompare(AccelY, other.AccelY) &&
+               qFuzzyCompare(AccelZ, other.AccelZ) &&
+               isStabilizationActive == other.isStabilizationActive &&
+               qFuzzyCompare(temperature, other.temperature) &&
+               
+               // Stationary Detection
+               isVehicleStationary == other.isVehicleStationary &&
+               qFuzzyCompare(previousAccelMagnitude, other.previousAccelMagnitude) &&
+               stationaryStartTime == other.stationaryStartTime &&
+               
+               // Laser Range Finder (LRF)
+               lrfConnected == other.lrfConnected &&
                qFuzzyCompare(lrfDistance, other.lrfDistance) &&
+               qFuzzyCompare(lrfTemp, other.lrfTemp) &&
+               lrfLaserCount == other.lrfLaserCount &&
                lrfSystemStatus == other.lrfSystemStatus &&
+               lrfFault == other.lrfFault &&
+               lrfNoEcho == other.lrfNoEcho &&
+               lrfLaserNotOut == other.lrfLaserNotOut &&
+               lrfOverTemp == other.lrfOverTemp &&
+               isOverTemperature == other.isOverTemperature &&
+               
+               // Radar Data
+               radarPlots == other.radarPlots &&
+               selectedRadarTrackId == other.selectedRadarTrackId &&
+               
+               // Joystick & Manual Controls
                deadManSwitchActive == other.deadManSwitchActive &&
                qFuzzyCompare(joystickAzValue, other.joystickAzValue) &&
                qFuzzyCompare(joystickElValue, other.joystickElValue) &&
@@ -669,15 +739,22 @@ struct SystemStateData {
                menuUp == other.menuUp &&
                menuDown == other.menuDown &&
                menuVal == other.menuVal &&
+               joystickHatDirection == other.joystickHatDirection &&
+               
+               // Weapon System Control (PLC21)
+               plc21Connected == other.plc21Connected &&
                stationEnabled == other.stationEnabled &&
                gotoHomePosition == other.gotoHomePosition &&
                gunArmed == other.gunArmed &&
                ammoLoaded == other.ammoLoaded &&
-
                authorized == other.authorized &&
                detectionEnabled == other.detectionEnabled &&
                fireMode == other.fireMode &&
                qFuzzyCompare(gimbalSpeed, other.gimbalSpeed) &&
+               enableStabilization == other.enableStabilization &&
+               
+               // Gimbal Station Hardware (PLC42)
+               plc42Connected == other.plc42Connected &&
                upperLimitSensorActive == other.upperLimitSensorActive &&
                lowerLimitSensorActive == other.lowerLimitSensorActive &&
                emergencyStopActive == other.emergencyStopActive &&
@@ -696,6 +773,8 @@ struct SystemStateData {
                elevationDirection == other.elevationDirection &&
                solenoidState == other.solenoidState &&
                resetAlarm == other.resetAlarm &&
+               
+               // Tracking System
                upTrack == other.upTrack &&
                downTrack == other.downTrack &&
                valTrack == other.valTrack &&
@@ -704,13 +783,31 @@ struct SystemStateData {
                trackingActive == other.trackingActive &&
                qFuzzyCompare(targetAz, other.targetAz) &&
                qFuzzyCompare(targetEl, other.targetEl) &&
+               qFuzzyCompare(trackedTargetVelocityX_px_s, other.trackedTargetVelocityX_px_s) &&
+               qFuzzyCompare(trackedTargetVelocityY_px_s, other.trackedTargetVelocityY_px_s) &&
+               qFuzzyCompare(currentCameraHfovDegrees, other.currentCameraHfovDegrees) &&
+               trackerHasValidTarget == other.trackerHasValidTarget &&
+               qFuzzyCompare(trackedTargetCenterX_px, other.trackedTargetCenterX_px) &&
+               qFuzzyCompare(trackedTargetCenterY_px, other.trackedTargetCenterY_px) &&
+               qFuzzyCompare(trackedTargetWidth_px, other.trackedTargetWidth_px) &&
+               qFuzzyCompare(trackedTargetHeight_px, other.trackedTargetHeight_px) &&
+               trackedTargetState == other.trackedTargetState &&
+               currentTrackingPhase == other.currentTrackingPhase &&
+               qFuzzyCompare(acquisitionBoxX_px, other.acquisitionBoxX_px) &&
+               qFuzzyCompare(acquisitionBoxY_px, other.acquisitionBoxY_px) &&
+               qFuzzyCompare(acquisitionBoxW_px, other.acquisitionBoxW_px) &&
+               qFuzzyCompare(acquisitionBoxH_px, other.acquisitionBoxH_px) &&
+               
+               // Ballistics & Fire Control
                zeroingModeActive == other.zeroingModeActive &&
                qFuzzyCompare(zeroingAzimuthOffset, other.zeroingAzimuthOffset) &&
                qFuzzyCompare(zeroingElevationOffset, other.zeroingElevationOffset) &&
                zeroingAppliedToBallistics == other.zeroingAppliedToBallistics &&
                windageModeActive == other.windageModeActive &&
                qFuzzyCompare(windageSpeedKnots, other.windageSpeedKnots) &&
+               qFuzzyCompare(windageDirectionDegrees, other.windageDirectionDegrees) &&
                windageAppliedToBallistics == other.windageAppliedToBallistics &&
+               windageDirectionCaptured == other.windageDirectionCaptured &&
                leadAngleCompensationActive == other.leadAngleCompensationActive &&
                currentLeadAngleStatus == other.currentLeadAngleStatus &&
                qFuzzyCompare(leadAngleOffsetAz, other.leadAngleOffsetAz) &&
@@ -719,14 +816,15 @@ struct SystemStateData {
                qFuzzyCompare(currentTargetAngularRateAz, other.currentTargetAngularRateAz) &&
                qFuzzyCompare(currentTargetAngularRateEl, other.currentTargetAngularRateEl) &&
                qFuzzyCompare(muzzleVelocityMPS, other.muzzleVelocityMPS) &&
+               
+               // Status & Information Display
                weaponSystemStatus == other.weaponSystemStatus &&
                targetInformation == other.targetInformation &&
                gpsCoordinates == other.gpsCoordinates &&
                sensorReadings == other.sensorReadings &&
                alertsWarnings == other.alertsWarnings &&
                leadStatusText == other.leadStatusText &&
-               zeroingStatusText == other.zeroingStatusText&&
-               (radarPlots == other.radarPlots);
+               zeroingStatusText == other.zeroingStatusText;
     }
     
     bool operator!=(const SystemStateData& other) const {

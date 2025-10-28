@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QHttpServer>
 
 // Forward declarations - Hardware
 class DayCameraControlDevice;
@@ -59,6 +60,7 @@ class SystemStatusViewModel;
 class AboutController;
 class AboutViewModel;
 class ApplicationController;
+class SystemDataLogger;
 
 class QQmlApplicationEngine;
 
@@ -153,6 +155,12 @@ private:
     SystemStatusController* m_systemStatusController = nullptr;
     AboutController* m_aboutController = nullptr;
     ApplicationController* m_appController = nullptr;
+
+    // === API SERVER ===
+    QHttpServer* m_apiServer;
+
+    // Data Logger
+    SystemDataLogger* m_dataLogger;
  };
 
 #endif // SYSTEMCONTROLLER_H

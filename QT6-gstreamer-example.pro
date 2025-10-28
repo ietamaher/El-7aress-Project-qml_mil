@@ -1,4 +1,4 @@
-QT += quick serialbus serialport dbus
+QT += quick serialbus serialport dbus sql httpserver
 
 #LIBS += -L/usr/lib/x86_64-linux-gnu/gstreamer-1.0 -lgstxvimagesink
 INCLUDEPATH += "/usr/include/gstreamer-1.0"
@@ -67,11 +67,13 @@ SOURCES += \
     src/hardware/devices/radardevice.cpp \
     src/hardware/devices/servoactuatordevice.cpp \
     src/hardware/devices/servodriverdevice.cpp \
+    src/logger/systemdatalogger.cpp \
     src/main.cpp \
     src/models/aboutviewmodel.cpp \
     src/models/areazoneparameterviewmodel.cpp \
     src/models/domain/joystickdatamodel.cpp \
     src/models/domain/systemstatemodel.cpp \
+    src/models/historyviewmodel.cpp \
     src/models/menuviewmodel.cpp \
     src/models/osdviewmodel.cpp \
     src/models/sectorscanparameterviewmodel.cpp \
@@ -147,6 +149,7 @@ HEADERS += \
     src/hardware/devices/servoactuatordevice.h \
     src/hardware/devices/servodriverdevice.h \
     src/hardware/devices/vpi_helpers.h \
+    src/logger/systemdatalogger.h \
     src/models/aboutviewmodel.h \
     src/models/areazoneparameterviewmodel.h \
     src/models/domain/daycameradatamodel.h \
@@ -162,6 +165,7 @@ HEADERS += \
     src/models/domain/servodriverdatamodel.h \
     src/models/domain/systemstatedata.h \
     src/models/domain/systemstatemodel.h \
+    src/models/historyviewmodel.h \
     src/models/menuviewmodel.h \
     src/models/osdviewmodel.h \
     src/models/sectorscanparameterviewmodel.h \

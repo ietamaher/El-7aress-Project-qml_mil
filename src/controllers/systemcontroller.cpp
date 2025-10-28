@@ -54,6 +54,7 @@
 #include "models/aboutviewmodel.h"
 #include "video/videoimageprovider.h"
 
+#include "logger/systemdatalogger.h"
 #include "deviceconfiguration.h"
 
 #include <QQmlContext>
@@ -113,7 +114,24 @@ void SystemController::initializeHardware()
     m_systemStateModel = new SystemStateModel(this);
     qInfo() << "  ✓ SystemStateModel created";
 
-    // 2. Create Hardware Devices using configuration
+    // 2. Create Data Logger with custom configuration
+    SystemDataLogger::LoggerConfig loggerConfig;
+    loggerConfig.gimbalMotionBufferSize = 60000;  // 1 minute at 60 Hz
+    loggerConfig.imuDataBufferSize = 120000;      // 20 minutes at 100 Hz
+    loggerConfig.trackingDataBufferSize = 36000;  // 20 minutes at 30 Hz
+    loggerConfig.enableDatabasePersistence = true; // Enable long-term storage
+    loggerConfig.databasePath = "./data/rcws_history.db";
+
+    m_dataLogger = new SystemDataLogger(loggerConfig, this);
+    qInfo() << "  ✓ SystemDataLogger created";
+
+    // 3. Connect SystemStateModel to DataLogger
+    connect(m_systemStateModel, &SystemStateModel::dataChanged,
+            m_dataLogger, &SystemDataLogger::onSystemStateChanged);
+
+    qInfo() << "  ✓ DataLogger connected to SystemStateModel";
+
+    // 3. Create Hardware Devices using configuration
     m_dayCamControl = new DayCameraControlDevice(this);
     m_gyroDevice = new ImuDevice(imuConf.port, imuConf.baudRate, imuConf.slaveId, this);
     m_joystickDevice = new JoystickDevice(this);
@@ -164,6 +182,31 @@ void SystemController::initializeHardware()
     m_joystickController = new JoystickController(m_joystickModel, m_systemStateModel, m_gimbalController, m_cameraController, m_weaponController, this);
 
     qInfo() << "  ✓ Hardware controllers created";
+
+    m_apiServer = new QHttpServer(this);
+
+// API endpoint: Get gimbal history
+m_apiServer->route("/api/gimbal-history", [this](const QHttpServerRequest &request) {
+    QDateTime endTime = QDateTime::currentDateTime();
+    QDateTime startTime = endTime.addSecs(-60);
+    
+    auto history = m_dataLogger->getGimbalMotionHistory(startTime, endTime);
+    
+    QJsonArray jsonArray;
+    for (const auto& point : history) {
+        QJsonObject obj;
+        obj["timestamp"] = point.timestamp.toMSecsSinceEpoch();
+        obj["az"] = point.gimbalAz;
+        obj["el"] = point.gimbalEl;
+        jsonArray.append(obj);
+    }
+    
+    return QHttpServerResponse(jsonArray);
+});
+
+m_apiServer->listen(QHostAddress::Any, 8080);
+qInfo() << "API Server listening on port 8080";
+
     qInfo() << "=== PHASE 1 COMPLETE ===\n";
 }
 
@@ -188,6 +231,7 @@ void SystemController::initializeQmlSystem(QQmlApplicationEngine* engine)
     connectVideoToProvider();
 
     // 3. Create ViewModels
+
     m_osdViewModel = new OsdViewModel(this);
 
     // Separate MenuViewModels for each menu

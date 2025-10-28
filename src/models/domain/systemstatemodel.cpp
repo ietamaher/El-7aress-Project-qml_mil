@@ -1,3 +1,38 @@
+/**
+ * @file SystemStateModel.cpp
+ * @brief Implementation of SystemStateModel class
+ * 
+ * This file contains ALL method implementations for the SystemStateModel class,
+ * organized to match the EXACT order in SystemStateModel.h for easy navigation.
+ * 
+ * ORGANIZATION (matches header file 1:1):
+ * 1. Constructor
+ * 2. Core System Data Management
+ * 3. User Interface Controls
+ * 4. Weapon Control and Tracking
+ * 5. Fire Control and Safety Zones
+ * 6. Lead Angle Compensation
+ * 7. Area Zone Management
+ * 8. Auto Sector Scan Management
+ * 9. Target Reference Point (TRP) Management
+ * 10. Configuration File Management
+ * 11. Weapon Zeroing Procedures
+ * 12. Windage Compensation
+ * 13. Tracking System Control
+ * 14. State Transition Methods
+ * 15. Radar Interface
+ * 16. Hardware Interface Slots
+ * 17. Sensor Data Slots
+ * 18. Joystick Control Slots
+ * 19. System Mode Control Slots
+ * 20. Utility Methods
+ * 21. Private Helper Methods
+ * 
+ * @author MB
+ * @date 19 Juin 2025
+ * @version 1.1 - Fully reorganized to match header structure
+ */
+
 #include "systemstatemodel.h"
 #include <QDebug>
 #include <QFile>
@@ -6,7 +41,6 @@
 #include <QJsonArray>
 #include <algorithm> // For std::find_if, std::sort (if needed)
 #include <set>       // For getting unique page numbers
-
 
 SystemStateModel::SystemStateModel(QObject *parent)
     : QObject(parent),
@@ -65,17 +99,17 @@ void SystemStateModel::updateData(const SystemStateData &newState) {
     }
 }
 
-// --- UI Related Setters Implementation (Keep existing logic, ensure signals are emitted) ---
+// --- UI Related Setters Implementation  ---
 void SystemStateModel::setColorStyle(const QColor &style)
 {
-    qDebug() << "SystemStateModel::setColorStyle() called with:" << style;  // ✅ ADD
+    qDebug() << "SystemStateModel::setColorStyle() called with:" << style;   
 
     SystemStateData newData = m_currentStateData;
     newData.colorStyle = style;
     newData.osdColorStyle = ColorUtils::fromQColor(style);
 
-    emit colorStyleChanged(style);  // ✅ Is this being emitted?
-    qDebug() << "SystemStateModel: colorStyleChanged signal emitted";  // ✅ ADD
+    emit colorStyleChanged(style);   
+    qDebug() << "SystemStateModel: colorStyleChanged signal emitted";   
 
     updateData(newData);
 }
@@ -471,10 +505,10 @@ void SystemStateModel::onServoAzDataChanged(const ServoData &azData) {
         m_currentStateData.azMotorTemp = azData.motorTemp;
         m_currentStateData.azDriverTemp = azData.driverTemp;
         m_currentStateData.azServoConnected = azData.isConnected;
-        m_currentStateData.azRpm = azData.rpm;           // ✅ ADDED
-        m_currentStateData.azTorque = azData.torque;     // ✅ ADDED
-        m_currentStateData.azFault = azData.fault;       // ✅ ADDED
-        // Potentially update other related fields from azData
+        m_currentStateData.azRpm = azData.rpm;           
+        m_currentStateData.azTorque = azData.torque;     
+        m_currentStateData.azFault = azData.fault;       
+ 
         emit dataChanged(m_currentStateData); // Emit general data change
         emit gimbalPositionChanged(m_currentStateData.gimbalAz, m_currentStateData.gimbalEl); // Emit specific gimbal change
     //}
@@ -487,10 +521,10 @@ void SystemStateModel::onServoElDataChanged(const ServoData &elData) {
         m_currentStateData.elMotorTemp = elData.motorTemp;
         m_currentStateData.elDriverTemp = elData.driverTemp;
         m_currentStateData.elServoConnected = elData.isConnected;
-        m_currentStateData.elRpm = elData.rpm;           // ✅ ADDED
-        m_currentStateData.elTorque = elData.torque;     // ✅ ADDED
-        m_currentStateData.elFault = elData.fault;       // ✅ ADDED
-        // Potentially update other related fields from elData
+        m_currentStateData.elRpm = elData.rpm;            
+        m_currentStateData.elTorque = elData.torque;      
+        m_currentStateData.elFault = elData.fault;        
+ 
         emit dataChanged(m_currentStateData); // Emit general data change
         emit gimbalPositionChanged(m_currentStateData.gimbalAz, m_currentStateData.gimbalEl); // Emit specific gimbal change
     //}
@@ -505,7 +539,7 @@ void SystemStateModel::onDayCameraDataChanged(const DayCameraData &dayData)
     newData.dayCameraConnected = dayData.isConnected;
     newData.dayCameraError = dayData.errorState;
     newData.dayCameraStatus = dayData.cameraStatus;
-    newData.dayAutofocusEnabled = dayData.autofocusEnabled;   // ✅ ADDED
+    newData.dayAutofocusEnabled = dayData.autofocusEnabled;    
     newData.dayFocusPosition = dayData.focusPosition;
     updateData(newData);
 
@@ -517,7 +551,7 @@ void SystemStateModel::setMotionMode(MotionMode newMode) {
         m_currentStateData.previousMotionMode = m_currentStateData.motionMode;
         if (m_currentStateData.motionMode == MotionMode::AutoSectorScan || m_currentStateData.motionMode == MotionMode::TRPScan) {
         // If exiting a scan mode
-            m_currentStateData.currentScanName = ""; // Clear it
+            m_currentStateData.currentScanName = "";  // Clear it
         }
         m_currentStateData.motionMode = newMode;
 
@@ -640,15 +674,15 @@ void SystemStateModel::onLensDataChanged(const LensData &lensData)
 void SystemStateModel::onLrfDataChanged(const LrfData &lrfData)
 {
     SystemStateData newData = m_currentStateData;  
-    newData.lrfConnected = lrfData.isConnected;             // ✅ ADDED
-    newData.lrfDistance = lrfData.lastDistance;             // ✅ Already correct
-    newData.lrfTemp = lrfData.temperature;                  // ✅ ADDED
-    newData.lrfLaserCount = lrfData.laserCount;             // ✅ ADDED
-    newData.lrfSystemStatus = lrfData.rawStatusByte;        // ✅ FIXED (was: isFault)
-    newData.lrfFault = lrfData.isFault;                     // ✅ ADDED
-    newData.lrfNoEcho = lrfData.noEcho;                     // ✅ ADDED
-    newData.lrfLaserNotOut = lrfData.laserNotOut;           // ✅ ADDED
-    newData.lrfOverTemp = lrfData.isOverTemperature;        // ✅ ADDED
+    newData.lrfConnected = lrfData.isConnected;              
+    newData.lrfDistance = lrfData.lastDistance;            
+    newData.lrfTemp = lrfData.temperature;                  
+    newData.lrfLaserCount = lrfData.laserCount;              
+    newData.lrfSystemStatus = lrfData.rawStatusByte;         
+    newData.lrfFault = lrfData.isFault;                      
+    newData.lrfNoEcho = lrfData.noEcho;                      
+    newData.lrfLaserNotOut = lrfData.laserNotOut;            
+    newData.lrfOverTemp = lrfData.isOverTemperature;       
     newData.isOverTemperature = lrfData.isOverTemperature;
     updateData(newData);
 }
@@ -742,13 +776,13 @@ void SystemStateModel::onServoActuatorDataChanged(const ServoActuatorData &actua
 {
     SystemStateData newData = m_currentStateData;
     newData.actuatorPosition = actuatorData.position_mm;
-    newData.actuatorConnected = actuatorData.isConnected;           // ✅ ADDED
-    newData.actuatorVelocity = actuatorData.velocity_mm_s;          // ✅ ADDED
-    newData.actuatorTemp = actuatorData.temperature_c;              // ✅ ADDED
-    newData.actuatorBusVoltage = actuatorData.busVoltage_v;         // ✅ ADDED
-    newData.actuatorTorque = actuatorData.torque_percent;           // ✅ ADDED
-    newData.actuatorMotorOff = actuatorData.status.isMotorOff;      // ✅ ADDED
-    newData.actuatorFault = actuatorData.status.isLatchingFaultActive; // ✅ ADDED
+    newData.actuatorConnected = actuatorData.isConnected;           
+    newData.actuatorVelocity = actuatorData.velocity_mm_s;           
+    newData.actuatorTemp = actuatorData.temperature_c;              
+    newData.actuatorBusVoltage = actuatorData.busVoltage_v;        
+    newData.actuatorTorque = actuatorData.torque_percent;            
+    newData.actuatorMotorOff = actuatorData.status.isMotorOff;      
+    newData.actuatorFault = actuatorData.status.isLatchingFaultActive;  
 
     updateData(newData);
 }

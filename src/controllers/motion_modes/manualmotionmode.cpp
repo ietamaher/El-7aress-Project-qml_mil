@@ -99,7 +99,8 @@ void ManualMotionMode::update(GimbalController* controller)
     double elVelocityDegS = m_currentElSpeedCmd_Hz / elStepsPerDegree;
 
     // 5. Send final command
-    sendStabilizedServoCommands(controller, azVelocityDegS, elVelocityDegS);
+    sendStabilizedServoCommands(controller, azVelocityDegS, elVelocityDegS, true);
+ 
 
 }
 

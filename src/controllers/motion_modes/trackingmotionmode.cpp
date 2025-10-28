@@ -142,8 +142,8 @@ void TrackingMotionMode::update(GimbalController* controller)
     m_smoothedElVel_dps = (VELOCITY_SMOOTHING_ALPHA * m_targetElVel_dps) + (1.0 - VELOCITY_SMOOTHING_ALPHA) * m_smoothedElVel_dps;
 
     // 3. Calculate Position Error
-    double errAz = m_smoothedTargetAz - data.gimbalAz; // Azimuth still uses encoder
-    double errEl = m_smoothedTargetEl - data.imuPitchDeg; // Elevation now uses IMU Pitch
+    double errAz = m_smoothedTargetAz - data.gimbalAz;  
+    double errEl = m_smoothedTargetEl - data.gimbalEl;  
     
     // Normalize azimuth error to [-180, 180] range
     while (errAz > 180.0) errAz -= 360.0;
@@ -153,7 +153,7 @@ void TrackingMotionMode::update(GimbalController* controller)
     bool useDerivativeOnMeasurement = true;
     // CRITICAL FIX: Use the measured dt_s, not the constant UPDATE_INTERVAL_S
     double pidAzVelocity = pidCompute(m_azPid, errAz, m_smoothedTargetAz, data.gimbalAz, useDerivativeOnMeasurement, dt_s);
-    double pidElVelocity = pidCompute(m_elPid, errEl, m_smoothedTargetEl, data.imuPitchDeg, useDerivativeOnMeasurement, dt_s); // Use imuPitchDeg for derivative measurement
+    double pidElVelocity = pidCompute(m_elPid, errEl, m_smoothedTargetEl, data.gimbalEl, useDerivativeOnMeasurement, dt_s); // Use imuPitchDeg for derivative measurement
 
     // 5. Add Feed-forward term (scaled down to prevent aggressive response)
     const double FEEDFORWARD_GAIN = 0.5; // Scale down the feed-forward contribution
@@ -186,6 +186,6 @@ void TrackingMotionMode::update(GimbalController* controller)
     }*/
 
     // 10. Send final commands
-    sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity);
+     sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity, false);
 }
 

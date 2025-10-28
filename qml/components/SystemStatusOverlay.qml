@@ -95,7 +95,7 @@ Rectangle {
                         width: parent.width
                         connected: viewModel ? viewModel.azConnected : false
                         hasError: viewModel ? viewModel.azFault : false
-                        accent: accentColor
+                        // accent: accentColor
 
                         Column {
                             anchors.fill: parent
@@ -127,7 +127,7 @@ Rectangle {
                         width: parent.width
                         connected: viewModel ? viewModel.elConnected : false
                         hasError: viewModel ? viewModel.elFault : false
-                        accent: accentColor
+                        // accent: accentColor
 
                         Column {
                             anchors.fill: parent
@@ -159,7 +159,7 @@ Rectangle {
                         width: parent.width
                         connected: viewModel ? viewModel.actuatorConnected : false
                         hasError: viewModel ? viewModel.actuatorFault : false
-                        accent: accentColor
+                        // accent: accentColor
 
                         Column {
                             anchors.fill: parent
@@ -200,7 +200,7 @@ Rectangle {
                         width: parent.width
                         connected: viewModel ? (viewModel.plc21Connected || viewModel.plc42Connected) : false
                         hasError: false
-                        accent: accentColor
+                        // accent: accentColor
 
                         Column {
                             anchors.fill: parent
@@ -208,12 +208,12 @@ Rectangle {
 
                             StatusRow {
                                 label: "PLC21:"
-                                value: viewModel ? viewModel.plc21StatusText : "N/A" // ✅ Use status text
+                                value: viewModel ? viewModel.plc21StatusText : "N/A" // Use status text
                                 valueColor: viewModel && viewModel.plc21Connected ? accentColor : "#FF6B6B"
                             }
                             StatusRow {
                                 label: "PLC42:"
-                                value: viewModel ? viewModel.plc42StatusText : "N/A" // ✅ Use status text
+                                value: viewModel ? viewModel.plc42StatusText : "N/A" // Use status text
                                 valueColor: viewModel && viewModel.plc42Connected ? accentColor : "#FF6B6B"
                             }
                             StatusRow {
@@ -234,7 +234,7 @@ Rectangle {
                         width: parent.width
                         connected: viewModel ? viewModel.imuConnected : false
                         hasError: false
-                        accent: accentColor
+                        // accent: accentColor
 
                         Column {
                             anchors.fill: parent
@@ -262,7 +262,7 @@ Rectangle {
                         width: parent.width
                         connected: viewModel ? viewModel.lrfConnected : false
                         hasError: viewModel ? viewModel.lrfFault : false
-                        accent: accentColor
+                        // accent: accentColor
 
                         Column {
                             anchors.fill: parent
@@ -304,7 +304,7 @@ Rectangle {
                         width: parent.width
                         connected: viewModel ? viewModel.dayCamConnected : false
                         hasError: viewModel ? viewModel.dayCamError : false
-                        accent: accentColor
+                        // accent: accentColor
                         isActive: viewModel ? viewModel.dayCamActive : false
 
                         Column {
@@ -341,7 +341,7 @@ Rectangle {
                         width: parent.width
                         connected: viewModel ? viewModel.nightCamConnected : false
                         hasError: viewModel ? viewModel.nightCamError : false
-                        accent: accentColor
+                        // accent: accentColor
                         isActive: viewModel ? viewModel.nightCamActive : false
 
                         Column {
@@ -350,7 +350,7 @@ Rectangle {
 
                             StatusRow { label: "FOV:"; value: viewModel ? viewModel.nightCamFovText : "N/A" }
                             StatusRow { label: "Zoom:"; value: viewModel ? viewModel.nightCamZoomText : "N/A" }
-                            StatusRow { label: "LUT:"; value: viewModel ? viewModel.nightCamVideoModeText : "N/A" } // ✅ NEW
+                            StatusRow { label: "LUT:"; value: viewModel ? viewModel.nightCamVideoModeText : "N/A" }
                             StatusRow {
                                 label: "FFC:"
                                 value: viewModel && viewModel.nightCamFfcInProgress ? "IN PROGRESS" : "IDLE"
@@ -484,11 +484,11 @@ Rectangle {
         property bool connected: false
         property bool hasError: false
         property bool isActive: false
-        property color accent: "#46E2A5"
+        property color accent: "#666666"
 
         height: 140
         color: Qt.rgba(accent.r, accent.g, accent.b, 0.05)
-        radius: 5
+        radius: 2
         border.color: hasError ? "#C81428" : Qt.rgba(accent.r, accent.g, accent.b, 0.3)
         border.width: 1
 
@@ -519,7 +519,7 @@ Rectangle {
                     anchors.rightMargin: 8
                     spacing: 6
 
-                    // ✅ ANIMATED Connection indicator
+                    //  ANIMATED Connection indicator
                     Rectangle {
                         id: connectionDot
                         width: 8
@@ -547,7 +547,7 @@ Rectangle {
                             }
                         }
 
-                        // ✅ Scale animation when connected
+                        // Scale animation when connected
                         SequentialAnimation on scale {
                             running: connected
                             loops: Animation.Infinite

@@ -168,7 +168,7 @@ void RadarSlewMotionMode::update(GimbalController* controller)
     }
 
     // Let the base class handle stabilization and sending the final command
-    sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity);
+    sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity, true);
 }
 
 

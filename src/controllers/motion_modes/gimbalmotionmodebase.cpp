@@ -63,42 +63,41 @@ void GimbalMotionModeBase::writeVelocityCommand(ServoDriverDevice* driverInterfa
     driverInterface->writeData(AzdReg::OpTrigger, triggerData);
 }
 
-// --- NEW: Gyro Bias Estimation --- 
 void GimbalMotionModeBase::updateGyroBias(const SystemStateData& systemState)
 {
-    // This function should be called from the main controller update loop
-    // before any motion mode update is called.
-
     // Static variables to maintain state across calls
-    static double sum = 0;
+    static double sumX = 0, sumY = 0, sumZ = 0;  // ← CHANGED: Added X and Y
     static int count = 0;
     static QDateTime lastResetTime = QDateTime::currentDateTime();
 
     // Only estimate bias if the vehicle is stationary
     if (systemState.isVehicleStationary) {
-        sum += systemState.GyroZ; // Accumulate raw GyroZ data
+        sumX += systemState.GyroX;   
+        sumY += systemState.GyroY;   
+        sumZ += systemState.GyroZ;
         count++;
 
-        // Average over a set number of samples (e.g., 50 samples at 20Hz = 2.5s)
-        // This 50-sample window is based on the 50ms update interval (50 * 0.05s = 2.5s)
         if (count >= 50) {
-            m_gyroBiasZ = sum / count; // Calculate the new bias
-            sum = 0; // Reset accumulator
-            count = 0; // Reset counter
-            lastResetTime = QDateTime::currentDateTime(); // Reset timer
-            qDebug() << "[Gimbal] New Gyro Z Bias calculated:" << m_gyroBiasZ;
+            m_gyroBiasX = sumX / count;   
+            m_gyroBiasY = sumY / count;   
+            m_gyroBiasZ = sumZ / count;
+            sumX = sumY = sumZ = 0;       
+            count = 0;
+            lastResetTime = QDateTime::currentDateTime();
+            qDebug() << "[Gimbal] New Gyro Bias - X:" << m_gyroBiasX 
+                     << "Y:" << m_gyroBiasY << "Z:" << m_gyroBiasZ;   
         }
     } else {
-        // If we start moving, reset the accumulator and counter
-        sum = 0;
+        sumX = sumY = sumZ = 0;   
         count = 0;
         lastResetTime = QDateTime::currentDateTime();
     }
 }
 
 void GimbalMotionModeBase::sendStabilizedServoCommands(GimbalController* controller,
-                                                       double desiredAzVelocity,
-                                                       double desiredElVelocity)
+                                 double desiredAzVelocity,
+                                 double desiredElVelocity,
+                                 bool enableStabilization)
 {
 
    /*if (!controller) {
@@ -110,6 +109,7 @@ void GimbalMotionModeBase::sendStabilizedServoCommands(GimbalController* control
         qWarning() << "sendStabilizedServoCommands: systemStateModel is null";
         return;
     }*/
+
     // --- Step 1: Get current system state ---
     SystemStateData systemState = controller->systemStateModel()->data();
 
@@ -117,7 +117,7 @@ void GimbalMotionModeBase::sendStabilizedServoCommands(GimbalController* control
     double finalElVelocity = desiredElVelocity;
 
     // --- Step 2: Apply stabilization if enabled ---
-    if (systemState.enableStabilization) { // Changed from enableStabilization to isStabilizationActive
+    if (enableStabilization && systemState.enableStabilization) {
         double azCorrection = 0.0;
         double elCorrection = 0.0;
 
@@ -236,16 +236,16 @@ void GimbalMotionModeBase::writeTargetPosition(ServoDriverDevice* driverInterfac
     quint16 lowerSteps = static_cast<quint16>(targetPositionInSteps & 0xFFFF);
     
     // PSEUDO-CODE: Register addresses would come from the AZD-KX manual.
-    static constexpr quint16 TARGET_POS_UPPER_REG = 0x0100; // Example address
-    static constexpr quint16 TARGET_POS_LOWER_REG = 0x0102; // Example address
-    static constexpr quint16 EXECUTE_MOVE_REG     = 0x007D; // Example address for "GO" command
+    static constexpr quint16 TARGET_POS_UPPER_REG = 0x0100;
+    static constexpr quint16 TARGET_POS_LOWER_REG = 0x0102;
+    static constexpr quint16 EXECUTE_MOVE_REG     = 0x007D;
 
     // Write the new target position
     driverInterface->writeData(TARGET_POS_UPPER_REG, {upperSteps});
     driverInterface->writeData(TARGET_POS_LOWER_REG, {lowerSteps});
     
     // Trigger the move
-    driverInterface->writeData(EXECUTE_MOVE_REG, {0x0001}); // Example "Start Move" command
+    driverInterface->writeData(EXECUTE_MOVE_REG, {0x0001}); // "Start Move" command
 }
  
 
@@ -306,7 +306,7 @@ void GimbalMotionModeBase::calculateStabilizationCorrection(double currentAz_deg
     // === START OF DIAGNOSTIC LOGGING ===
     // Use a static variable to log only every Nth frame to avoid flooding the console.
     static int logCounter = 0;
-    const int LOG_INTERVAL = 50; // Log every 5th call (e.g., 4 times per second if update is 20Hz)
+    const int LOG_INTERVAL = 50; // Log every 5th call (20 times per second)
 
     bool shouldLog = (logCounter++ % LOG_INTERVAL == 0); 
 
@@ -317,13 +317,13 @@ void GimbalMotionModeBase::calculateStabilizationCorrection(double currentAz_deg
         elCorrection_dps = 0.0;
         return;
     }
-
-    // --- Filter the raw DPS data ---
-    // The member filters m_gyroXFilter etc. are used here.
-    double gyroX_dps_filtered = m_gyroXFilter.update(gyroX_dps_raw);
-    double gyroY_dps_filtered = m_gyroYFilter.update(gyroY_dps_raw);
-    // Apply bias correction to Z-axis gyro BEFORE filtering and kinematic transformation
+    // Apply bias correction
+    double gyroX_dps_corrected = gyroX_dps_raw - m_gyroBiasX;
+    double gyroY_dps_corrected = gyroY_dps_raw - m_gyroBiasY;
     double gyroZ_dps_corrected = gyroZ_dps_raw - m_gyroBiasZ;
+    //  Filter the raw DPS data ---
+    double gyroX_dps_filtered = m_gyroXFilter.update(gyroX_dps_corrected);
+    double gyroY_dps_filtered = m_gyroYFilter.update(gyroY_dps_corrected);
     double gyroZ_dps_filtered = m_gyroZFilter.update(gyroZ_dps_corrected);
 
     // Map to platform motion axes (p, q, r)

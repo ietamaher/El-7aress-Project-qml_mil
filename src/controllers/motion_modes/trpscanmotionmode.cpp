@@ -154,7 +154,7 @@ void TRPScanMotionMode::update(GimbalController* controller)
                 m_elPid.reset();
             }
 
-            sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity);
+            sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity, true);
             break;
         }
     }

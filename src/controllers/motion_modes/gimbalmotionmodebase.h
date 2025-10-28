@@ -84,10 +84,12 @@ protected:
      * @param controller Pointer to the GimbalController to access system state (IMU, angles).
      * @param desiredAzVelocity The desired azimuth velocity relative to a stable world frame (deg/s).
      * @param desiredElVelocity The desired elevation velocity relative to a stable world frame (deg/s).
+     * @param enableStabilization True to apply stabilization corrections, false to send raw commands.
      */
     void sendStabilizedServoCommands(GimbalController* controller,
-                                     double desiredAzVelocity,
-                                     double desiredElVelocity);
+                                 double desiredAzVelocity,
+                                 double desiredElVelocity,
+                                 bool enableStabilization = true);
     // --- UNIFIED PID CONTROLLER ---
     struct PIDController {
         double Kp = 0.0;
@@ -173,7 +175,9 @@ private:
     GyroLowPassFilter m_gyroYFilter;
     GyroLowPassFilter m_gyroZFilter;
 
-    // Gyro bias for Z-axis (azimuth)
+    // Gyro bias  
+    double m_gyroBiasX = 0.0;
+    double m_gyroBiasY = 0.0;
     double m_gyroBiasZ = 0.0;
 
     void calculateStabilizationCorrection(double currentAz_deg, double currentEl_deg,

@@ -49,81 +49,202 @@ The project has been reorganized into the following directory structure:
 
 
 ```
-    QT6-gstreamer-example/
-    ├── qml/
-    │   ├── components/          # Reusable UI components
-    │   │   ├── MenuOverlay.qml
+ DIRECTORY STRUCTURE:
+----------------------------------------
+└── QT6-gstreamer-example
+    ├── CCIP.md
+    ├── QT6-gstreamer-example.pro
+    ├── agent.md
+    ├── config
+    │   └── devices.json
+    ├── data
+    ├── documentation
+    │   └── DATALOGGER_DOCUMENTATION.md
+    ├── joystick_manual_md.md
+    ├── post_git.md
+    ├── preview.webp
+    ├── qml
+    │   ├── common
+    │   │   ├── NavigableList.qml
+    │   │   └── ParameterField.qml
+    │   ├── components
+    │   │   ├── AboutDialog.qml
+    │   │   ├── AreaZoneParameterPanel.qml
+    │   │   ├── AzimuthIndicator.qml
+    │   │   ├── ElevationScale.qml
+    │   │   ├── OsdOverlay.qml
+    │   │   ├── ReticleRenderer.qml
+    │   │   ├── SectorScanParameterPanel.qml
+    │   │   ├── SystemStatusOverlay.qml
+    │   │   ├── TRPParameterPanel.qml
+    │   │   ├── TrackingBox.qml
+    │   │   ├── WindageOverlay.qml
     │   │   ├── ZeroingOverlay.qml
-    │   │   └── OSDOverlay.qml
-    │   └── views/
+    │   │   ├── ZoneDefinitionOverlay.qml
+    │   │   └── ZoneMapCanvas.qml
+    │   └── views
+    │       ├── MainMenu.qml
     │       └── main.qml
-    │
-    ├── src/
-    │   ├── controllers/         # Application Flow Controllers
-    │   │   ├── ApplicationController       # Root coordinator
-    │   │   ├── MainMenuController
-    │   │   ├── GimbalController           # Controls gimbal movement
-    │   │   ├── TrackingController         # Manages target tracking
-    │   │   ├── JoystickController         # Joystick input handler
-    │   │   ├── ZeroingController
-    │   │   ├── WindageController
-    │   │   └── FireControlController      # Fire control logic
-    │   │
-    │   ├── models/              # Data Models & ViewModels
-    │   │   ├── viewmodels/      # UI ViewModels
-    │   │   │   ├── MenuViewModel
-    │   │   │   ├── OsdViewModel
-    │   │   │   ├── ZeroingViewModel
-    │   │   │   └── WindageViewModel
-    │   │   │
-    │   │   └── domain/          # Domain/Business Models
-    │   │       ├── SystemState.h           # Core system state (read-only for most)
-    │   │       ├── GimbalState.h           # Gimbal position, status
-    │   │       ├── BallisticsState.h       # Zeroing, windage, lead angle
-    │   │       ├── TrackingState.h         # Tracking lock, target info
-    │   │       ├── ZoneDefinitions.h       # Area zones, TRPs, etc.
-    │   │       └── WeaponState.h           # Fire control, safety
-    │   │
-    │   ├── services/            # Singleton Business Logic Services
-    │   │   ├── ServiceManager              # DI container
-    │   │   ├── StateCoordinator            # Central state management
-    │   │   ├── ZoneManager                 # Manage zones (no-fire, TRP, etc.)
-    │   │   ├── BallisticsService           # Zeroing, windage, lead angle
-    │   │   ├── TrackingService             # Target tracking logic
-    │   │   ├── SafetyService               # Fire control safety checks
-    │   │   └── ConfigurationService        # Save/load settings
-    │   │
-    │   ├── hardware/            # Hardware Interface Layer
-    │   │   ├── interfaces/      # Abstract interfaces
-    │   │   │   ├── IServoDriver.h
-    │   │   │   ├── ISensor.h
-    │   │   │   └── IInputDevice.h
-    │   │   │
-    │   │   ├── devices/         # Concrete device implementations
-    │   │   │   ├── Plc21Device
-    │   │   │   ├── Plc42Device
-    │   │   │   ├── ServoAzimuthDriver
-    │   │   │   ├── ServoElevationDriver
-    │   │   │   ├── LrfDevice              # Laser Range Finder
-    │   │   │   ├── ImuDevice              # Gyroscope/IMU
-    │   │   │   ├── JoystickDevice
-    │   │   │   ├── DayCameraDevice
-    │   │   │   ├── NightCameraDevice
-    │   │   │   └── RadarDevice
-    │   │   │
-    │   │   └── protocols/       # Communication protocols
-    │   │       ├── ModbusProtocol
-    │   │       ├── SerialProtocol
-    │   │       └── CanBusProtocol
-    │   │
-    │   ├── utils/               # Utility classes
-    │   │   ├── ReticleAimpointCalculator
-    │   │   ├── GeometryUtils
-    │   │   └── TimestampLogger
-    │   │
-    │   └── video/               # Video pipeline
-    │       ├── GstVideoSource
-    │       └── VideoImageProvider
+    ├── readme.md
+    ├── resources
+    │   └── resources.qrc
+    ├── scripts
+    │   ├── cleanup_virtual_ports.sh
+    │   ├── run_full_test.sh
+    │   ├── setup_virtual_ports.sh
+    │   ├── sim_plc21.sh
+    │   ├── sim_plc42.sh
+    │   ├── sim_servo_az.sh
+    │   ├── sim_servo_el.sh
+    │   ├── start_modbus_simulators.sh
+    │   └── verify_setup.sh
+    └── src
+        ├── controllers
+        │   ├── aboutcontroller.cpp
+        │   ├── aboutcontroller.h
+        │   ├── applicationcontroller.cpp
+        │   ├── applicationcontroller.h
+        │   ├── cameracontroller.cpp
+        │   ├── cameracontroller.h
+        │   ├── colormenucontroller.cpp
+        │   ├── colormenucontroller.h
+        │   ├── deviceconfiguration.cpp
+        │   ├── deviceconfiguration.h
+        │   ├── gimbalcontroller.cpp
+        │   ├── gimbalcontroller.h
+        │   ├── joystickcontroller.cpp
+        │   ├── joystickcontroller.h
+        │   ├── mainmenucontroller.cpp
+        │   ├── mainmenucontroller.h
+        │   ├── motion_modes
+        │   │   ├── autosectorscanmotionmode.cpp
+        │   │   ├── autosectorscanmotionmode.h
+        │   │   ├── gimbalmotionmodebase.cpp
+        │   │   ├── gimbalmotionmodebase.h
+        │   │   ├── manualmotionmode.cpp
+        │   │   ├── manualmotionmode.h
+        │   │   ├── pidcontroller.h
+        │   │   ├── radarslewmotionmode.cpp
+        │   │   ├── radarslewmotionmode.h
+        │   │   ├── trackingmotionmode.cpp
+        │   │   ├── trackingmotionmode.h
+        │   │   ├── trpscanmotionmode.cpp
+        │   │   └── trpscanmotionmode.h
+        │   ├── osdcontroller.cpp
+        │   ├── osdcontroller.h
+        │   ├── reticlemenucontroller.cpp
+        │   ├── reticlemenucontroller.h
+        │   ├── systemcontroller.cpp
+        │   ├── systemcontroller.h
+        │   ├── systemstatuscontroller.cpp
+        │   ├── systemstatuscontroller.h
+        │   ├── weaponcontroller.cpp
+        │   ├── weaponcontroller.h
+        │   ├── windagecontroller.cpp
+        │   ├── windagecontroller.h
+        │   ├── zeroingcontroller.cpp
+        │   ├── zeroingcontroller.h
+        │   ├── zonedefinitioncontroller.cpp
+        │   └── zonedefinitioncontroller.h
+        ├── hardware
+        │   └── devices
+        │       ├── baseserialdevice.cpp
+        │       ├── baseserialdevice.h
+        │       ├── cameravideostreamdevice.cpp
+        │       ├── cameravideostreamdevice.h
+        │       ├── daycameracontroldevice.cpp
+        │       ├── daycameracontroldevice.h
+        │       ├── imudevice.cpp
+        │       ├── imudevice.h
+        │       ├── joystickdevice.cpp
+        │       ├── joystickdevice.h
+        │       ├── lensdevice.cpp
+        │       ├── lensdevice.h
+        │       ├── lrfdevice.cpp
+        │       ├── lrfdevice.h
+        │       ├── modbusdevicebase.cpp
+        │       ├── modbusdevicebase.h
+        │       ├── nightcameracontroldevice.cpp
+        │       ├── nightcameracontroldevice.h
+        │       ├── plc21device.cpp
+        │       ├── plc21device.h
+        │       ├── plc42device.cpp
+        │       ├── plc42device.h
+        │       ├── radardevice.cpp
+        │       ├── radardevice.h
+        │       ├── servoactuatordevice.cpp
+        │       ├── servoactuatordevice.h
+        │       ├── servodriverdevice.cpp
+        │       ├── servodriverdevice.h
+        │       └── vpi_helpers.h
+        ├── logger
+        │   ├── systemdatalogger.cpp
+        │   └── systemdatalogger.h
+        ├── main.cpp
+        ├── models
+        │   ├── aboutviewmodel.cpp
+        │   ├── aboutviewmodel.h
+        │   ├── areazoneparameterviewmodel.cpp
+        │   ├── areazoneparameterviewmodel.h
+        │   ├── domain
+        │   │   ├── daycameradatamodel.h
+        │   │   ├── gyrodatamodel.h
+        │   │   ├── joystickdatamodel.cpp
+        │   │   ├── joystickdatamodel.h
+        │   │   ├── lensdatamodel.h
+        │   │   ├── lrfdatamodel.h
+        │   │   ├── nightcameradatamodel.h
+        │   │   ├── plc21datamodel.h
+        │   │   ├── plc42datamodel.h
+        │   │   ├── radardatamodel.h
+        │   │   ├── servoactuatordatamodel.h
+        │   │   ├── servodriverdatamodel.h
+        │   │   ├── systemstatedata.h
+        │   │   ├── systemstatemodel.cpp
+        │   │   └── systemstatemodel.h
+        │   ├── historyviewmodel.cpp
+        │   ├── historyviewmodel.h
+        │   ├── menuviewmodel.cpp
+        │   ├── menuviewmodel.h
+        │   ├── osdviewmodel.cpp
+        │   ├── osdviewmodel.h
+        │   ├── sectorscanparameterviewmodel.cpp
+        │   ├── sectorscanparameterviewmodel.h
+        │   ├── systemstatusviewmodel.cpp
+        │   ├── systemstatusviewmodel.h
+        │   ├── trpparameterviewmodel.cpp
+        │   ├── trpparameterviewmodel.h
+        │   ├── viewmodels
+        │   ├── windageviewmodel.cpp
+        │   ├── windageviewmodel.h
+        │   ├── zeroingviewmodel.cpp
+        │   ├── zeroingviewmodel.h
+        │   ├── zonedefinitionviewmodel.cpp
+        │   ├── zonedefinitionviewmodel.h
+        │   ├── zonemapviewmodel.cpp
+        │   └── zonemapviewmodel.h
+        ├── services
+        │   ├── servicemanager.cpp
+        │   ├── servicemanager.h
+        │   ├── zonegeometryservice.cpp
+        │   └── zonegeometryservice.h
+        ├── utils
+        │   ├── TimestampLogger.h
+        │   ├── ballisticsprocessor.cpp
+        │   ├── ballisticsprocessor.h
+        │   ├── colorutils.cpp
+        │   ├── colorutils.h
+        │   ├── inference.cpp
+        │   ├── inference.h
+        │   ├── millenious.h
+        │   ├── reticleaimpointcalculator.cpp
+        │   ├── reticleaimpointcalculator.h
+        │   └── targetstate.h
+        └── video
+            ├── gstvideosource.cpp
+            ├── gstvideosource.h
+            ├── videoimageprovider.cpp
+            └── videoimageprovider.h
 
 
 ```
