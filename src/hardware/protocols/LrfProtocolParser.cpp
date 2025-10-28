@@ -37,7 +37,7 @@ std::vector<MessagePtr> LrfProtocolParser::parse(const QByteArray& rawData) {
     return out;
 }
 
-QByteArray LrfProtocolParser::buildCommand(quint8 commandCode, const QByteArray& params) const {
+QByteArray LrfProtocolParser::buildCommand(quint8 commandCode, const QByteArray& params) {
     QByteArray packet;
     packet.reserve(PACKET_SIZE);
     packet.append(FRAME_HEADER);
