@@ -90,7 +90,10 @@ SOURCES += \
     src/utils/inference.cpp \
     src/utils/reticleaimpointcalculator.cpp \
     src/video/gstvideosource.cpp \
-    src/video/videoimageprovider.cpp
+    src/video/videoimageprovider.cpp \
+    src/hardware/protocols/ServoDriverProtocolParser.cpp \
+    src/hardware/protocols/ServoActuatorProtocolParser.cpp \
+    src/hardware/protocols/LrfProtocolParser.cpp
 
 RESOURCES += resources/resources.qrc
 
@@ -185,7 +188,19 @@ HEADERS += \
     src/utils/reticleaimpointcalculator.h \
     src/utils/targetstate.h \
     src/video/gstvideosource.h \
-    src/video/videoimageprovider.h
+    src/video/videoimageprovider.h \
+    src/hardware/interfaces/IDevice.h \
+    src/hardware/interfaces/Transport.h \
+    src/hardware/interfaces/ProtocolParser.h \
+    src/hardware/interfaces/Message.h \
+    src/hardware/data/DataTypes.h \
+    src/hardware/devices/TemplatedDevice.h \
+    src/hardware/protocols/ServoDriverProtocolParser.h \
+    src/hardware/protocols/ServoActuatorProtocolParser.h \
+    src/hardware/protocols/LrfProtocolParser.h \
+    src/hardware/messages/ServoDriverMessage.h \
+    src/hardware/messages/ServoActuatorMessage.h \
+    src/hardware/messages/LrfMessage.h
 
 
 

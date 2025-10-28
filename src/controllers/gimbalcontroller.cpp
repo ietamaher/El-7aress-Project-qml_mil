@@ -4,6 +4,9 @@
 #include "motion_modes/autosectorscanmotionmode.h"
 #include "motion_modes/radarslewmotionmode.h"
 #include "motion_modes/trpscanmotionmode.h"
+
+#include "hardware/devices/servodriverdevice.h"
+#include "hardware/devices/plc42device.h"
 #include <QDebug>
 
 namespace GimbalUtils { // Example namespace

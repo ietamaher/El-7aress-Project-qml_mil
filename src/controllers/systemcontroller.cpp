@@ -140,7 +140,7 @@ void SystemController::initializeHardware()
     m_nightCamControl = new NightCameraControlDevice(this);
     m_plc21Device = new Plc21Device(plc21Conf.port, plc21Conf.baudRate, plc21Conf.slaveId, plc21Conf.parity, this);
     m_plc42Device = new Plc42Device(plc42Conf.port, plc42Conf.baudRate, plc42Conf.slaveId, plc42Conf.parity, this);
-    m_servoActuatorDevice = new ServoActuatorDevice(this);
+    m_servoActuatorDevice = new ServoActuatorDevice("servoActuator", this);
 
     // Servo devices with configuration
     m_servoAzThread = new QThread(this);

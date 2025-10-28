@@ -3,7 +3,7 @@
 
 
 #include <QObject>
-#include "hardware/devices/servodriverdevice.h"
+#include "hardware/data/DataTypes.h"
 
 
 class ServoDriverDataModel : public QObject {
@@ -11,14 +11,14 @@ class ServoDriverDataModel : public QObject {
 public:
     explicit ServoDriverDataModel(QObject *parent = nullptr) : QObject(parent) {}
 
-    ServoData data() const { return m_data; }
+    ServoDriverData data() const { return m_data; }
 
 
 signals:
-    void dataChanged(const ServoData  &newData);
+    void dataChanged(const ServoDriverData  &newData);
 
 public slots:
-    void updateData(const ServoData &newData) {
+    void updateData(const ServoDriverData &newData) {
         if (m_data != newData) {
             m_data = newData;
             emit dataChanged(m_data);
@@ -26,7 +26,7 @@ public slots:
     }
 
 private:
-    ServoData m_data;
+    ServoDriverData m_data;
 };
 
 #endif // SERVODRIVERDATAMODEL_H

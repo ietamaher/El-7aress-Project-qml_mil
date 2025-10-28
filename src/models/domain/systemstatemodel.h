@@ -635,13 +635,13 @@ public slots:
      * @brief Handles changes in servo azimuth data.
      * @param azData The new azimuth servo data.
      */
-    void onServoAzDataChanged(const ServoData &azData);
+    void onServoAzDataChanged(const ServoDriverData &azData);
     
     /**
      * @brief Handles changes in servo elevation data.
      * @param elData The new elevation servo data.
      */
-    void onServoElDataChanged(const ServoData &elData);
+    void onServoElDataChanged(const ServoDriverData &elData);
     
     /**
      * @brief Handles changes in servo actuator data.
