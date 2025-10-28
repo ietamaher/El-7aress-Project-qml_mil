@@ -1,120 +1,155 @@
 #include "imudevice.h"
+#include "../interfaces/Transport.h"
+#include "../protocols/ImuProtocolParser.h"
+#include "../messages/ImuMessage.h"
+#include <QModbusRtuSerialClient>
 #include <QModbusDataUnit>
+#include <QModbusReply>
 #include <QDebug>
-#include <QtEndian>
-#include <QMutexLocker>
 
-ImuDevice::ImuDevice(const QString &device, int baudRate, int slaveId, QObject *parent)
-    // The SST810 protocol specifies NO parity. This is crucial.
-    : ModbusDeviceBase(device, baudRate, slaveId, QSerialPort::NoParity, parent)
+ImuDevice::ImuDevice(const QString& identifier, QObject* parent)
+    : TemplatedDevice<ImuData>(parent),
+      m_identifier(identifier),
+      m_pollTimer(new QTimer(this))
 {
-    connect(this, &ModbusDeviceBase::connectionStateChanged, this, &ImuDevice::handleConnectionChange);
-    
-    setPollInterval(50);
+    connect(m_pollTimer, &QTimer::timeout, this, &ImuDevice::pollTimerTimeout);
 }
 
 ImuDevice::~ImuDevice() {
-    disconnectDevice();
+    m_pollTimer->stop();
 }
 
-ImuData ImuDevice::getCurrentData() const {
-    QMutexLocker locker(&m_mutex);
-    return m_currentData;
+void ImuDevice::setDependencies(Transport* transport,
+                                 ImuProtocolParser* parser) {
+    m_transport = transport;
+    m_parser = parser;
+
+    // Parent them to this device for lifetime management
+    m_transport->setParent(this);
+    m_parser->setParent(this);
+
+    // Connect transport signals
+    connect(m_transport, &Transport::connectionStateChanged,
+            this, [this](bool connected) {
+        auto newData = std::make_shared<ImuData>(*data());
+        newData->isConnected = connected;
+        updateData(newData);
+        emit imuDataChanged(*newData);
+    });
 }
 
-void ImuDevice::handleConnectionChange(bool connected) {
-    ImuData newData = getCurrentData();
-    newData.isConnected = connected;
-    updateImuData(newData);
+bool ImuDevice::initialize() {
+    setState(DeviceState::Initializing);
+
+    if (!m_transport || !m_parser) {
+        qCritical() << m_identifier << "missing dependencies!";
+        setState(DeviceState::Error);
+        return false;
+    }
+
+    // Get configuration from device property
+    QJsonObject config = property("config").toJsonObject();
+    int pollInterval = config["pollIntervalMs"].toInt(50);
+    config["parity"] = "none"; // SST810 uses NO parity
+
+    qDebug() << m_identifier << "initializing with poll interval:" << pollInterval << "ms";
+
+    // Open transport
+    if (m_transport->open(config)) {
+        setState(DeviceState::Online);
+
+        // Start polling
+        m_pollTimer->start(pollInterval);
+
+        qDebug() << m_identifier << "initialized successfully";
+        return true;
+    }
+
+    qCritical() << m_identifier << "failed to initialize transport";
+    setState(DeviceState::Error);
+    return false;
 }
 
-void ImuDevice::readData() {
-    // Read all 18 registers (9 float values) in a single request.
+void ImuDevice::shutdown() {
+    m_pollTimer->stop();
+
+    if (m_transport) {
+        QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
+    }
+
+    setState(DeviceState::Offline);
+}
+
+void ImuDevice::pollTimerTimeout() {
+    // Read all 18 Input Registers in a single request
+    sendReadRequest();
+}
+
+void ImuDevice::sendReadRequest() {
+    if (state() != DeviceState::Online || !m_transport) return;
+
+    // Cast to ModbusTransport to access Modbus-specific methods
+    auto modbusTransport = qobject_cast<QModbusRtuSerialClient*>(
+        m_transport->property("client").value<QObject*>());
+
+    if (!modbusTransport) return;
+
     QModbusDataUnit readUnit(QModbusDataUnit::InputRegisters,
-                             ALL_DATA_START_ADDRESS,
-                             ALL_DATA_REGISTER_COUNT);
+                             ImuRegisters::ALL_DATA_START_ADDR,
+                             ImuRegisters::ALL_DATA_REG_COUNT);
 
-    if (auto *reply = sendReadRequest(readUnit)) {
-        connectReplyFinished(reply, [this](QModbusReply* r) { onReadReady(r); });
+    QModbusReply* reply = nullptr;
+    QMetaObject::invokeMethod(m_transport, "sendReadRequest",
+                              Qt::DirectConnection,
+                              Q_RETURN_ARG(QModbusReply*, reply),
+                              Q_ARG(QModbusDataUnit, readUnit));
+
+    if (reply) {
+        connect(reply, &QModbusReply::finished, this, [this, reply]() {
+            onModbusReplyReady(reply);
+        });
     }
 }
 
-void ImuDevice::onReadReady(QModbusReply *reply) {
-    stopTimeoutTimer();
-    if (!reply) return;
-
-    if (reply->error() != QModbusDevice::NoError) {
-        logError(QString("IMU Read Error: %1 (Code: 0x%2)")
-                     .arg(reply->errorString())
-                     .arg(reply->rawResult().exceptionCode(), 2, 16, QChar('0')));
-    } else {
-        parseModbusResponse(reply->result());
-    }
-
-    onDataReadComplete();
-}
-
-void ImuDevice::parseModbusResponse(const QModbusDataUnit &dataUnit) {
-    if (dataUnit.valueCount() != ALL_DATA_REGISTER_COUNT) {
-        logError(QString("IMU: Incorrect register count. Expected %1, got %2.")
-                     .arg(ALL_DATA_REGISTER_COUNT).arg(dataUnit.valueCount()));
+void ImuDevice::onModbusReplyReady(QModbusReply* reply) {
+    if (!reply || !m_parser) {
+        if (reply) reply->deleteLater();
         return;
     }
 
-    ImuData newData = getCurrentData();
+    if (reply->error() != QModbusDevice::NoError) {
+        qWarning() << m_identifier << "Modbus error:" << reply->errorString();
+        auto newData = std::make_shared<ImuData>(*data());
+        newData->isConnected = false;
+        updateData(newData);
+        emit imuDataChanged(*newData);
+        reply->deleteLater();
+        return;
+    }
 
-    // Helper lambda to parse a 4-byte Big Endian float from two 16-bit registers.
-    auto parseFloat = [&](int index) -> float {
-        // Combine two 16-bit registers into one 32-bit value.
-        quint16 high = dataUnit.value(index);
-        quint16 low = dataUnit.value(index + 1);
-        quint32 combined = (static_cast<quint32>(high) << 16) | low;
+    // Parse the reply into messages
+    auto messages = m_parser->parse(reply);
+    reply->deleteLater();
 
-        // Reinterpret the bits of the 32-bit integer as a float.
-        float value;
-        memcpy(&value, &combined, sizeof(value));
-        return value;
-    };
-
-    // --- Map registers to data structure fields ---
-    // Per the tech support email, ALL values are floats.
-    // The device uses the standard X-Y axis labels, but this may not map
-    // directly to aerospace imuRollDeg/imuPitchDeg conventions.
-    // X-Angle -> Pitch, Y-Angle -> Roll is a common mapping.
-    newData.imuPitchDeg         = parseFloat(0);  // 0x03E8 - 0x03E9: X-axis angle
-    newData.imuRollDeg          = parseFloat(2);  // 0x03EA - 0x03EB: Y-axis angle
-    newData.temperature   = parseFloat(4) / 10.0; // 0x03EC - 0x03ED: Temperature (with scaling)
-
-    newData.accelX_g      = parseFloat(6);  // 0x03EE - 0x03EF: X-axis accelerometer
-    newData.accelY_g      = parseFloat(8);  // 0x03F0 - 0x03F1: Y-axis accelerometer
-    newData.accelZ_g      = parseFloat(10); // 0x03F2 - 0x03F3: Z-axis accelerometer
-
-    newData.angRateX_dps  = parseFloat(12); // 0x03F4 - 0x03F5: X-axis gyroscope (Pitch Rate)
-    newData.angRateY_dps  = parseFloat(14); // 0x03F6 - 0x03F7: Y-axis gyroscope (Roll Rate)
-    newData.angRateZ_dps  = parseFloat(16); // 0x03F8 - 0x03F9: Z-axis gyroscope (Yaw Rate)
-
-    updateImuData(newData);
-
-    /*    qDebug().noquote().nospace()
-        << "[IMU] imuPitchDeg=" << newData.imuPitchDeg
-        << " imuRollDeg=" << newData.imuRollDeg
-        << " temp=" << newData.temperature
-        << " accel=(" << newData.accelX_g << ", "
-                      << newData.accelY_g << ", "
-                      << newData.accelZ_g << ")"
-        << " gyro=(" << newData.angRateX_dps << ", "
-                     << newData.angRateY_dps << ", "
-                     << newData.angRateZ_dps << ")";*/
+    // Process each message
+    for (const auto& msg : messages) {
+        if (msg) {
+            processMessage(*msg);
+        }
+    }
 }
 
-void ImuDevice::onDataReadComplete() { /* No-op for single read request */ }
-void ImuDevice::onWriteComplete()    { /* No-op, read-only device */ }
+void ImuDevice::processMessage(const Message& message) {
+    if (message.typeId() == Message::Type::ImuDataType) {
+        auto const* dataMsg = static_cast<const ImuDataMessage*>(&message);
 
-void ImuDevice::updateImuData(const ImuData &newData) {
-    QMutexLocker locker(&m_mutex);
-    if (newData != m_currentData) {
-        m_currentData = newData;
-        locker.unlock();
-        emit imuDataChanged(m_currentData);
+        // Update with new data
+        auto newData = std::make_shared<ImuData>(dataMsg->data());
+        updateData(newData);
+        emit imuDataChanged(*newData);
     }
+}
+
+void ImuDevice::setPollInterval(int intervalMs) {
+    m_pollTimer->setInterval(intervalMs);
 }

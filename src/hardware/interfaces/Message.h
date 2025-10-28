@@ -22,6 +22,8 @@ public:
         Plc42DataType,
         // Radar (NMEA)
         RadarPlotType,
+        // IMU/Inclinometer (Modbus)
+        ImuDataType,
         // Other devices (keep existing from MIL-STD)
         LrfDataType,
         LrfInfoType
