@@ -1,314 +1,329 @@
 #include "plc42device.h"
+#include "../interfaces/Transport.h"
+#include "../protocols/Plc42ProtocolParser.h"
+#include "../messages/Plc42Message.h"
+#include <QModbusRtuSerialClient>
 #include <QModbusDataUnit>
-#include <QVariant>
 #include <QModbusReply>
-#include <QSerialPort>
-#include <QMutexLocker>
-#include <QtMath>
+#include <QDebug>
 
-#define NUM_HOLDING_REGS 10
-
-// Constructor: Inherits from ModbusDeviceBase, eliminating duplicate initialization code.
-Plc42Device::Plc42Device(const QString &device,
-                         int baudRate,
-                         int slaveId,
-                         QSerialPort::Parity parity,
-                         QObject *parent)
-    : ModbusDeviceBase(device, baudRate, slaveId, parity, parent)
+Plc42Device::Plc42Device(const QString& identifier, QObject* parent)
+    : TemplatedDevice<Plc42Data>(parent),
+      m_identifier(identifier),
+      m_pollTimer(new QTimer(this))
 {
-    // Set PLC42-specific polling interval (200ms)
-    setPollInterval(50);
-    
-    // Initialize PLC42 data structure
-    m_currentData = Plc42Data();
+    connect(m_pollTimer, &QTimer::timeout, this, &Plc42Device::pollTimerTimeout);
 }
 
-// Destructor: Base class handles cleanup automatically.
-Plc42Device::~Plc42Device()
-{
-    // Base class destructor will handle Modbus device cleanup
+Plc42Device::~Plc42Device() {
+    m_pollTimer->stop();
 }
 
-// Implementation of pure virtual method from ModbusDeviceBase
-void Plc42Device::readData()
-{
-    readDigitalInputs();
-    readHoldingData();
+void Plc42Device::setDependencies(Transport* transport,
+                                   Plc42ProtocolParser* parser) {
+    m_transport = transport;
+    m_parser = parser;
+
+    // Parent them to this device for lifetime management
+    m_transport->setParent(this);
+    m_parser->setParent(this);
+
+    // Connect transport signals
+    connect(m_transport, &Transport::connectionStateChanged,
+            this, [this](bool connected) {
+        auto newData = std::make_shared<Plc42Data>(*data());
+        newData->isConnected = connected;
+        updateData(newData);
+        emit plc42DataChanged(*newData);
+    });
 }
 
-// Implementation of pure virtual method from ModbusDeviceBase
-void Plc42Device::onDataReadComplete()
-{
-    // Update connection status in the data structure
-    Plc42Data newData = m_currentData;
-    newData.isConnected = isConnected();
-    updatePlc42Data(newData);
+bool Plc42Device::initialize() {
+    setState(DeviceState::Initializing);
+
+    if (!m_transport || !m_parser) {
+        qCritical() << m_identifier << "missing dependencies!";
+        setState(DeviceState::Error);
+        return false;
+    }
+
+    // Get configuration from device property
+    QJsonObject config = property("config").toJsonObject();
+    int pollInterval = config["pollIntervalMs"].toInt(50);
+
+    qDebug() << m_identifier << "initializing with poll interval:" << pollInterval << "ms";
+
+    // Open transport
+    if (m_transport->open(config)) {
+        setState(DeviceState::Online);
+
+        // Start polling
+        m_pollTimer->start(pollInterval);
+
+        qDebug() << m_identifier << "initialized successfully";
+        return true;
+    }
+
+    qCritical() << m_identifier << "failed to initialize transport";
+    setState(DeviceState::Error);
+    return false;
 }
 
-// Implementation of pure virtual method from ModbusDeviceBase
-void Plc42Device::onWriteComplete()
-{
-    // Handle any post-write operations if needed
-    // Currently no specific action required for PLC42
+void Plc42Device::shutdown() {
+    m_pollTimer->stop();
+
+    if (m_transport) {
+        QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
+    }
+
+    setState(DeviceState::Offline);
 }
 
-// Reads digital inputs (Discrete Inputs) from the PLC.
-void Plc42Device::readDigitalInputs()
-{
-    if (!isConnected())
-        return;
+void Plc42Device::pollTimerTimeout() {
+    // Read digital inputs (discrete inputs)
+    sendReadRequest(Plc42Registers::DIGITAL_INPUTS_START_ADDR,
+                    7,  // Read 7 discrete inputs
+                    true);
 
-    QModbusDataUnit readUnit(QModbusDataUnit::DiscreteInputs,
-                             0,
-                             7);
+    // Read holding registers
+    sendReadRequest(Plc42Registers::HOLDING_REGISTERS_START_ADDR,
+                    Plc42Registers::HOLDING_REGISTERS_COUNT,
+                    false);
+}
 
-    if (auto *reply = sendReadRequest(readUnit)) {
-       // connect(reply, &QModbusReply::finished,
-         //       this, &Plc42Device::onDigitalInputsReadReady);
-        connectReplyFinished(reply, [this](QModbusReply* r){ onDigitalInputsReadReady(r); });
-    } else {
-        logError("Read digital inputs error: Failed to send request");
-        emit errorOccurred("Read digital inputs error: Failed to send request");
+void Plc42Device::sendReadRequest(int startAddress, int count, bool isDiscreteInputs) {
+    if (state() != DeviceState::Online || !m_transport) return;
+
+    // Cast to ModbusTransport to access Modbus-specific methods
+    auto modbusTransport = qobject_cast<QModbusRtuSerialClient*>(
+        m_transport->property("client").value<QObject*>());
+
+    if (!modbusTransport) return;
+
+    QModbusDataUnit::RegisterType regType = isDiscreteInputs ?
+        QModbusDataUnit::DiscreteInputs : QModbusDataUnit::HoldingRegisters;
+
+    QModbusDataUnit readUnit(regType, startAddress, count);
+
+    QModbusReply* reply = nullptr;
+    QMetaObject::invokeMethod(m_transport, "sendReadRequest",
+                              Qt::DirectConnection,
+                              Q_RETURN_ARG(QModbusReply*, reply),
+                              Q_ARG(QModbusDataUnit, readUnit));
+
+    if (reply) {
+        connect(reply, &QModbusReply::finished, this, [this, reply]() {
+            onModbusReplyReady(reply);
+        });
     }
 }
 
-// Handles the response for digital input read requests.
-void Plc42Device::onDigitalInputsReadReady(QModbusReply *reply)
-{
-    if (!reply)
+void Plc42Device::onModbusReplyReady(QModbusReply* reply) {
+    if (!reply || !m_parser) {
+        if (reply) reply->deleteLater();
         return;
-
-    stopTimeoutTimer();
-
-    if (reply->error() == QModbusDevice::NoError) {
-        const QModbusDataUnit unit = reply->result();
-        Plc42Data newData = m_currentData;
-
-        // Update individual digital input fields based on their respective indices.
-        if (unit.valueCount() >= 8) {
-            newData.stationUpperSensor  = (unit.value(0) != 0);
-            newData.stationLowerSensor  = (unit.value(1) != 0);
-            newData.emergencyStopActive = (unit.value(2) != 0);
-            newData.ammunitionLevel     = (unit.value(3) != 0);
-            newData.stationInput1       = (unit.value(4) != 0);
-            newData.stationInput2       = (unit.value(5) != 0);
-            newData.stationInput3       = (unit.value(6) != 0);
-            newData.solenoidActive      = (unit.value(7) != 0);
-        } else {
-            logError("Insufficient digital input values.");
-        }
-
-        newData.isConnected = isConnected();
-        updatePlc42Data(newData);
-    } else {
-        logError("Digital inputs read error: " + reply->errorString());
-        emit errorOccurred(reply->errorString());
-        
-        // Update connection status
-        Plc42Data newData = m_currentData;
-        newData.isConnected = false;
-        updatePlc42Data(newData);
     }
+
+    if (reply->error() != QModbusDevice::NoError) {
+        qWarning() << m_identifier << "Modbus error:" << reply->errorString();
+        auto newData = std::make_shared<Plc42Data>(*data());
+        newData->isConnected = false;
+        updateData(newData);
+        emit plc42DataChanged(*newData);
+        reply->deleteLater();
+        return;
+    }
+
+    // Parse the reply into messages
+    auto messages = m_parser->parse(reply);
     reply->deleteLater();
-}
 
-// Reads holding registers from the PLC.
-void Plc42Device::readHoldingData()
-{
-    if (!isConnected())
-        return;
-
-    QModbusDataUnit readUnit(QModbusDataUnit::HoldingRegisters,
-                             0,
-                             10);
-
-    if (auto *reply = sendReadRequest(readUnit)) {
-       // connect(reply, &QModbusReply::finished,
-              //  this, &Plc42Device::onHoldingDataReadReady);
-         connectReplyFinished(reply, [this](QModbusReply* r){ onHoldingDataReadReady(r); });   
-    } else {
-        logError("Read holding registers error: Failed to send request");
-        emit errorOccurred("Read holding registers error: Failed to send request");
-    }
-}
-
-// Handles the response for holding register read requests.
-void Plc42Device::onHoldingDataReadReady(QModbusReply *reply)
-{
-    if (!reply)
-        return;
-
-    stopTimeoutTimer();
-
-    if (reply->error() == QModbusDevice::NoError) {
-        QModbusDataUnit unit = reply->result();
-        Plc42Data newData = m_currentData;
-
-        if (unit.valueCount() >= 7) {
-            newData.solenoidMode       = unit.value(0);
-            newData.gimbalOpMode       = unit.value(1);
-            
-            // Combine two 16-bit registers into a 32-bit value for azimuth speed.
-            uint16_t azLow  = unit.value(2);
-            uint16_t azHigh = unit.value(3);
-            newData.azimuthSpeed = (static_cast<uint32_t>(azHigh) << 16) | azLow;
-
-            // Combine two 16-bit registers into a 32-bit value for elevation speed.
-            uint16_t elLow  = unit.value(4);
-            uint16_t elHigh = unit.value(5);
-            newData.elevationSpeed = (static_cast<uint32_t>(elHigh) << 16) | elLow;
-
-            newData.azimuthDirection   = unit.value(6);
-            
-            // Additional registers if available
-            if (unit.valueCount() >= 10) {
-                newData.elevationDirection = unit.value(7);
-                newData.solenoidState      = unit.value(8);
-                newData.resetAlarm         = unit.value(9);
-            }
-        } else {
-            logError("Insufficient holding register values.");
+    // Process each message
+    for (const auto& msg : messages) {
+        if (msg) {
+            processMessage(*msg);
         }
-
-        newData.isConnected = isConnected();
-        updatePlc42Data(newData);
-    } else {
-        logError("Holding data read error: " + reply->errorString());
-        emit errorOccurred(reply->errorString());
-        
-        // Update connection status
-        Plc42Data newData = m_currentData;
-        newData.isConnected = false;
-        updatePlc42Data(newData);
     }
-    reply->deleteLater();
 }
 
-// Writes the cached holding register values to the PLC.
-void Plc42Device::writeRegisterData()
-{
-    if (!isConnected())
-        return;
+void Plc42Device::processMessage(const Message& message) {
+    if (message.typeId() == Message::Type::Plc42DataType) {
+        auto const* dataMsg = static_cast<const Plc42DataMessage*>(&message);
+        mergePartialData(dataMsg->data());
+    }
+}
 
-    QModbusDataUnit writeUnit(QModbusDataUnit::HoldingRegisters, 
-                              0, 
-                              NUM_HOLDING_REGS);
-    
-    writeUnit.setValue(0, m_currentData.solenoidMode);
-    writeUnit.setValue(1, m_currentData.gimbalOpMode);
+void Plc42Device::mergePartialData(const Plc42Data& partialData) {
+    auto currentData = data();
+    auto newData = std::make_shared<Plc42Data>(*currentData);
+    newData->isConnected = true;
 
-    // Split 32-bit azimuth speed into two 16-bit registers.
-    uint16_t azLow  = static_cast<uint16_t>(m_currentData.azimuthSpeed & 0xFFFF);
-    uint16_t azHigh = static_cast<uint16_t>((m_currentData.azimuthSpeed >> 16) & 0xFFFF);
+    bool dataChanged = false;
+
+    // Merge discrete inputs
+    if (partialData.stationUpperSensor != currentData->stationUpperSensor ||
+        partialData.stationLowerSensor != currentData->stationLowerSensor ||
+        partialData.emergencyStopActive != currentData->emergencyStopActive ||
+        partialData.ammunitionLevel != currentData->ammunitionLevel ||
+        partialData.stationInput1 != currentData->stationInput1 ||
+        partialData.stationInput2 != currentData->stationInput2 ||
+        partialData.stationInput3 != currentData->stationInput3 ||
+        partialData.solenoidActive != currentData->solenoidActive) {
+
+        newData->stationUpperSensor = partialData.stationUpperSensor;
+        newData->stationLowerSensor = partialData.stationLowerSensor;
+        newData->emergencyStopActive = partialData.emergencyStopActive;
+        newData->ammunitionLevel = partialData.ammunitionLevel;
+        newData->stationInput1 = partialData.stationInput1;
+        newData->stationInput2 = partialData.stationInput2;
+        newData->stationInput3 = partialData.stationInput3;
+        newData->solenoidActive = partialData.solenoidActive;
+        dataChanged = true;
+    }
+
+    // Merge holding registers
+    if (partialData.solenoidMode != currentData->solenoidMode ||
+        partialData.gimbalOpMode != currentData->gimbalOpMode ||
+        partialData.azimuthSpeed != currentData->azimuthSpeed ||
+        partialData.elevationSpeed != currentData->elevationSpeed ||
+        partialData.azimuthDirection != currentData->azimuthDirection ||
+        partialData.elevationDirection != currentData->elevationDirection ||
+        partialData.solenoidState != currentData->solenoidState ||
+        partialData.resetAlarm != currentData->resetAlarm) {
+
+        newData->solenoidMode = partialData.solenoidMode;
+        newData->gimbalOpMode = partialData.gimbalOpMode;
+        newData->azimuthSpeed = partialData.azimuthSpeed;
+        newData->elevationSpeed = partialData.elevationSpeed;
+        newData->azimuthDirection = partialData.azimuthDirection;
+        newData->elevationDirection = partialData.elevationDirection;
+        newData->solenoidState = partialData.solenoidState;
+        newData->resetAlarm = partialData.resetAlarm;
+        dataChanged = true;
+    }
+
+    if (dataChanged) {
+        updateData(newData);
+        emit plc42DataChanged(*newData);
+    }
+}
+
+//================================================================================
+// PUBLIC API - CONTROL METHODS
+//================================================================================
+
+void Plc42Device::setSolenoidMode(uint16_t mode) {
+    auto newData = std::make_shared<Plc42Data>(*data());
+    newData->solenoidMode = mode;
+    updateData(newData);
+    m_hasPendingWrites = true;
+    sendWriteHoldingRegisters();
+}
+
+void Plc42Device::setGimbalMotionMode(uint16_t mode) {
+    auto newData = std::make_shared<Plc42Data>(*data());
+    newData->gimbalOpMode = mode;
+    updateData(newData);
+    m_hasPendingWrites = true;
+    sendWriteHoldingRegisters();
+}
+
+void Plc42Device::setAzimuthSpeedHolding(uint32_t speed) {
+    auto newData = std::make_shared<Plc42Data>(*data());
+    newData->azimuthSpeed = speed;
+    updateData(newData);
+    m_hasPendingWrites = true;
+    sendWriteHoldingRegisters();
+}
+
+void Plc42Device::setElevationSpeedHolding(uint32_t speed) {
+    auto newData = std::make_shared<Plc42Data>(*data());
+    newData->elevationSpeed = speed;
+    updateData(newData);
+    m_hasPendingWrites = true;
+    sendWriteHoldingRegisters();
+}
+
+void Plc42Device::setAzimuthDirection(uint16_t direction) {
+    auto newData = std::make_shared<Plc42Data>(*data());
+    newData->azimuthDirection = direction;
+    updateData(newData);
+    m_hasPendingWrites = true;
+    sendWriteHoldingRegisters();
+}
+
+void Plc42Device::setElevationDirection(uint16_t direction) {
+    auto newData = std::make_shared<Plc42Data>(*data());
+    newData->elevationDirection = direction;
+    updateData(newData);
+    m_hasPendingWrites = true;
+    sendWriteHoldingRegisters();
+}
+
+void Plc42Device::setSolenoidState(uint16_t state) {
+    auto newData = std::make_shared<Plc42Data>(*data());
+    newData->solenoidState = state;
+    updateData(newData);
+    m_hasPendingWrites = true;
+    sendWriteHoldingRegisters();
+}
+
+void Plc42Device::setResetAlarm(uint16_t alarm) {
+    auto newData = std::make_shared<Plc42Data>(*data());
+    newData->resetAlarm = alarm;
+    updateData(newData);
+    m_hasPendingWrites = true;
+    sendWriteHoldingRegisters();
+}
+
+void Plc42Device::sendWriteHoldingRegisters() {
+    if (state() != DeviceState::Online || !m_transport) return;
+
+    auto currentData = data();
+
+    QModbusDataUnit writeUnit(QModbusDataUnit::HoldingRegisters,
+                              Plc42Registers::HOLDING_REGISTERS_START_ADDR,
+                              Plc42Registers::HOLDING_REGISTERS_COUNT);
+
+    writeUnit.setValue(0, currentData->solenoidMode);
+    writeUnit.setValue(1, currentData->gimbalOpMode);
+
+    // Split 32-bit azimuth speed into two 16-bit registers
+    uint16_t azLow  = static_cast<uint16_t>(currentData->azimuthSpeed & 0xFFFF);
+    uint16_t azHigh = static_cast<uint16_t>((currentData->azimuthSpeed >> 16) & 0xFFFF);
     writeUnit.setValue(2, azLow);
     writeUnit.setValue(3, azHigh);
 
-    // Split 32-bit elevation speed into two 16-bit registers.
-    uint16_t elLow  = static_cast<uint16_t>(m_currentData.elevationSpeed & 0xFFFF);
-    uint16_t elHigh = static_cast<uint16_t>((m_currentData.elevationSpeed >> 16) & 0xFFFF);
+    // Split 32-bit elevation speed into two 16-bit registers
+    uint16_t elLow  = static_cast<uint16_t>(currentData->elevationSpeed & 0xFFFF);
+    uint16_t elHigh = static_cast<uint16_t>((currentData->elevationSpeed >> 16) & 0xFFFF);
     writeUnit.setValue(4, elLow);
     writeUnit.setValue(5, elHigh);
 
-    writeUnit.setValue(6, m_currentData.azimuthDirection);
-    writeUnit.setValue(7, m_currentData.elevationDirection);
-    writeUnit.setValue(8, m_currentData.solenoidState);
-    writeUnit.setValue(9, m_currentData.resetAlarm);
+    writeUnit.setValue(6, currentData->azimuthDirection);
+    writeUnit.setValue(7, currentData->elevationDirection);
+    writeUnit.setValue(8, currentData->solenoidState);
+    writeUnit.setValue(9, currentData->resetAlarm);
 
-    if (auto *reply = sendWriteRequest(writeUnit)) {
-        //connect(reply, &QModbusReply::finished, this, &Plc42Device::onWriteReady);
-        connectReplyFinished(reply, [this](QModbusReply* r){ onWriteReady(r); });
+    QModbusReply* reply = nullptr;
+    QMetaObject::invokeMethod(m_transport, "sendWriteRequest",
+                              Qt::DirectConnection,
+                              Q_RETURN_ARG(QModbusReply*, reply),
+                              Q_ARG(QModbusDataUnit, writeUnit));
 
-    } else {
-        logError("Error writing holding registers: Failed to send request");
-        emit errorOccurred("Error writing holding registers: Failed to send request");
-    }
-}
-
-// Control methods - these update local data and write to device
-void Plc42Device::setSolenoidMode(uint16_t mode)
-{
-    Plc42Data newData = m_currentData;
-    newData.solenoidMode = mode;
-    updatePlc42Data(newData);
-    writeRegisterData();
-}
-
-void Plc42Device::setGimbalMotionMode(uint16_t mode)
-{
-    Plc42Data newData = m_currentData;
-    newData.gimbalOpMode = mode;
-    updatePlc42Data(newData);
-    writeRegisterData();
-}
-
-void Plc42Device::setAzimuthSpeedHolding(uint32_t speed)
-{
-    Plc42Data newData = m_currentData;
-    newData.azimuthSpeed = speed;
-    updatePlc42Data(newData);
-    writeRegisterData();
-}
-
-void Plc42Device::setElevationSpeedHolding(uint32_t speed)
-{
-    Plc42Data newData = m_currentData;
-    newData.elevationSpeed = speed;
-    updatePlc42Data(newData);
-    writeRegisterData();
-}
-
-void Plc42Device::setAzimuthDirection(uint16_t direction)
-{
-    Plc42Data newData = m_currentData;
-    newData.azimuthDirection = direction;
-    updatePlc42Data(newData);
-    writeRegisterData();
-}
-
-void Plc42Device::setElevationDirection(uint16_t direction)
-{
-    Plc42Data newData = m_currentData;
-    newData.elevationDirection = direction;
-    updatePlc42Data(newData);
-    writeRegisterData();
-}
-
-void Plc42Device::setSolenoidState(uint16_t state)
-{
-    Plc42Data newData = m_currentData;
-    newData.solenoidState = state;
-    updatePlc42Data(newData);
-    writeRegisterData();
-}
-
-void Plc42Device::setResetAlarm(uint16_t alarm)
-{
-    Plc42Data newData = m_currentData;
-    newData.resetAlarm = alarm;
-    updatePlc42Data(newData);
-    writeRegisterData();
-}
-
-// Handles the response for write requests.
-void Plc42Device::onWriteReady(QModbusReply *reply)
-{
     if (reply) {
-        if (reply->error() != QModbusDevice::NoError) {
-            logError("Write response error: " + reply->errorString());
-            emit errorOccurred(reply->errorString());
-        } else {
-            // Notify base class that write completed successfully
-            onWriteComplete();
-        }
-        reply->deleteLater();
+        connect(reply, &QModbusReply::finished, this, [this, reply]() {
+            bool success = (reply->error() == QModbusDevice::NoError);
+            if (!success) {
+                qWarning() << m_identifier << "Write error:" << reply->errorString();
+            }
+            m_hasPendingWrites = false;
+            emit registerWritten(success);
+            reply->deleteLater();
+        });
     }
 }
 
-// Updates the internal PLC42 data and emits a signal if data has changed.
-void Plc42Device::updatePlc42Data(const Plc42Data &newData)
-{
-    if (newData != m_currentData) {
-        m_currentData = newData;
-        emit plc42DataChanged(m_currentData);
-    }
+void Plc42Device::setPollInterval(int intervalMs) {
+    m_pollTimer->setInterval(intervalMs);
 }

@@ -215,9 +215,9 @@ struct ServoActuatorData {
 /**
  * @brief PLC21 panel data structure
  */
-/*struct Plc21PanelData {
+struct Plc21PanelData {
     bool isConnected = false;
-    
+
     // Digital inputs
     bool armGunSW = false;
     bool loadAmmunitionSW = false;
@@ -229,7 +229,7 @@ struct ServoActuatorData {
     bool menuUpSW = false;
     bool menuDownSW = false;
     bool menuValSw = false;
-    
+
     // Analog inputs
     int speedSW = 2;
     int fireMode = 0;
@@ -251,14 +251,14 @@ struct ServoActuatorData {
                 fireMode != other.fireMode ||
                 panelTemperature != other.panelTemperature);
     }
-};*/
+};
 
 /**
  * @brief PLC42 data structure
  */
-/*struct Plc42Data {
+struct Plc42Data {
     bool isConnected = false;
-    
+
     // Discrete inputs
     bool stationUpperSensor = false;
     bool stationLowerSensor = false;
@@ -268,7 +268,7 @@ struct ServoActuatorData {
     bool stationInput2 = false;
     bool stationInput3 = false;
     bool solenoidActive = false;
-    
+
     // Holding registers
     uint16_t solenoidMode = 0;
     uint16_t gimbalOpMode = 0;
@@ -298,6 +298,6 @@ struct ServoActuatorData {
                 solenoidState != other.solenoidState ||
                 resetAlarm != other.resetAlarm);
     }
-};*/
+};
 
 #endif // DATATYPES_H
