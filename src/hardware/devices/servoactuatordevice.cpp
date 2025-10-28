@@ -7,36 +7,43 @@
 ServoActuatorDevice::ServoActuatorDevice(const QString& identifier, QObject* parent)
     : TemplatedDevice<ServoActuatorData>(parent),
       m_identifier(identifier),
-      m_commandTimeoutTimer(new QTimer(this))
+      m_commandTimeoutTimer(new QTimer(this)),
+      m_communicationWatchdog(new QTimer(this))
 {
     m_commandTimeoutTimer->setSingleShot(true);
-    connect(m_commandTimeoutTimer, &QTimer::timeout, 
+    connect(m_commandTimeoutTimer, &QTimer::timeout,
             this, &ServoActuatorDevice::handleCommandTimeout);
+
+    m_communicationWatchdog->setSingleShot(true);
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &ServoActuatorDevice::onCommunicationWatchdogTimeout);
 }
 
 ServoActuatorDevice::~ServoActuatorDevice() {
     m_commandTimeoutTimer->stop();
+    m_communicationWatchdog->stop();
 }
 
-void ServoActuatorDevice::setDependencies(Transport* transport, 
+void ServoActuatorDevice::setDependencies(Transport* transport,
                                            ServoActuatorProtocolParser* parser) {
     m_transport = transport;
     m_parser = parser;
-    
+
     // Parent them to this device for lifetime management
     m_transport->setParent(this);
     m_parser->setParent(this);
-    
+
     // Connect transport signals
-    connect(m_transport, &Transport::frameReceived, 
+    connect(m_transport, &Transport::frameReceived,
             this, &ServoActuatorDevice::onFrameReceived);
-    
-    connect(m_transport, &Transport::connectionStateChanged, 
+
+    // Handle transport disconnect (but not connect - we only show connected when we receive valid data)
+    connect(m_transport, &Transport::connectionStateChanged,
             this, [this](bool connected) {
-        auto newData = std::make_shared<ServoActuatorData>(*data());
-        newData->isConnected = connected;
-        updateData(newData);
-        emit actuatorDataChanged(*newData);
+        if (!connected) {
+            onTransportDisconnected();
+        }
     });
 }
 
@@ -69,13 +76,15 @@ bool ServoActuatorDevice::initialize() {
 
 void ServoActuatorDevice::shutdown() {
     m_commandTimeoutTimer->stop();
+    m_communicationWatchdog->stop();
     m_commandQueue.clear();
     m_pendingCommand.clear();
-    
+
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
     }
-    
+
+    setConnectionState(false);
     setState(DeviceState::Offline);
 }
 
@@ -137,8 +146,11 @@ void ServoActuatorDevice::processMessage(const Message& message) {
 void ServoActuatorDevice::mergePartialData(const ServoActuatorData& partialData) {
     auto currentData = data();
     auto newData = std::make_shared<ServoActuatorData>(*currentData);
-    newData->isConnected = true;
-    
+
+    // We received valid data - device is connected and communicating
+    setConnectionState(true);
+    resetCommunicationWatchdog();
+
     bool dataChanged = false;
     
     // Merge only non-zero/non-default values
@@ -315,4 +327,40 @@ void ServoActuatorDevice::clearFaults() {
 
 void ServoActuatorDevice::reboot() {
     sendCommand("ZR321");
+}
+
+//================================================================================
+// PRIVATE - CONNECTION STATE MANAGEMENT
+//================================================================================
+
+void ServoActuatorDevice::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<ServoActuatorData>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+        emit actuatorDataChanged(*newData);
+
+        if (connected) {
+            qDebug() << m_identifier << "Communication established";
+        } else {
+            qWarning() << m_identifier << "Communication lost";
+        }
+    }
+}
+
+void ServoActuatorDevice::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void ServoActuatorDevice::onTransportDisconnected() {
+    qWarning() << m_identifier << "Transport disconnected";
+    m_communicationWatchdog->stop();
+    setConnectionState(false);
+}
+
+void ServoActuatorDevice::onCommunicationWatchdogTimeout() {
+    qWarning() << m_identifier << "Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
 }

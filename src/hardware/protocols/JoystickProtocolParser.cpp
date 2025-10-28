@@ -4,7 +4,7 @@
 #include <cmath>
 
 JoystickProtocolParser::JoystickProtocolParser(QObject* parent)
-    : QObject(parent), m_currentState()
+    : ProtocolParser(parent), m_currentState()
 {
     reset();
 }

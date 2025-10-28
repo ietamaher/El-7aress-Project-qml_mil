@@ -93,21 +93,27 @@ private slots:
     void processMessage(const Message& message);
     void handleCommandTimeout();
     void processNextCommand();
+    void onTransportDisconnected();
+    void onCommunicationWatchdogTimeout();
 
 private:
     void sendCommand(const QString& command);
     void mergePartialData(const ServoActuatorData& partialData);
+    void resetCommunicationWatchdog();
+    void setConnectionState(bool connected);
 
     QString m_identifier;
     Transport* m_transport = nullptr;
     ServoActuatorProtocolParser* m_parser = nullptr;
-    
+
     QTimer* m_commandTimeoutTimer;
+    QTimer* m_communicationWatchdog;
     QString m_pendingCommand;
     QQueue<QString> m_commandQueue;
-    
+
     static constexpr int COMMAND_TIMEOUT_MS = 1000;
     static constexpr int INTER_COMMAND_DELAY_MS = 20;
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };
 
 #endif // SERVOACTUATORDEVICE_H

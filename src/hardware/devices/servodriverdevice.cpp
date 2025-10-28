@@ -11,33 +11,39 @@ ServoDriverDevice::ServoDriverDevice(const QString& identifier, QObject* parent)
     : TemplatedDevice<ServoDriverData>(parent),
       m_identifier(identifier),
       m_pollTimer(new QTimer(this)),
-      m_temperatureTimer(new QTimer(this))
+      m_temperatureTimer(new QTimer(this)),
+      m_communicationWatchdog(new QTimer(this))
 {
     connect(m_pollTimer, &QTimer::timeout, this, &ServoDriverDevice::pollTimerTimeout);
     connect(m_temperatureTimer, &QTimer::timeout, this, &ServoDriverDevice::temperatureTimerTimeout);
+
+    m_communicationWatchdog->setSingleShot(true);
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &ServoDriverDevice::onCommunicationWatchdogTimeout);
 }
 
 ServoDriverDevice::~ServoDriverDevice() {
     m_pollTimer->stop();
     m_temperatureTimer->stop();
+    m_communicationWatchdog->stop();
 }
 
-void ServoDriverDevice::setDependencies(Transport* transport, 
+void ServoDriverDevice::setDependencies(Transport* transport,
                                          ServoDriverProtocolParser* parser) {
     m_transport = transport;
     m_parser = parser;
-    
+
     // Parent them to this device for lifetime management
     m_transport->setParent(this);
     m_parser->setParent(this);
-    
-    // Connect transport signals
-    connect(m_transport, &Transport::connectionStateChanged, 
+
+    // Handle transport disconnect (but not connect - we only show connected when we receive valid data)
+    connect(m_transport, &Transport::connectionStateChanged,
             this, [this](bool connected) {
-        auto newData = std::make_shared<ServoDriverData>(*data());
-        newData->isConnected = connected;
-        updateData(newData);
-        emit servoDataChanged(*newData);
+        if (!connected) {
+            onTransportDisconnected();
+        }
     });
 }
 
@@ -80,11 +86,13 @@ bool ServoDriverDevice::initialize() {
 void ServoDriverDevice::shutdown() {
     m_pollTimer->stop();
     m_temperatureTimer->stop();
-    
+    m_communicationWatchdog->stop();
+
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
     }
-    
+
+    setConnectionState(false);
     setState(DeviceState::Offline);
 }
 
@@ -159,11 +167,14 @@ void ServoDriverDevice::onModbusReplyReady(QModbusReply* reply) {
 void ServoDriverDevice::processMessage(const Message& message) {
     if (message.typeId() == Message::Type::ServoDriverDataType) {
         auto const* dataMsg = static_cast<const ServoDriverDataMessage*>(&message);
-        
+
+        // We received valid data - device is connected and communicating
+        setConnectionState(true);
+        resetCommunicationWatchdog();
+
         // Merge partial data with current data
         auto currentData = data();
         auto newData = std::make_shared<ServoDriverData>(*currentData);
-        newData->isConnected = true;
         
         const ServoDriverData& partialData = dataMsg->data();
         
@@ -298,4 +309,40 @@ void ServoDriverDevice::sendWriteRequest(int startAddress, const QVector<quint16
     if (reply) {
         connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
     }
+}
+
+//================================================================================
+// PRIVATE - CONNECTION STATE MANAGEMENT
+//================================================================================
+
+void ServoDriverDevice::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<ServoDriverData>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+        emit servoDataChanged(*newData);
+
+        if (connected) {
+            qDebug() << m_identifier << "Communication established";
+        } else {
+            qWarning() << m_identifier << "Communication lost";
+        }
+    }
+}
+
+void ServoDriverDevice::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void ServoDriverDevice::onTransportDisconnected() {
+    qWarning() << m_identifier << "Transport disconnected";
+    m_communicationWatchdog->stop();
+    setConnectionState(false);
+}
+
+void ServoDriverDevice::onCommunicationWatchdogTimeout() {
+    qWarning() << m_identifier << "Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
 }
