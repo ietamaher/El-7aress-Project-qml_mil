@@ -91,9 +91,18 @@ SOURCES += \
     src/utils/reticleaimpointcalculator.cpp \
     src/video/gstvideosource.cpp \
     src/video/videoimageprovider.cpp \
-    src/hardware/protocols/ServoDriverProtocolParser.cpp \
+    src/hardware/communication/modbustransport.cpp \
+    src/hardware/communication/serialporttransport.cpp \
+    src/hardware/protocols/DayCameraProtocolParser.cpp \
+    src/hardware/protocols/ImuProtocolParser.cpp \
+    src/hardware/protocols/JoystickProtocolParser.cpp \
+    src/hardware/protocols/LrfProtocolParser.cpp \
+    src/hardware/protocols/NightCameraProtocolParser.cpp \
+    src/hardware/protocols/Plc21ProtocolParser.cpp \
+    src/hardware/protocols/Plc42ProtocolParser.cpp \
+    src/hardware/protocols/RadarProtocolParser.cpp \
     src/hardware/protocols/ServoActuatorProtocolParser.cpp \
-    src/hardware/protocols/LrfProtocolParser.cpp
+    src/hardware/protocols/ServoDriverProtocolParser.cpp
 
 RESOURCES += resources/resources.qrc
 
@@ -195,12 +204,28 @@ HEADERS += \
     src/hardware/interfaces/Message.h \
     src/hardware/data/DataTypes.h \
     src/hardware/devices/TemplatedDevice.h \
-    src/hardware/protocols/ServoDriverProtocolParser.h \
-    src/hardware/protocols/ServoActuatorProtocolParser.h \
+    src/hardware/communication/modbustransport.h \
+    src/hardware/communication/serialporttransport.h \
+    src/hardware/protocols/DayCameraProtocolParser.h \
+    src/hardware/protocols/ImuProtocolParser.h \
+    src/hardware/protocols/JoystickProtocolParser.h \
     src/hardware/protocols/LrfProtocolParser.h \
-    src/hardware/messages/ServoDriverMessage.h \
+    src/hardware/protocols/NightCameraProtocolParser.h \
+    src/hardware/protocols/Plc21ProtocolParser.h \
+    src/hardware/protocols/Plc42ProtocolParser.h \
+    src/hardware/protocols/RadarProtocolParser.h \
+    src/hardware/protocols/ServoActuatorProtocolParser.h \
+    src/hardware/protocols/ServoDriverProtocolParser.h \
+    src/hardware/messages/DayCameraMessage.h \
+    src/hardware/messages/ImuMessage.h \
+    src/hardware/messages/JoystickMessage.h \
+    src/hardware/messages/LrfMessage.h \
+    src/hardware/messages/NightCameraMessage.h \
+    src/hardware/messages/Plc21Message.h \
+    src/hardware/messages/Plc42Message.h \
+    src/hardware/messages/RadarMessage.h \
     src/hardware/messages/ServoActuatorMessage.h \
-    src/hardware/messages/LrfMessage.h
+    src/hardware/messages/ServoDriverMessage.h
 
 
 
