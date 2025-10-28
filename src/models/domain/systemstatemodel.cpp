@@ -498,23 +498,23 @@ void SystemStateModel::updateNextIdsAfterLoad() {
 }
 
 
-void SystemStateModel::onServoAzDataChanged(const ServoData &azData) {
-    // Assuming ServoData contains azimuth position
+void SystemStateModel::onServoAzDataChanged(const ServoDriverData &azData) {
+    // Assuming ServoDriverData contains azimuth position
     //if (!qFuzzyCompare(m_currentStateData.gimbalAz, azData.position * 0.0016179775280)) { // Check if position actually changed
         m_currentStateData.gimbalAz = azData.position* 0.0016179775280;;
         m_currentStateData.azMotorTemp = azData.motorTemp;
         m_currentStateData.azDriverTemp = azData.driverTemp;
         m_currentStateData.azServoConnected = azData.isConnected;
-        m_currentStateData.azRpm = azData.rpm;           
-        m_currentStateData.azTorque = azData.torque;     
-        m_currentStateData.azFault = azData.fault;       
- 
+        m_currentStateData.azRpm = azData.rpm;
+        m_currentStateData.azTorque = azData.torque;
+        m_currentStateData.azFault = azData.fault;
+
         emit dataChanged(m_currentStateData); // Emit general data change
         emit gimbalPositionChanged(m_currentStateData.gimbalAz, m_currentStateData.gimbalEl); // Emit specific gimbal change
     //}
 }
 
-void SystemStateModel::onServoElDataChanged(const ServoData &elData) {
+void SystemStateModel::onServoElDataChanged(const ServoDriverData &elData) {
     // Assuming ServoData contains elevation position
     // if (!qFuzzyCompare(m_currentStateData.gimbalEl, elData.position * (-0.0018))) { // Check if position actually changed
         m_currentStateData.gimbalEl = elData.position * (-0.0018);
@@ -570,16 +570,16 @@ void SystemStateModel::onGyroDataChanged(const ImuData &gyroData)
 {
     SystemStateData newData = m_currentStateData;
     newData.imuConnected = gyroData.isConnected;
-    newData.imuRollDeg = gyroData.imuRollDeg; // or convert to float
-    newData.imuPitchDeg = gyroData.imuPitchDeg; // or convert to float
-    newData.imuYawDeg = gyroData.imuYawDeg; // or convert to float
+    newData.imuRollDeg = gyroData.rollDeg; // ImuData uses rollDeg, not imuRollDeg
+    newData.imuPitchDeg = gyroData.pitchDeg; // ImuData uses pitchDeg, not imuPitchDeg
+    newData.imuYawDeg = gyroData.yawDeg; // ImuData uses yawDeg, not imuYawDeg
     newData.imuTemp = gyroData.temperature;
-    newData.AccelX = gyroData.accelX_g; // Assuming this is an int
-    newData.AccelY = gyroData.accelY_g; // Assuming this is an int
-    newData.AccelZ = gyroData.accelZ_g; // Assuming this is an int
-    newData.GyroX = gyroData.angRateX_dps; // Assuming this is an int
-    newData.GyroY = gyroData.angRateY_dps; // Assuming this is an int
-    newData.GyroZ = gyroData.angRateZ_dps; // Assuming this is an int
+    newData.AccelX = gyroData.accelX_g;
+    newData.AccelY = gyroData.accelY_g;
+    newData.AccelZ = gyroData.accelZ_g;
+    newData.GyroX = gyroData.angRateX_dps;
+    newData.GyroY = gyroData.angRateY_dps;
+    newData.GyroZ = gyroData.angRateZ_dps;
 
     // Update stationary status
      updateStationaryStatus(newData);
