@@ -110,8 +110,9 @@ ActuatorStatus ServoActuatorProtocolParser::parseStatusRegister(const QString& h
         status.activeStatusMessages.append("Invalid Hex Status Received");
         return status;
     }
-    
-    status.rawStatusValue = statusValue;
+
+    // Note: rawStatusValue was removed from ActuatorStatus structure
+    // Status information is conveyed through activeStatusMessages instead
 
     // Parse each bit
     for (int i = 0; i < 32; ++i) {
