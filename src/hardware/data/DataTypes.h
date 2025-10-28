@@ -72,6 +72,27 @@
 // ============================================================================
 
 /**
+ * @brief Radar target tracking data structure (NMEA RATTM)
+ */
+struct RadarData {
+    bool isConnected = false;
+    quint32 id = 0;                     // Unique identifier for the tracked target
+    float azimuthDegrees = 0.0f;        // Target's bearing from the vessel in degrees
+    float rangeMeters = 0.0f;           // Distance to the target in meters
+    float relativeCourseDegrees = 0.0f; // Target's course relative to the vessel
+    float relativeSpeedMPS = 0.0f;      // Target's speed relative to the vessel (m/s)
+
+    bool operator!=(const RadarData &other) const {
+        return (isConnected != other.isConnected ||
+                id != other.id ||
+                !qFuzzyCompare(azimuthDegrees, other.azimuthDegrees) ||
+                !qFuzzyCompare(rangeMeters, other.rangeMeters) ||
+                !qFuzzyCompare(relativeCourseDegrees, other.relativeCourseDegrees) ||
+                !qFuzzyCompare(relativeSpeedMPS, other.relativeSpeedMPS));
+    }
+};
+
+/**
  * @brief Laser Range Finder data structure
  */
 struct LrfData {

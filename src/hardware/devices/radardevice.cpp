@@ -1,87 +1,138 @@
 #include "radardevice.h"
+#include "../interfaces/Transport.h"
+#include "../protocols/RadarProtocolParser.h"
+#include "../messages/RadarMessage.h"
+#include <QJsonObject>
 #include <QDebug>
-#include <QStringList>
 
-RadarDevice::RadarDevice(QObject *parent)
-    : BaseSerialDevice(parent)
+RadarDevice::RadarDevice(const QString& identifier, QObject* parent)
+    : TemplatedDevice<RadarData>(parent),
+      m_identifier(identifier)
 {
 }
 
-void RadarDevice::configureSerialPort()
-{
-    // NMEA 0183 standard typically uses 4800 baud, 8-N-1
-    m_serialPort->setBaudRate(QSerialPort::Baud4800);
-    m_serialPort->setDataBits(QSerialPort::Data8);
-    m_serialPort->setParity(QSerialPort::NoParity);
-    m_serialPort->setStopBits(QSerialPort::OneStop);
-    m_serialPort->setFlowControl(QSerialPort::NoFlowControl);
+RadarDevice::~RadarDevice() {
+    shutdown();
 }
 
-void RadarDevice::processIncomingData()
-{
-    // NMEA sentences end with <CR><LF> (\r\n)
-    m_readBuffer.append(m_serialPort->readAll());
+void RadarDevice::setDependencies(Transport* transport,
+                                   RadarProtocolParser* parser) {
+    m_transport = transport;
+    m_parser = parser;
 
-    while (m_readBuffer.contains("\r\n")) {
-        int endIndex = m_readBuffer.indexOf("\r\n");
-        QByteArray rawSentence = m_readBuffer.left(endIndex);
-        m_readBuffer.remove(0, endIndex + 2); // +2 for \r\n
-        // NMEA sentences start with '$'
-        if (rawSentence.startsWith("$")) {
-            if (validateChecksum(rawSentence)) {
-                QString sentence = QString(rawSentence).trimmed();
-                QStringList parts = sentence.split("*");
-                QString dataPart = parts.at(0);
+    // Parent them to this device for lifetime management
+    m_transport->setParent(this);
+    m_parser->setParent(this);
 
-                if (dataPart.startsWith("$RATTM")) {
-                    RadarData plot = parseRATTM(dataPart.toUtf8());
-                    // For now, we'll just add to a list. Later, we might update existing targets.
-                    // This simple implementation assumes new plots are always added.
-                    // A more robust solution would involve matching IDs and updating.
-                    m_trackedTargets.append(plot);
-                    emit radarPlotsUpdated(m_trackedTargets);
-                }
-            } else {
-                logError("NMEA checksum mismatch: " + QString(rawSentence));
-            }
+    // Connect transport signals
+    connect(m_transport, &Transport::frameReceived,
+            this, &RadarDevice::processFrame);
+
+    connect(m_transport, &Transport::connectionStateChanged,
+            this, [this](bool connected) {
+        if (!connected) {
+            // Clear targets when disconnected
+            m_trackedTargets.clear();
+            emit radarPlotsUpdated(m_trackedTargets);
+        }
+    });
+}
+
+bool RadarDevice::initialize() {
+    setState(DeviceState::Initializing);
+
+    if (!m_transport || !m_parser) {
+        qCritical() << m_identifier << "missing dependencies!";
+        setState(DeviceState::Error);
+        return false;
+    }
+
+    // Get configuration from device property
+    QJsonObject config = property("config").toJsonObject();
+    config["baudRate"] = 4800; // NMEA 0183 standard baud rate
+
+    qDebug() << m_identifier << "initializing...";
+
+    // Open transport
+    if (m_transport->open(config)) {
+        setState(DeviceState::Online);
+        qDebug() << m_identifier << "initialized successfully";
+        return true;
+    }
+
+    qCritical() << m_identifier << "failed to initialize transport";
+    setState(DeviceState::Error);
+    return false;
+}
+
+void RadarDevice::shutdown() {
+    if (m_transport) {
+        QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
+    }
+
+    m_trackedTargets.clear();
+    setState(DeviceState::Offline);
+}
+
+void RadarDevice::processFrame(const QByteArray& frame) {
+    if (!m_parser) return;
+
+    // Parse frame into messages
+    auto messages = m_parser->parse(frame);
+
+    // Process each message
+    for (const auto& msg : messages) {
+        if (msg) {
+            processMessage(*msg);
         }
     }
 }
 
-bool RadarDevice::validateChecksum(const QByteArray &sentence)
-{
-    int asteriskIndex = sentence.indexOf("*");
-    if (asteriskIndex == -1 || asteriskIndex + 2 >= sentence.length()) {
-        return false; // No checksum or incomplete checksum
+void RadarDevice::processMessage(const Message& message) {
+    if (message.typeId() == Message::Type::RadarPlotType) {
+        auto const* plotMsg = static_cast<const RadarPlotMessage*>(&message);
+        const RadarData& newPlot = plotMsg->data();
+
+        // Update tracked targets
+        updateTrackedTarget(newPlot);
+
+        // Update current data (for TemplatedDevice)
+        auto currentData = std::make_shared<RadarData>(newPlot);
+        updateData(currentData);
+
+        // Emit signals
+        emit newPlotReceived(newPlot);
+        emit radarPlotsUpdated(m_trackedTargets);
     }
-
-    QByteArray dataToChecksum = sentence.mid(1, asteriskIndex - 1); // Exclude '$' and '*' and checksum
-    quint8 calculatedChecksum = 0;
-    for (char c : dataToChecksum) {
-        calculatedChecksum ^= static_cast<quint8>(c);
-    }
-
-    bool ok;
-    quint8 receivedChecksum = sentence.mid(asteriskIndex + 1, 2).toUInt(&ok, 16);
-
-    return ok && (calculatedChecksum == receivedChecksum);
 }
 
-RadarData RadarDevice::parseRATTM(const QByteArray &sentence)
-{
-    RadarData plot;
-    QStringList fields = QString(sentence).split(",");
-
-    if (fields.size() >= 10) { // $RATTM,x,x,x,x,x,x,x,x,x*CS<CR><LF>
-        plot.id = fields.at(1).toUInt();
-        plot.azimuthDegrees = fields.at(2).toFloat(); // Bearing
-        plot.rangeMeters = fields.at(3).toFloat() * 1852.0; // Convert nautical miles to meters (1 NM = 1852 meters)
-        // fields.at(4) is 'T' or 'M' for True/Magnetic bearing, we ignore for now
-        plot.relativeCourseDegrees = fields.at(5).toFloat();
-        plot.relativeSpeedMPS = fields.at(6).toFloat() * 0.514444; // Convert knots to m/s (1 knot = 0.514444 m/s)
-        // Remaining fields are not used in this basic implementation
-    } else {
-        logError("Malformed $RATTM sentence: " + QString(sentence));
+void RadarDevice::updateTrackedTarget(const RadarData& newPlot) {
+    // Find existing target by ID
+    bool found = false;
+    for (int i = 0; i < m_trackedTargets.size(); ++i) {
+        if (m_trackedTargets[i].id == newPlot.id) {
+            // Update existing target
+            m_trackedTargets[i] = newPlot;
+            found = true;
+            break;
+        }
     }
-    return plot;
+
+    if (!found) {
+        // Add new target
+        m_trackedTargets.append(newPlot);
+    }
+}
+
+//================================================================================
+// PUBLIC API - TARGET MANAGEMENT
+//================================================================================
+
+QVector<RadarData> RadarDevice::trackedTargets() const {
+    return m_trackedTargets;
+}
+
+void RadarDevice::clearTrackedTargets() {
+    m_trackedTargets.clear();
+    emit radarPlotsUpdated(m_trackedTargets);
 }
