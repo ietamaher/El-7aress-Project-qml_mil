@@ -11,20 +11,20 @@
 /**
  * @brief Day camera data structure (Pelco-D protocol)
  */
-/*struct DayCameraData {
+struct DayCameraData {
     bool isConnected = false;
     bool errorState = false;
     quint8 cameraStatus = 0;
-    
+
     // Zoom control
     bool zoomMovingIn = false;
     bool zoomMovingOut = false;
     quint16 zoomPosition = 0;   // 14-bit max for VISCA
-    
+
     // Focus control
     bool autofocusEnabled = true;
     quint16 focusPosition = 0;  // 12-bit max
-    
+
     // Field of view
     float currentHFOV = 11.0;
 
@@ -39,12 +39,12 @@
                 focusPosition != other.focusPosition ||
                 !qFuzzyCompare(currentHFOV, other.currentHFOV));
     }
-};*/
+};
 
 /**
  * @brief Night camera data structure (TAU2 protocol)
  */
-/*struct NightCameraData {
+struct NightCameraData {
     bool isConnected = false;
     quint8 errorState = 0x00;
     bool ffcInProgress = false;
@@ -65,7 +65,7 @@
                 videoMode != other.videoMode ||
                 cameraStatus != other.cameraStatus);
     }
-};*/
+};
 
 // ============================================================================
 // SENSOR DATA STRUCTURES

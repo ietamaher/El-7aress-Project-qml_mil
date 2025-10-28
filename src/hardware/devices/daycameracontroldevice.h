@@ -1,92 +1,63 @@
+/**
+ * @file daycameracontroldevice.h
+ * @brief Refactored Day Camera device following MIL-STD architecture
+ *
+ * @author refactored_to_milstd
+ * @date 2025-10-28
+ * @version 2.0
+ */
+
 #ifndef DAYCAMERACONTROLDEVICE_H
 #define DAYCAMERACONTROLDEVICE_H
 
-#include <QObject>
-#include <QSerialPort>
-#include <QtGlobal>
-#include "baseserialdevice.h"
+#include "../devices/TemplatedDevice.h"
+#include "../data/DataTypes.h"
 
-struct DayCameraData
-{
-    bool isConnected = false;
-    bool errorState = false;
-    quint8 cameraStatus = 0; // e.g. 0x00 (OK) or 0x01 (Error)
+class Transport;
+class DayCameraProtocolParser;
+class Message;
 
-    // For zoom
-    bool zoomMovingIn = false;
-    bool zoomMovingOut = false;
-    quint16 zoomPosition = 0;   // 14-bit max for VISCA
-    bool autofocusEnabled = true;
-    quint16 focusPosition = 0;  // 12-bit max
-    float currentHFOV = 11.0;
-
-    bool operator==(const DayCameraData &other) const {
-        return (
-            isConnected == other.isConnected &&
-            errorState == other.errorState &&
-            cameraStatus == other.cameraStatus &&
-            zoomMovingIn == other.zoomMovingIn &&
-            zoomMovingOut == other.zoomMovingOut &&
-            zoomPosition == other.zoomPosition &&
-            autofocusEnabled == other.autofocusEnabled &&
-            focusPosition == other.focusPosition &&
-            currentHFOV == other.currentHFOV
-            );
-    }
-    bool operator!=(const DayCameraData &other) const {
-        return !(*this == other);
-    }
-};
-
-class DayCameraControlDevice : public BaseSerialDevice
-{
+class DayCameraControlDevice : public TemplatedDevice<DayCameraData> {
     Q_OBJECT
-
 public:
-    explicit DayCameraControlDevice(QObject *parent = nullptr);
-    
-    // Camera-specific interface
-    DayCameraData currentData() const;
-    
+    explicit DayCameraControlDevice(const QString& identifier, QObject* parent = nullptr);
+    ~DayCameraControlDevice() override;
+
+    QString identifier() const { return m_identifier; }
+
+    Q_INVOKABLE void setDependencies(Transport* transport, DayCameraProtocolParser* parser);
+    Q_INVOKABLE bool initialize() override;
+    void shutdown() override;
+    DeviceType type() const override { return DeviceType::DayCamera; }
+
     // Zoom controls
-    void zoomIn();
-    void zoomOut();
-    void zoomStop();
-    void setZoomPosition(quint16 position);
-    
+    Q_INVOKABLE void zoomIn();
+    Q_INVOKABLE void zoomOut();
+    Q_INVOKABLE void zoomStop();
+    Q_INVOKABLE void setZoomPosition(quint16 position);
+
     // Focus controls
-    void focusNear();
-    void focusFar();
-    void focusStop();
-    void setFocusAuto(bool enabled);
-    void setFocusPosition(quint16 position);
-    
-    // Status
-    void getCameraStatus();
+    Q_INVOKABLE void focusNear();
+    Q_INVOKABLE void focusFar();
+    Q_INVOKABLE void focusStop();
+    Q_INVOKABLE void setFocusAuto(bool enabled);
+    Q_INVOKABLE void setFocusPosition(quint16 position);
+
+    Q_INVOKABLE void getCameraStatus();
 
 signals:
-    void dayCameraDataChanged(const DayCameraData &data);
+    void dayCameraDataChanged(const DayCameraData& data);
 
-protected:
-    // Implement base class pure virtual methods
-    void configureSerialPort() override;
-    void processIncomingData() override;
-    void onConnectionEstablished() override;
-    void onConnectionLost() override;
+private slots:
+    void processFrame(const QByteArray& frame);
+    void processMessage(const Message& message);
 
 private:
-    // Pelco-D protocol helpers
-    QByteArray buildPelcoD(quint8 address, quint8 cmd1, quint8 cmd2,
-                          quint8 data1, quint8 data2) const;
-    void sendPelcoDCommand(quint8 cmd1, quint8 cmd2, quint8 data1 = 0, quint8 data2 = 0);
-    
-    void updateDayCameraData(const DayCameraData &newData);
-    double computeHFOVfromZoom(quint16 zoomPos) const;
-    
-    DayCameraData m_currentData;
-    QByteArray m_lastSentCommand;
-    
-    static const quint8 CAMERA_ADDRESS = 0x01;
+    void sendCommand(quint8 cmd1, quint8 cmd2, quint8 data1 = 0, quint8 data2 = 0);
+
+    QString m_identifier;
+    Transport* m_transport = nullptr;
+    DayCameraProtocolParser* m_parser = nullptr;
 };
 
 #endif // DAYCAMERACONTROLDEVICE_H

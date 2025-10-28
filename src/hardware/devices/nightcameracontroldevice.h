@@ -1,93 +1,57 @@
+/**
+ * @file nightcameracontroldevice.h
+ * @brief Refactored Night Camera device following MIL-STD architecture
+ *
+ * @author refactored_to_milstd
+ * @date 2025-10-28
+ * @version 2.0
+ */
+
 #ifndef NIGHTCAMERACONTROLDEVICE_H
 #define NIGHTCAMERACONTROLDEVICE_H
 
-#include "baseserialdevice.h"
+#include "../devices/TemplatedDevice.h"
+#include "../data/DataTypes.h"
 #include <QTimer>
 
-// Structure to hold camera data
-struct NightCameraData {
-    bool isConnected = false;
-    quint8 errorState = 0x00;
-    bool ffcInProgress = false;
-    bool digitalZoomEnabled = false;
-    quint8 digitalZoomLevel = 0;
-    double currentHFOV = 10.4;
-    quint16 videoMode = 0;
-    quint8 lut = 0;
-    quint8 cameraStatus = 0;
+class Transport;
+class NightCameraProtocolParser;
+class Message;
 
-    bool operator==(const NightCameraData &other) const {
-        return (isConnected == other.isConnected &&
-                errorState == other.errorState &&
-                ffcInProgress == other.ffcInProgress &&
-                digitalZoomEnabled == other.digitalZoomEnabled &&
-                digitalZoomLevel == other.digitalZoomLevel &&
-                currentHFOV == other.currentHFOV &&
-                videoMode == other.videoMode &&
-                cameraStatus == other.cameraStatus);
-    }
-    
-    bool operator!=(const NightCameraData &other) const {
-        return !(*this == other);
-    }
-};
-
-class NightCameraControlDevice : public BaseSerialDevice {
+class NightCameraControlDevice : public TemplatedDevice<NightCameraData> {
     Q_OBJECT
-
 public:
-    explicit NightCameraControlDevice(QObject *parent = nullptr);
-    ~NightCameraControlDevice();
+    explicit NightCameraControlDevice(const QString& identifier, QObject* parent = nullptr);
+    ~NightCameraControlDevice() override;
 
-    // Camera control methods
-    void performFFC();
-    void setDigitalZoom(quint8 zoomLevel);
-    void setVideoModeLUT(quint16 mode);
-    void getCameraStatus();
+    QString identifier() const { return m_identifier; }
 
-    // Data access
-    const NightCameraData& getCurrentData() const { return m_currentData; }
+    Q_INVOKABLE void setDependencies(Transport* transport, NightCameraProtocolParser* parser);
+    Q_INVOKABLE bool initialize() override;
+    void shutdown() override;
+    DeviceType type() const override { return DeviceType::NightCamera; }
+
+    // Camera controls
+    Q_INVOKABLE void performFFC();
+    Q_INVOKABLE void setDigitalZoom(quint8 zoomLevel);
+    Q_INVOKABLE void setVideoModeLUT(quint16 mode);
+    Q_INVOKABLE void getCameraStatus();
 
 signals:
-    void nightCameraDataChanged(const NightCameraData &data);
-    void responseReceived(const QByteArray &response);
-    void statusChanged(bool isConnected);
-
-protected:
-    // BaseSerialDevice interface implementation
-    void configureSerialPort() override;
-    void processIncomingData() override;
-    void onConnectionEstablished() override;
-    void onConnectionLost() override;
-
-    // Reconnection settings
-    int getMaxReconnectAttempts() const override { return 3; }
-    int getReconnectDelayMs(int attempt) const override { return 2000 + (attempt * 1000); }
+    void nightCameraDataChanged(const NightCameraData& data);
 
 private slots:
+    void processFrame(const QByteArray& frame);
+    void processMessage(const Message& message);
     void checkCameraStatus();
 
 private:
-    // Command building and CRC
-    QByteArray buildCommand(quint8 function, const QByteArray &data);
-    quint16 calculateCRC(const QByteArray &data, int length);
-    bool verifyCRC(const QByteArray &packet);
+    void sendCommand(quint8 function, const QByteArray& data);
 
-    // Response handlers
-    void handleResponse(const QByteArray &response);
-    void handleStatusResponse(const QByteArray &data);
-    void handleVideoModeResponse(const QByteArray &data);
-    void handleVideoLUTResponse(const QByteArray &data);
-    void handleFFCResponse(const QByteArray &data);
-    void handleStatusError(quint8 statusByte);
-
-    // Data management
-    void updateNightCameraData(const NightCameraData &newData);
-
-    // Member variables
-    NightCameraData m_currentData;
-    QTimer *m_statusCheckTimer = nullptr;
-    static const int m_statusCheckIntervalMs = 5000;
+    QString m_identifier;
+    Transport* m_transport = nullptr;
+    NightCameraProtocolParser* m_parser = nullptr;
+    QTimer* m_statusCheckTimer = nullptr;
 };
 
 #endif // NIGHTCAMERACONTROLDEVICE_H
