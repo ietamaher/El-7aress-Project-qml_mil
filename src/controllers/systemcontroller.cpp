@@ -13,6 +13,16 @@
 #include "hardware/devices/servoactuatordevice.h"
 #include "hardware/devices/servodriverdevice.h"
 
+// Transport & Protocol Parsers
+#include "hardware/communication/modbustransport.h"
+#include "hardware/communication/serialporttransport.h"
+#include "hardware/protocols/ImuProtocolParser.h"
+#include "hardware/protocols/DayCameraProtocolParser.h"
+#include "hardware/protocols/NightCameraProtocolParser.h"
+#include "hardware/protocols/JoystickProtocolParser.h"
+#include "hardware/protocols/Plc21ProtocolParser.h"
+#include "hardware/protocols/Plc42ProtocolParser.h"
+
 // Data Models
 #include "models/domain/gyrodatamodel.h"
 #include "models/domain/joystickdatamodel.h"
@@ -131,18 +141,59 @@ void SystemController::initializeHardware()
 
     qInfo() << "  ✓ DataLogger connected to SystemStateModel";
 
-    // 3. Create Hardware Devices using configuration
+    // 3. Create Transport Layer (MIL-STD Architecture)
+    m_imuTransport = new ModbusTransport(this);
+    m_dayCameraTransport = new SerialPortTransport(this);
+    m_nightCameraTransport = new SerialPortTransport(this);
+    m_plc21Transport = new ModbusTransport(this);
+    m_plc42Transport = new ModbusTransport(this);
+    qInfo() << "  ✓ Transport layer created";
+
+    // 4. Create Protocol Parsers (MIL-STD Architecture)
+    m_imuParser = new ImuProtocolParser(this);
+    m_dayCameraParser = new DayCameraProtocolParser(this);
+    m_nightCameraParser = new NightCameraProtocolParser(this);
+    m_joystickParser = new JoystickProtocolParser(this);
+    m_plc21Parser = new Plc21ProtocolParser(this);
+    m_plc42Parser = new Plc42ProtocolParser(this);
+    qInfo() << "  ✓ Protocol parsers created";
+
+    // 5. Create Hardware Devices using MIL-STD dependency injection
+
+    // Day Camera (Pelco-D via Serial)
     m_dayCamControl = new DayCameraControlDevice(this);
-    m_gyroDevice = new ImuDevice(imuConf.port, imuConf.baudRate, imuConf.slaveId, this);
+    m_dayCamControl->setDependencies(m_dayCameraTransport, m_dayCameraParser);
+
+    // IMU (Modbus RTU)
+    m_gyroDevice = new ImuDevice(this);
+    m_gyroDevice->setDependencies(m_imuTransport, m_imuParser);
+
+    // Joystick (SDL2 - no transport needed)
     m_joystickDevice = new JoystickDevice(this);
+    m_joystickDevice->setParser(m_joystickParser);
+
+    // Lens (unchanged - not refactored yet)
     m_lensDevice = new LensDevice(this);
+
+    // LRF (unchanged - uses existing architecture)
     m_lrfDevice = new LRFDevice(this);
+
+    // Night Camera (TAU2 via Serial)
     m_nightCamControl = new NightCameraControlDevice(this);
-    m_plc21Device = new Plc21Device(plc21Conf.port, plc21Conf.baudRate, plc21Conf.slaveId, plc21Conf.parity, this);
-    m_plc42Device = new Plc42Device(plc42Conf.port, plc42Conf.baudRate, plc42Conf.slaveId, plc42Conf.parity, this);
+    m_nightCamControl->setDependencies(m_nightCameraTransport, m_nightCameraParser);
+
+    // PLC21 (Modbus RTU)
+    m_plc21Device = new Plc21Device(this);
+    m_plc21Device->setDependencies(m_plc21Transport, m_plc21Parser);
+
+    // PLC42 (Modbus RTU)
+    m_plc42Device = new Plc42Device(this);
+    m_plc42Device->setDependencies(m_plc42Transport, m_plc42Parser);
+
+    // Servo Actuator (unchanged - uses existing architecture)
     m_servoActuatorDevice = new ServoActuatorDevice("servoActuator", this);
 
-    // Servo devices with configuration
+    // Servo devices with configuration (unchanged - uses existing architecture)
     m_servoAzThread = new QThread(this);
     m_servoAzDevice = new ServoDriverDevice(servoAzConf.name, servoAzConf.port, servoAzConf.baudRate, servoAzConf.slaveId, servoAzConf.parity, nullptr);
     m_servoElThread = new QThread(this);
@@ -152,7 +203,7 @@ void SystemController::initializeHardware()
     m_dayVideoProcessor = new CameraVideoStreamDevice(0, videoConf.dayDevicePath, videoConf.sourceWidth, videoConf.sourceHeight, m_systemStateModel, nullptr);
     m_nightVideoProcessor = new CameraVideoStreamDevice(1, videoConf.nightDevicePath, videoConf.sourceWidth, videoConf.sourceHeight, m_systemStateModel, nullptr);
 
-    qInfo() << "  ✓ Hardware devices created from configuration";
+    qInfo() << "  ✓ Hardware devices created with dependency injection";
 
     // 3. Create Data Models
     m_dayCamControlModel = new DayCameraDataModel(this);
@@ -293,31 +344,81 @@ void SystemController::startSystem()
 
     // Get configuration
     const auto& videoConf = DeviceConfiguration::video();
+    const auto& imuConf = DeviceConfiguration::imu();
     const auto& lrfConf = DeviceConfiguration::lrf();
+    const auto& plc21Conf = DeviceConfiguration::plc21();
+    const auto& plc42Conf = DeviceConfiguration::plc42();
     const auto& actuatorConf = DeviceConfiguration::actuator();
 
-    // Open Device Connections using configuration
-    m_dayCamControl->openSerialPort(videoConf.dayControlPort);
-    m_gyroDevice->connectDevice();
+    // 1. Configure and open Transport connections (MIL-STD Architecture)
+
+    // IMU Transport (Modbus RTU)
+    QJsonObject imuTransportConfig;
+    imuTransportConfig["port"] = imuConf.port;
+    imuTransportConfig["baudRate"] = imuConf.baudRate;
+    imuTransportConfig["parity"] = static_cast<int>(imuConf.parity);
+    imuTransportConfig["slaveId"] = imuConf.slaveId;
+    m_imuTransport->open(imuTransportConfig);
+
+    // Day Camera Transport (Serial)
+    QJsonObject dayCameraTransportConfig;
+    dayCameraTransportConfig["port"] = videoConf.dayControlPort;
+    dayCameraTransportConfig["baudRate"] = 9600;  // Pelco-D standard
+    dayCameraTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
+    m_dayCameraTransport->open(dayCameraTransportConfig);
+
+    // Night Camera Transport (Serial)
+    QJsonObject nightCameraTransportConfig;
+    nightCameraTransportConfig["port"] = videoConf.nightControlPort;
+    nightCameraTransportConfig["baudRate"] = 57600;  // TAU2 standard
+    nightCameraTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
+    m_nightCameraTransport->open(nightCameraTransportConfig);
+
+    // PLC21 Transport (Modbus RTU)
+    QJsonObject plc21TransportConfig;
+    plc21TransportConfig["port"] = plc21Conf.port;
+    plc21TransportConfig["baudRate"] = plc21Conf.baudRate;
+    plc21TransportConfig["parity"] = static_cast<int>(plc21Conf.parity);
+    plc21TransportConfig["slaveId"] = plc21Conf.slaveId;
+    m_plc21Transport->open(plc21TransportConfig);
+
+    // PLC42 Transport (Modbus RTU)
+    QJsonObject plc42TransportConfig;
+    plc42TransportConfig["port"] = plc42Conf.port;
+    plc42TransportConfig["baudRate"] = plc42Conf.baudRate;
+    plc42TransportConfig["parity"] = static_cast<int>(plc42Conf.parity);
+    plc42TransportConfig["slaveId"] = plc42Conf.slaveId;
+    m_plc42Transport->open(plc42TransportConfig);
+
+    qInfo() << "  ✓ Transport connections opened";
+
+    // 2. Initialize MIL-STD refactored devices
+    m_dayCamControl->initialize();
+    m_gyroDevice->initialize();
+    m_joystickDevice->initialize();
+    m_nightCamControl->initialize();
+    m_plc21Device->initialize();
+    m_plc42Device->initialize();
+
+    qInfo() << "  ✓ MIL-STD devices initialized";
+
+    // 3. Open legacy device connections (not yet refactored)
     m_lrfDevice->openSerialPort(lrfConf.port);
-    m_nightCamControl->openSerialPort(videoConf.nightControlPort);
-    m_plc21Device->connectDevice();
-    m_plc42Device->connectDevice();
     m_servoActuatorDevice->openSerialPort(actuatorConf.port);
 
     if (m_servoAzDevice) m_servoAzDevice->connectDevice();
     if (m_servoElDevice) m_servoElDevice->connectDevice();
 
-    qInfo() << "  ✓ Device connections opened";
+    qInfo() << "  ✓ Legacy device connections opened";
 
-    // 2. Initialize Cameras
+    // 4. Configure camera defaults
     m_dayCamControl->zoomOut();
     m_dayCamControl->zoomStop();
     m_nightCamControl->setDigitalZoom(0);
 
-    qInfo() << "  ✓ Cameras initialized";
+    qInfo() << "  ✓ Camera defaults configured";
 
-    // 3. Start Video Processing Threads
+    // 5. Start Video Processing Threads
     if (m_dayVideoProcessor) {
         m_dayVideoProcessor->start();
         qInfo() << "  ✓ Day camera thread started";
@@ -328,7 +429,7 @@ void SystemController::startSystem()
         qInfo() << "  ✓ Night camera thread started";
     }
 
-    // 4. Clear Gimbal Alarms
+    // 6. Clear Gimbal Alarms
     if (m_gimbalController) {
         m_gimbalController->clearAlarms();
         qInfo() << "  ✓ Gimbal alarms cleared";

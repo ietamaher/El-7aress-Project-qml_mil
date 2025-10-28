@@ -18,6 +18,17 @@ class Plc42Device;
 class ServoActuatorDevice;
 class ServoDriverDevice;
 
+// Forward declarations - Transport & Parsers
+class Transport;
+class ModbusTransport;
+class SerialPortTransport;
+class ImuProtocolParser;
+class DayCameraProtocolParser;
+class NightCameraProtocolParser;
+class JoystickProtocolParser;
+class Plc21ProtocolParser;
+class Plc42ProtocolParser;
+
 // Forward declarations - Data Models
 class DayCameraDataModel;
 class GyroDataModel;
@@ -83,6 +94,21 @@ private:
     void connectVideoToProvider();
     void createQmlControllers();      // NEW
     void connectQmlControllers();     // NEW
+
+    // === TRANSPORT LAYER ===
+    ModbusTransport* m_imuTransport = nullptr;
+    SerialPortTransport* m_dayCameraTransport = nullptr;
+    SerialPortTransport* m_nightCameraTransport = nullptr;
+    ModbusTransport* m_plc21Transport = nullptr;
+    ModbusTransport* m_plc42Transport = nullptr;
+
+    // === PROTOCOL PARSERS ===
+    ImuProtocolParser* m_imuParser = nullptr;
+    DayCameraProtocolParser* m_dayCameraParser = nullptr;
+    NightCameraProtocolParser* m_nightCameraParser = nullptr;
+    JoystickProtocolParser* m_joystickParser = nullptr;
+    Plc21ProtocolParser* m_plc21Parser = nullptr;
+    Plc42ProtocolParser* m_plc42Parser = nullptr;
 
     // === HARDWARE DEVICES ===
     DayCameraControlDevice* m_dayCamControl = nullptr;

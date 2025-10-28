@@ -1,234 +1,160 @@
 #include "daycameracontroldevice.h"
+#include "../interfaces/Transport.h"
+#include "../protocols/DayCameraProtocolParser.h"
+#include "../messages/DayCameraMessage.h"
+#include <QJsonObject>
 #include <QDebug>
-#include <QTimer>
 
-DayCameraControlDevice::DayCameraControlDevice(QObject *parent)
-    : BaseSerialDevice(parent)
-{
-    // Initialize camera-specific data
-    m_currentData.isConnected = false;
+DayCameraControlDevice::DayCameraControlDevice(const QString& identifier, QObject* parent)
+    : TemplatedDevice<DayCameraData>(parent), m_identifier(identifier) {}
+
+DayCameraControlDevice::~DayCameraControlDevice() {
+    shutdown();
 }
 
-void DayCameraControlDevice::configureSerialPort()
-{
-    m_serialPort->setBaudRate(QSerialPort::Baud9600);
-    m_serialPort->setDataBits(QSerialPort::Data8);
-    m_serialPort->setParity(QSerialPort::NoParity);
-    m_serialPort->setStopBits(QSerialPort::OneStop);
-    m_serialPort->setFlowControl(QSerialPort::NoFlowControl);
+void DayCameraControlDevice::setDependencies(Transport* transport, DayCameraProtocolParser* parser) {
+    m_transport = transport;
+    m_parser = parser;
+
+    m_transport->setParent(this);
+    m_parser->setParent(this);
+
+    connect(m_transport, &Transport::frameReceived, this, &DayCameraControlDevice::processFrame);
+    connect(m_transport, &Transport::connectionStateChanged, this, [this](bool connected) {
+        auto newData = std::make_shared<DayCameraData>(*data());
+        newData->isConnected = connected;
+        updateData(newData);
+        emit dayCameraDataChanged(*newData);
+    });
 }
 
-void DayCameraControlDevice::processIncomingData()
-{
-    // Process Pelco-D response frames (7 bytes each)
-    while (m_readBuffer.size() >= 7) {
-        // Verify SYNC byte
-        if (static_cast<quint8>(m_readBuffer.at(0)) != 0xFF) {
-            logError(QString("Invalid SYNC byte: 0x%1")
-                    .arg(static_cast<quint8>(m_readBuffer.at(0)), 2, 16, QChar('0')));
-            m_readBuffer.remove(0, 1);
-            continue;
-        }
+bool DayCameraControlDevice::initialize() {
+    setState(DeviceState::Initializing);
 
-        // Extract 7-byte frame
-        QByteArray frame = m_readBuffer.left(7);
-        m_readBuffer.remove(0, 7);
+    if (!m_transport || !m_parser) {
+        qCritical() << m_identifier << "missing dependencies!";
+        setState(DeviceState::Error);
+        return false;
+    }
 
-        // Parse frame fields
-        quint8 addr = static_cast<quint8>(frame.at(1));
-        quint8 resp1 = static_cast<quint8>(frame.at(2));
-        quint8 resp2 = static_cast<quint8>(frame.at(3));
-        quint8 data1 = static_cast<quint8>(frame.at(4));
-        quint8 data2 = static_cast<quint8>(frame.at(5));
-        quint8 recvChecksum = static_cast<quint8>(frame.at(6));
+    QJsonObject config = property("config").toJsonObject();
+    config["baudRate"] = 9600;
 
-        // Verify checksum
-        quint8 calcChecksum = (addr + resp1 + resp2 + data1 + data2) & 0xFF;
-        if (recvChecksum != calcChecksum) {
-            logError(QString("Checksum mismatch: received 0x%1, calculated 0x%2")
-                    .arg(recvChecksum, 2, 16, QChar('0'))
-                    .arg(calcChecksum, 2, 16, QChar('0')));
-            continue;
-        }
+    if (m_transport->open(config)) {
+        setState(DeviceState::Online);
+        getCameraStatus();
+        return true;
+    }
 
-        // Process valid frame
-        DayCameraData newData = m_currentData;
-        
-        if (resp2 == 0xA7) {
-            // Zoom position response
-            quint16 zoomPos = (data1 << 8) | data2;
-            newData.zoomPosition = zoomPos;
-            newData.currentHFOV = computeHFOVfromZoom(zoomPos);
-        } else if (resp2 == 0x63) {
-            // Focus position response
-            quint16 focusPos = (data1 << 8) | data2;
-            newData.focusPosition = focusPos;
-        }
-        
-        updateDayCameraData(newData);
-        m_lastSentCommand.clear();
+    setState(DeviceState::Error);
+    return false;
+}
+
+void DayCameraControlDevice::shutdown() {
+    if (m_transport) {
+        QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
+    }
+    setState(DeviceState::Offline);
+}
+
+void DayCameraControlDevice::processFrame(const QByteArray& frame) {
+    if (!m_parser) return;
+
+    auto messages = m_parser->parse(frame);
+    for (const auto& msg : messages) {
+        if (msg) processMessage(*msg);
     }
 }
 
-void DayCameraControlDevice::onConnectionEstablished()
-{
-    DayCameraData newData = m_currentData;
-    newData.isConnected = true;
-    newData.errorState = false;
-    updateDayCameraData(newData);
-}
+void DayCameraControlDevice::processMessage(const Message& message) {
+    if (message.typeId() == Message::Type::DayCameraDataType) {
+        auto const* dataMsg = static_cast<const DayCameraDataMessage*>(&message);
 
-void DayCameraControlDevice::onConnectionLost()
-{
-    DayCameraData newData = m_currentData;
-    newData.isConnected = false;
-    newData.errorState = true;
-    updateDayCameraData(newData);
-}
+        // Merge with current data
+        auto currentData = data();
+        auto newData = std::make_shared<DayCameraData>(*currentData);
 
-DayCameraData DayCameraControlDevice::currentData() const
-{
-    QMutexLocker locker(&m_mutex);
-    return m_currentData;
-}
+        const DayCameraData& partial = dataMsg->data();
+        if (partial.zoomPosition != 0) {
+            newData->zoomPosition = partial.zoomPosition;
+            newData->currentHFOV = partial.currentHFOV;
+        }
+        if (partial.focusPosition != 0) {
+            newData->focusPosition = partial.focusPosition;
+        }
 
-QByteArray DayCameraControlDevice::buildPelcoD(quint8 address, quint8 cmd1, quint8 cmd2,
-                                              quint8 data1, quint8 data2) const
-{
-    QByteArray packet;
-    packet.append((char)0xFF);
-    packet.append((char)address);
-    packet.append((char)cmd1);
-    packet.append((char)cmd2);
-    packet.append((char)data1);
-    packet.append((char)data2);
-
-    quint8 checksum = (address + cmd1 + cmd2 + data1 + data2) & 0xFF;
-    packet.append((char)checksum);
-    return packet;
-}
-
-void DayCameraControlDevice::sendPelcoDCommand(quint8 cmd1, quint8 cmd2, quint8 data1, quint8 data2)
-{
-    if (!isConnected()) {
-        logError("Cannot send camera command: not connected");
-        return;
+        updateData(newData);
+        emit dayCameraDataChanged(*newData);
     }
-    
-    QByteArray command = buildPelcoD(CAMERA_ADDRESS, cmd1, cmd2, data1, data2);
-    m_lastSentCommand = command;
-    sendData(command);
 }
 
-void DayCameraControlDevice::zoomIn()
-{
-    DayCameraData newData = m_currentData;
-    newData.zoomMovingIn = true;
-    newData.zoomMovingOut = false;
-    updateDayCameraData(newData);
+void DayCameraControlDevice::sendCommand(quint8 cmd1, quint8 cmd2, quint8 data1, quint8 data2) {
+    if (state() != DeviceState::Online || !m_transport || !m_parser) return;
 
-    sendPelcoDCommand(0x00, 0x20); // Zoom Tele
+    QByteArray command = m_parser->buildCommand(cmd1, cmd2, data1, data2);
+    m_transport->sendFrame(command);
 }
 
-void DayCameraControlDevice::zoomOut()
-{
-    DayCameraData newData = m_currentData;
-    newData.zoomMovingOut = true;
-    newData.zoomMovingIn = false;
-    updateDayCameraData(newData);
-
-    sendPelcoDCommand(0x00, 0x40); // Zoom Wide
+void DayCameraControlDevice::zoomIn() {
+    auto newData = std::make_shared<DayCameraData>(*data());
+    newData->zoomMovingIn = true;
+    newData->zoomMovingOut = false;
+    updateData(newData);
+    emit dayCameraDataChanged(*newData);
+    sendCommand(0x00, 0x20);
 }
 
-void DayCameraControlDevice::zoomStop()
-{
-    DayCameraData newData = m_currentData;
-    newData.zoomMovingIn = false;
-    newData.zoomMovingOut = false;
-    updateDayCameraData(newData);
-
-    sendPelcoDCommand(0x00, 0x00); // Stop
+void DayCameraControlDevice::zoomOut() {
+    auto newData = std::make_shared<DayCameraData>(*data());
+    newData->zoomMovingOut = true;
+    newData->zoomMovingIn = false;
+    updateData(newData);
+    emit dayCameraDataChanged(*newData);
+    sendCommand(0x00, 0x40);
 }
 
-void DayCameraControlDevice::setZoomPosition(quint16 position)
-{
-    DayCameraData newData = m_currentData;
-    newData.zoomPosition = position;
-    newData.zoomMovingIn = false;
-    newData.zoomMovingOut = false;
-    updateDayCameraData(newData);
+void DayCameraControlDevice::zoomStop() {
+    auto newData = std::make_shared<DayCameraData>(*data());
+    newData->zoomMovingIn = false;
+    newData->zoomMovingOut = false;
+    updateData(newData);
+    emit dayCameraDataChanged(*newData);
+    sendCommand(0x00, 0x00);
+}
 
+void DayCameraControlDevice::setZoomPosition(quint16 position) {
     quint8 high = (position >> 8) & 0xFF;
     quint8 low = position & 0xFF;
-    sendPelcoDCommand(0x00, 0xA7, high, low);
+    sendCommand(0x00, 0xA7, high, low);
 }
 
-void DayCameraControlDevice::focusNear()
-{
-    sendPelcoDCommand(0x01, 0x00); // Focus Near
+void DayCameraControlDevice::focusNear() {
+    sendCommand(0x01, 0x00);
 }
 
-void DayCameraControlDevice::focusFar()
-{
-    sendPelcoDCommand(0x00, 0x02); // Focus Far
+void DayCameraControlDevice::focusFar() {
+    sendCommand(0x00, 0x02);
 }
 
-void DayCameraControlDevice::focusStop()
-{
-    sendPelcoDCommand(0x00, 0x00); // Stop
+void DayCameraControlDevice::focusStop() {
+    sendCommand(0x00, 0x00);
 }
 
-void DayCameraControlDevice::setFocusAuto(bool enabled)
-{
-    DayCameraData newData = m_currentData;
-    newData.autofocusEnabled = enabled;
-    updateDayCameraData(newData);
+void DayCameraControlDevice::setFocusAuto(bool enabled) {
+    auto newData = std::make_shared<DayCameraData>(*data());
+    newData->autofocusEnabled = enabled;
+    updateData(newData);
+    emit dayCameraDataChanged(*newData);
 
-    if (enabled) {
-        sendPelcoDCommand(0x01, 0x63); // Enable autofocus (vendor-specific)
-    } else {
-        sendPelcoDCommand(0x01, 0x64); // Disable autofocus (vendor-specific)
-    }
+    sendCommand(0x01, enabled ? 0x63 : 0x64);
 }
 
-void DayCameraControlDevice::setFocusPosition(quint16 position)
-{
-    DayCameraData newData = m_currentData;
-    newData.focusPosition = position;
-    updateDayCameraData(newData);
-
+void DayCameraControlDevice::setFocusPosition(quint16 position) {
     quint8 high = (position >> 8) & 0xFF;
     quint8 low = position & 0xFF;
-    sendPelcoDCommand(0x00, 0x63, high, low);
+    sendCommand(0x00, 0x63, high, low);
 }
 
-void DayCameraControlDevice::getCameraStatus()
-{
-    sendPelcoDCommand(0x00, 0xA7); // Request zoom position
-}
-
-double DayCameraControlDevice::computeHFOVfromZoom(quint16 zoomPos) const
-{
-    const quint16 maxZoom = 0x4000;
-    double fraction = qMin((double)zoomPos / maxZoom, 1.0);
-
-    double wideHFOV = 63.7;
-    double teleHFOV = 2.3;
-    return wideHFOV - (wideHFOV - teleHFOV) * fraction;
-}
-
-void DayCameraControlDevice::updateDayCameraData(const DayCameraData &newData)
-{
-    bool dataChanged = false;
-    {
-        QMutexLocker locker(&m_mutex);
-        if (newData != m_currentData) {
-            m_currentData = newData;
-            dataChanged = true;
-        }
-    }
-    
-    if (dataChanged) {
-        emit dayCameraDataChanged(m_currentData);
-    }
+void DayCameraControlDevice::getCameraStatus() {
+    sendCommand(0x00, 0xA7);
 }

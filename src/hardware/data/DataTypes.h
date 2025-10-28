@@ -11,20 +11,20 @@
 /**
  * @brief Day camera data structure (Pelco-D protocol)
  */
-/*struct DayCameraData {
+struct DayCameraData {
     bool isConnected = false;
     bool errorState = false;
     quint8 cameraStatus = 0;
-    
+
     // Zoom control
     bool zoomMovingIn = false;
     bool zoomMovingOut = false;
     quint16 zoomPosition = 0;   // 14-bit max for VISCA
-    
+
     // Focus control
     bool autofocusEnabled = true;
     quint16 focusPosition = 0;  // 12-bit max
-    
+
     // Field of view
     float currentHFOV = 11.0;
 
@@ -39,12 +39,12 @@
                 focusPosition != other.focusPosition ||
                 !qFuzzyCompare(currentHFOV, other.currentHFOV));
     }
-};*/
+};
 
 /**
  * @brief Night camera data structure (TAU2 protocol)
  */
-/*struct NightCameraData {
+struct NightCameraData {
     bool isConnected = false;
     quint8 errorState = 0x00;
     bool ffcInProgress = false;
@@ -65,7 +65,7 @@
                 videoMode != other.videoMode ||
                 cameraStatus != other.cameraStatus);
     }
-};*/
+};
 
 // ============================================================================
 // SENSOR DATA STRUCTURES
@@ -128,17 +128,17 @@ struct LrfData {
 /**
  * @brief IMU/Inclinometer data structure
  */
-/*struct ImuData {
+struct ImuData {
     bool isConnected = false;
-    
+
     // Processed angles (from Kalman filter)
     double rollDeg = 0.0;
     double pitchDeg = 0.0;
     double yawDeg = 0.0;
-    
+
     // Physical state
     double temperature = 0.0;
-    
+
     // Raw IMU data
     double accelX_g = 0.0;
     double accelY_g = 0.0;
@@ -160,7 +160,7 @@ struct LrfData {
                 angRateY_dps != other.angRateY_dps ||
                 angRateZ_dps != other.angRateZ_dps);
     }
-};*/
+};
 
 // ============================================================================
 // SERVO/ACTUATOR DATA STRUCTURES
@@ -318,6 +318,43 @@ struct Plc42Data {
                 elevationDirection != other.elevationDirection ||
                 solenoidState != other.solenoidState ||
                 resetAlarm != other.resetAlarm);
+    }
+};
+
+// ============================================================================
+// INPUT DEVICE DATA STRUCTURES
+// ============================================================================
+
+/**
+ * @brief Joystick input device data structure (SDL2-based)
+ */
+struct JoystickData {
+    bool isConnected = false;
+
+    // Axis values (normalized -1.0 to 1.0)
+    float axisX = 0.0f;
+    float axisY = 0.0f;
+
+    // Hat switch state (0 = centered, 1 = up, 2 = right, 4 = down, 8 = left)
+    int hatState = 0;
+
+    // Button states (up to 16 buttons)
+    static const int MAX_BUTTONS = 16;
+    bool buttons[MAX_BUTTONS] = { false };
+
+    bool operator!=(const JoystickData &other) const {
+        if (isConnected != other.isConnected ||
+            !qFuzzyCompare(axisX + 1.0f, other.axisX + 1.0f) ||
+            !qFuzzyCompare(axisY + 1.0f, other.axisY + 1.0f) ||
+            hatState != other.hatState) {
+            return true;
+        }
+        for (int i = 0; i < MAX_BUTTONS; i++) {
+            if (buttons[i] != other.buttons[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 };
 

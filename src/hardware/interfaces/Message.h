@@ -24,6 +24,11 @@ public:
         RadarPlotType,
         // IMU/Inclinometer (Modbus)
         ImuDataType,
+        // Camera devices
+        DayCameraDataType,
+        NightCameraDataType,
+        // Input devices
+        JoystickDataType,
         // Other devices (keep existing from MIL-STD)
         LrfDataType,
         LrfInfoType
