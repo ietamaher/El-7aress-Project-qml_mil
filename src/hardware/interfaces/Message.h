@@ -20,8 +20,11 @@ public:
         // PLC devices (Modbus)
         Plc21DataType,
         Plc42DataType,
-        // Other devices (keep existing from MIL-STD)
+        // Radar (NMEA)
         RadarPlotType,
+        // IMU/Inclinometer (Modbus)
+        ImuDataType,
+        // Other devices (keep existing from MIL-STD)
         LrfDataType,
         LrfInfoType
 
