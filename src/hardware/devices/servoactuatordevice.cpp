@@ -49,29 +49,18 @@ void ServoActuatorDevice::setDependencies(Transport* transport,
 
 bool ServoActuatorDevice::initialize() {
     setState(DeviceState::Initializing);
-    
+
     if (!m_transport || !m_parser) {
         qCritical() << m_identifier << "missing dependencies!";
         setState(DeviceState::Error);
         return false;
     }
 
-    // Get configuration from device property
-    QJsonObject config = property("config").toJsonObject();
-    config["baudRate"] = 115200; // Fixed baud rate for actuator
-    
-    qDebug() << m_identifier << "initializing...";
-    
-    // Open transport
-    if (m_transport->open(config)) {
-        setState(DeviceState::Online);
-        qDebug() << m_identifier << "initialized successfully";
-        return true;
-    }
-    
-    qCritical() << m_identifier << "failed to initialize transport";
-    setState(DeviceState::Error);
-    return false;
+    // Transport should already be opened by SystemController
+    qDebug() << m_identifier << "initialized successfully";
+
+    setState(DeviceState::Online);
+    return true;
 }
 
 void ServoActuatorDevice::shutdown() {

@@ -37,17 +37,12 @@ bool DayCameraControlDevice::initialize() {
         return false;
     }
 
-    QJsonObject config = property("config").toJsonObject();
-    config["baudRate"] = 9600;
+    // Transport should already be opened by SystemController
+    qDebug() << m_identifier << "initialized successfully";
 
-    if (m_transport->open(config)) {
-        setState(DeviceState::Online);
-        getCameraStatus();
-        return true;
-    }
-
-    setState(DeviceState::Error);
-    return false;
+    setState(DeviceState::Online);
+    getCameraStatus();
+    return true;
 }
 
 void DayCameraControlDevice::shutdown() {

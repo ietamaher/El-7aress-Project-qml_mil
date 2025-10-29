@@ -47,22 +47,11 @@ bool RadarDevice::initialize() {
         return false;
     }
 
-    // Get configuration from device property
-    QJsonObject config = property("config").toJsonObject();
-    config["baudRate"] = 4800; // NMEA 0183 standard baud rate
+    // Transport should already be opened by SystemController
+    qDebug() << m_identifier << "initialized successfully";
 
-    qDebug() << m_identifier << "initializing...";
-
-    // Open transport
-    if (m_transport->open(config)) {
-        setState(DeviceState::Online);
-        qDebug() << m_identifier << "initialized successfully";
-        return true;
-    }
-
-    qCritical() << m_identifier << "failed to initialize transport";
-    setState(DeviceState::Error);
-    return false;
+    setState(DeviceState::Online);
+    return true;
 }
 
 void RadarDevice::shutdown() {

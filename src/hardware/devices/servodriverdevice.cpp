@@ -49,38 +49,32 @@ void ServoDriverDevice::setDependencies(Transport* transport,
 
 bool ServoDriverDevice::initialize() {
     setState(DeviceState::Initializing);
-    
+
     if (!m_transport || !m_parser) {
         qCritical() << m_identifier << "missing dependencies!";
         setState(DeviceState::Error);
         return false;
     }
 
-    // Get configuration from device property
+    // Transport should already be opened by SystemController
+    qDebug() << m_identifier << "initializing...";
+
+    // Get polling intervals from config (defaults: 50ms poll, 5s temperature)
     QJsonObject config = property("config").toJsonObject();
     int pollInterval = config["pollIntervalMs"].toInt(50);
     int tempInterval = config["temperatureIntervalMs"].toInt(5000);
-    
-    qDebug() << m_identifier << "initializing with poll interval:" << pollInterval << "ms";
-    
-    // Open transport
-    if (m_transport->open(config)) {
-        setState(DeviceState::Online);
-        
-        // Start polling
-        m_pollTimer->start(pollInterval);
-        m_temperatureTimer->setInterval(tempInterval);
-        if (m_temperatureEnabled) {
-            m_temperatureTimer->start();
-        }
-        
-        qDebug() << m_identifier << "initialized successfully";
-        return true;
+
+    setState(DeviceState::Online);
+
+    // Start polling
+    m_pollTimer->start(pollInterval);
+    m_temperatureTimer->setInterval(tempInterval);
+    if (m_temperatureEnabled) {
+        m_temperatureTimer->start();
     }
-    
-    qCritical() << m_identifier << "failed to initialize transport";
-    setState(DeviceState::Error);
-    return false;
+
+    qDebug() << m_identifier << "initialized successfully with poll interval:" << pollInterval << "ms";
+    return true;
 }
 
 void ServoDriverDevice::shutdown() {
