@@ -26,12 +26,8 @@ void WindageController::initialize()
                     qDebug() << "Windage mode became inactive externally.";
                 }
 
-                // Update editing value if model changes
-                if (m_currentState == WindageState::Set_WindSpeed
-                    && m_currentWindSpeedEdit != data.windageSpeedKnots) {
-                    m_currentWindSpeedEdit = data.windageSpeedKnots;
-                    updateUI();
-                }
+                // Note: We do NOT sync m_currentWindSpeedEdit from the model during editing.
+                // The controller maintains its own edit value independently until SELECT confirms it.
             });
 
     connect(m_stateModel, &SystemStateModel::colorStyleChanged,
