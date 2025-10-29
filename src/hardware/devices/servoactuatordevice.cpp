@@ -8,11 +8,15 @@ ServoActuatorDevice::ServoActuatorDevice(const QString& identifier, QObject* par
     : TemplatedDevice<ServoActuatorData>(parent),
       m_identifier(identifier),
       m_commandTimeoutTimer(new QTimer(this)),
+      m_statusCheckTimer(new QTimer(this)),
       m_communicationWatchdog(new QTimer(this))
 {
     m_commandTimeoutTimer->setSingleShot(true);
     connect(m_commandTimeoutTimer, &QTimer::timeout,
             this, &ServoActuatorDevice::handleCommandTimeout);
+
+    connect(m_statusCheckTimer, &QTimer::timeout,
+            this, &ServoActuatorDevice::checkActuatorStatus);
 
     m_communicationWatchdog->setSingleShot(true);
     m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
@@ -22,6 +26,7 @@ ServoActuatorDevice::ServoActuatorDevice(const QString& identifier, QObject* par
 
 ServoActuatorDevice::~ServoActuatorDevice() {
     m_commandTimeoutTimer->stop();
+    m_statusCheckTimer->stop();
     m_communicationWatchdog->stop();
 }
 
@@ -60,11 +65,13 @@ bool ServoActuatorDevice::initialize() {
     qDebug() << m_identifier << "initialized successfully";
 
     setState(DeviceState::Online);
+    m_statusCheckTimer->start(STATUS_CHECK_INTERVAL_MS);
     return true;
 }
 
 void ServoActuatorDevice::shutdown() {
     m_commandTimeoutTimer->stop();
+    m_statusCheckTimer->stop();
     m_communicationWatchdog->stop();
     m_commandQueue.clear();
     m_pendingCommand.clear();
@@ -316,6 +323,11 @@ void ServoActuatorDevice::clearFaults() {
 
 void ServoActuatorDevice::reboot() {
     sendCommand("ZR321");
+}
+
+void ServoActuatorDevice::checkActuatorStatus() {
+    // Periodically query all status parameters
+    checkAllStatus();
 }
 
 //================================================================================

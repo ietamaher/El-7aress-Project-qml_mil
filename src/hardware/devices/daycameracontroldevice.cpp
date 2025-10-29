@@ -9,8 +9,11 @@
 DayCameraControlDevice::DayCameraControlDevice(const QString& identifier, QObject* parent)
     : TemplatedDevice<DayCameraData>(parent),
       m_identifier(identifier),
+      m_statusCheckTimer(new QTimer(this)),
       m_communicationWatchdog(new QTimer(this))
 {
+    connect(m_statusCheckTimer, &QTimer::timeout, this, &DayCameraControlDevice::checkCameraStatus);
+
     m_communicationWatchdog->setSingleShot(false);
     m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
     connect(m_communicationWatchdog, &QTimer::timeout,
@@ -45,12 +48,14 @@ bool DayCameraControlDevice::initialize() {
     qDebug() << m_identifier << "initialized successfully";
 
     setState(DeviceState::Online);
+    m_statusCheckTimer->start(10000);  // Send stop command every 10 seconds
     m_communicationWatchdog->start();
     getCameraStatus();
     return true;
 }
 
 void DayCameraControlDevice::shutdown() {
+    m_statusCheckTimer->stop();
     m_communicationWatchdog->stop();
 
     if (m_transport) {
@@ -164,6 +169,11 @@ void DayCameraControlDevice::setFocusPosition(quint16 position) {
 
 void DayCameraControlDevice::getCameraStatus() {
     sendCommand(0x00, 0xA7);
+}
+
+void DayCameraControlDevice::checkCameraStatus() {
+    // Send stop command (0x00, 0x00) to keep communication alive
+    zoomStop();
 }
 
 void DayCameraControlDevice::resetCommunicationWatchdog() {

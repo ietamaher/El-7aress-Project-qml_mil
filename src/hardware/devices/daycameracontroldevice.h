@@ -51,6 +51,7 @@ signals:
 private slots:
     void processFrame(const QByteArray& frame);
     void processMessage(const Message& message);
+    void checkCameraStatus();
     void onCommunicationWatchdogTimeout();
 
 private:
@@ -61,9 +62,10 @@ private:
     QString m_identifier;
     Transport* m_transport = nullptr;
     DayCameraProtocolParser* m_parser = nullptr;
+    QTimer* m_statusCheckTimer = nullptr;
     QTimer* m_communicationWatchdog = nullptr;
 
-    static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 15000;  // 15 seconds without data = disconnected
 };
 
 #endif // DAYCAMERACONTROLDEVICE_H
