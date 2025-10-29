@@ -10,6 +10,7 @@
 #include "hardware/devices/nightcameracontroldevice.h"
 #include "hardware/devices/plc21device.h"
 #include "hardware/devices/plc42device.h"
+#include "hardware/devices/radardevice.h"
 #include "hardware/devices/servoactuatordevice.h"
 #include "hardware/devices/servodriverdevice.h"
 
@@ -20,16 +21,21 @@
 #include "hardware/protocols/DayCameraProtocolParser.h"
 #include "hardware/protocols/NightCameraProtocolParser.h"
 #include "hardware/protocols/JoystickProtocolParser.h"
+#include "hardware/protocols/LrfProtocolParser.h"
+#include "hardware/protocols/RadarProtocolParser.h"
 #include "hardware/protocols/Plc21ProtocolParser.h"
 #include "hardware/protocols/Plc42ProtocolParser.h"
 #include "hardware/protocols/ServoDriverProtocolParser.h"
 #include "hardware/protocols/ServoActuatorProtocolParser.h"
 
 // Data Models
+#include "models/domain/daycameradatamodel.h"
+#include "models/domain/nightcameradatamodel.h"
 #include "models/domain/gyrodatamodel.h"
 #include "models/domain/joystickdatamodel.h"
 #include "models/domain/lensdatamodel.h"
 #include "models/domain/lrfdatamodel.h"
+#include "models/domain/radardatamodel.h"
 #include "models/domain/plc21datamodel.h"
 #include "models/domain/plc42datamodel.h"
 #include "models/domain/servoactuatordatamodel.h"
@@ -147,6 +153,8 @@ void SystemController::initializeHardware()
     m_imuTransport = new ModbusTransport(this);
     m_dayCameraTransport = new SerialPortTransport(this);
     m_nightCameraTransport = new SerialPortTransport(this);
+    m_lrfTransport = new SerialPortTransport(this);
+    m_radarTransport = new SerialPortTransport(this);
     m_plc21Transport = new ModbusTransport(this);
     m_plc42Transport = new ModbusTransport(this);
     m_servoAzTransport = new ModbusTransport(this);
@@ -159,6 +167,8 @@ void SystemController::initializeHardware()
     m_dayCameraParser = new DayCameraProtocolParser(this);
     m_nightCameraParser = new NightCameraProtocolParser(this);
     m_joystickParser = new JoystickProtocolParser(this);
+    m_lrfParser = new LrfProtocolParser(this);
+    m_radarParser = new RadarProtocolParser(this);
     m_plc21Parser = new Plc21ProtocolParser(this);
     m_plc42Parser = new Plc42ProtocolParser(this);
     m_servoAzParser = new ServoDriverProtocolParser(this);
@@ -183,12 +193,17 @@ void SystemController::initializeHardware()
     // Lens (unchanged - not refactored yet)
     m_lensDevice = new LensDevice(this);
 
-    // LRF (uses existing MIL-STD architecture)
+    // LRF (Serial binary protocol)
     m_lrfDevice = new LRFDevice(this);
+    m_lrfDevice->setDependencies(m_lrfTransport, m_lrfParser);
 
     // Night Camera (TAU2 via Serial)
     m_nightCamControl = new NightCameraControlDevice("nightCamera", this);
     m_nightCamControl->setDependencies(m_nightCameraTransport, m_nightCameraParser);
+
+    // Radar (NMEA 0183 via Serial)
+    m_radarDevice = new RadarDevice("radar", this);
+    m_radarDevice->setDependencies(m_radarTransport, m_radarParser);
 
     // PLC21 (Modbus RTU)
     m_plc21Device = new Plc21Device("plc21", this);
@@ -226,6 +241,7 @@ void SystemController::initializeHardware()
     m_nightCamControlModel = new NightCameraDataModel(this);
     m_plc21Model = new Plc21DataModel(this);
     m_plc42Model = new Plc42DataModel(this);
+    m_radarModel = new RadarDataModel(this);
     m_servoActuatorModel = new ServoActuatorDataModel(this);
     m_servoAzModel = new ServoDriverDataModel(this);
     m_servoElModel = new ServoDriverDataModel(this);
@@ -427,6 +443,21 @@ void SystemController::startSystem()
     servoActuatorTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
     m_servoActuatorTransport->open(servoActuatorTransportConfig);
 
+    // LRF Transport (Serial binary protocol)
+    QJsonObject lrfTransportConfig;
+    lrfTransportConfig["port"] = lrfConf.port;
+    lrfTransportConfig["baudRate"] = lrfConf.baudRate;
+    lrfTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
+    m_lrfTransport->open(lrfTransportConfig);
+
+    // Radar Transport (Serial NMEA 0183)
+    const auto& radarConf = DeviceConfiguration::radar();
+    QJsonObject radarTransportConfig;
+    radarTransportConfig["port"] = radarConf.port;
+    radarTransportConfig["baudRate"] = radarConf.baudRate;
+    radarTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
+    m_radarTransport->open(radarTransportConfig);
+
     qInfo() << "  ✓ Transport connections opened";
 
     // 2. Initialize all MIL-STD refactored devices
@@ -437,6 +468,7 @@ void SystemController::startSystem()
     m_plc21Device->initialize();
     m_plc42Device->initialize();
     m_lrfDevice->initialize();
+    m_radarDevice->initialize();
     m_servoActuatorDevice->initialize();
 
     if (m_servoAzDevice) m_servoAzDevice->initialize();

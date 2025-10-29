@@ -15,6 +15,7 @@ class LRFDevice;
 class NightCameraControlDevice;
 class Plc21Device;
 class Plc42Device;
+class RadarDevice;
 class ServoActuatorDevice;
 class ServoDriverDevice;
 
@@ -30,6 +31,8 @@ class Plc21ProtocolParser;
 class Plc42ProtocolParser;
 class ServoDriverProtocolParser;
 class ServoActuatorProtocolParser;
+class LrfProtocolParser;
+class RadarProtocolParser;
 
 // Forward declarations - Data Models
 class DayCameraDataModel;
@@ -40,6 +43,7 @@ class LrfDataModel;
 class NightCameraDataModel;
 class Plc21DataModel;
 class Plc42DataModel;
+class RadarDataModel;
 class ServoActuatorDataModel;
 class ServoDriverDataModel;
 class SystemStateModel;
@@ -101,6 +105,8 @@ private:
     ModbusTransport* m_imuTransport = nullptr;
     SerialPortTransport* m_dayCameraTransport = nullptr;
     SerialPortTransport* m_nightCameraTransport = nullptr;
+    SerialPortTransport* m_lrfTransport = nullptr;
+    SerialPortTransport* m_radarTransport = nullptr;
     ModbusTransport* m_plc21Transport = nullptr;
     ModbusTransport* m_plc42Transport = nullptr;
     ModbusTransport* m_servoAzTransport = nullptr;
@@ -112,6 +118,8 @@ private:
     DayCameraProtocolParser* m_dayCameraParser = nullptr;
     NightCameraProtocolParser* m_nightCameraParser = nullptr;
     JoystickProtocolParser* m_joystickParser = nullptr;
+    LrfProtocolParser* m_lrfParser = nullptr;
+    RadarProtocolParser* m_radarParser = nullptr;
     Plc21ProtocolParser* m_plc21Parser = nullptr;
     Plc42ProtocolParser* m_plc42Parser = nullptr;
     ServoDriverProtocolParser* m_servoAzParser = nullptr;
@@ -129,6 +137,7 @@ private:
     CameraVideoStreamDevice* m_nightVideoProcessor = nullptr;
     Plc21Device* m_plc21Device = nullptr;
     Plc42Device* m_plc42Device = nullptr;
+    RadarDevice* m_radarDevice = nullptr;
     ServoActuatorDevice* m_servoActuatorDevice = nullptr;
     ServoDriverDevice* m_servoAzDevice = nullptr;
     ServoDriverDevice* m_servoElDevice = nullptr;
@@ -146,6 +155,7 @@ private:
     NightCameraDataModel* m_nightCamControlModel = nullptr;
     Plc21DataModel* m_plc21Model = nullptr;
     Plc42DataModel* m_plc42Model = nullptr;
+    RadarDataModel* m_radarModel = nullptr;
     ServoActuatorDataModel* m_servoActuatorModel = nullptr;
     ServoDriverDataModel* m_servoAzModel = nullptr;
     ServoDriverDataModel* m_servoElModel = nullptr;
