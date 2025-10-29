@@ -38,13 +38,9 @@ void ServoDriverDevice::setDependencies(Transport* transport,
     m_transport->setParent(this);
     m_parser->setParent(this);
 
-    // Handle transport disconnect (but not connect - we only show connected when we receive valid data)
-    connect(m_transport, &Transport::connectionStateChanged,
-            this, [this](bool connected) {
-        if (!connected) {
-            onTransportDisconnected();
-        }
-    });
+    // Don't listen to transport connectionStateChanged - we manage connection via watchdog
+    // This prevents spurious disconnection warnings during transport initialization
+    // when QModbusClient goes through intermediate states (Connecting, etc.)
 }
 
 bool ServoDriverDevice::initialize() {
@@ -327,12 +323,6 @@ void ServoDriverDevice::setConnectionState(bool connected) {
 
 void ServoDriverDevice::resetCommunicationWatchdog() {
     m_communicationWatchdog->start();
-}
-
-void ServoDriverDevice::onTransportDisconnected() {
-    qWarning() << m_identifier << "Transport disconnected";
-    m_communicationWatchdog->stop();
-    setConnectionState(false);
 }
 
 void ServoDriverDevice::onCommunicationWatchdogTimeout() {
