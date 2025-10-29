@@ -5,6 +5,7 @@
 
 class ModbusTransport : public Transport {
     Q_OBJECT
+    Q_PROPERTY(QObject* client READ clientObject)
 public:
     explicit ModbusTransport(QObject* parent = nullptr);
     ~ModbusTransport() override;
@@ -19,6 +20,10 @@ public:
 
     // FIXED: Add method to get current slave ID
     int slaveId() const { return m_slaveId; }
+
+    // Expose client for direct Modbus access (needed by devices)
+    QModbusRtuSerialClient* client() const { return m_client; }
+    QObject* clientObject() const { return m_client; }
 
 signals:
     void modbusReplyReady(QModbusReply* reply);
