@@ -87,7 +87,6 @@ private slots:
     void temperatureTimerTimeout();
     void onModbusReplyReady(QModbusReply* reply);
     void processMessage(const Message& message);
-    void onTransportDisconnected();
     void onCommunicationWatchdogTimeout();
 
 private:
