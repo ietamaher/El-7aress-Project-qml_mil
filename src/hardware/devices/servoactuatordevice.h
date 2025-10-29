@@ -93,6 +93,7 @@ private slots:
     void processMessage(const Message& message);
     void handleCommandTimeout();
     void processNextCommand();
+    void checkActuatorStatus();
     void onTransportDisconnected();
     void onCommunicationWatchdogTimeout();
 
@@ -107,12 +108,14 @@ private:
     ServoActuatorProtocolParser* m_parser = nullptr;
 
     QTimer* m_commandTimeoutTimer;
+    QTimer* m_statusCheckTimer;
     QTimer* m_communicationWatchdog;
     QString m_pendingCommand;
     QQueue<QString> m_commandQueue;
 
     static constexpr int COMMAND_TIMEOUT_MS = 1000;
     static constexpr int INTER_COMMAND_DELAY_MS = 20;
+    static constexpr int STATUS_CHECK_INTERVAL_MS = 5000;  // Check status every 5 seconds
     static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };
 
