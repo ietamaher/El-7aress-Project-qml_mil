@@ -141,10 +141,11 @@ void LRFDevice::processMessage(const Message& message) {
 
 void LRFDevice::handleCommandResponseTimeout() {
     qWarning() << "LRF command response timeout!";
-    
+
     auto currentData = data();
     auto newData = std::make_shared<LrfData>(*currentData);
     newData->isFault = true;
+    newData->isConnected = false;
     updateData(newData);
     emit lrfDataChanged(newData);
     emit responseTimeout();

@@ -85,8 +85,9 @@ void RadarDevice::processMessage(const Message& message) {
         // Update tracked targets
         updateTrackedTarget(newPlot);
 
-        // Update current data (for TemplatedDevice)
+        // Update current data (for TemplatedDevice) - mark as connected when receiving valid data
         auto currentData = std::make_shared<RadarData>(newPlot);
+        currentData->isConnected = true;
         updateData(currentData);
 
         // Emit signals

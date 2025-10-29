@@ -3,10 +3,19 @@
 #include "../protocols/DayCameraProtocolParser.h"
 #include "../messages/DayCameraMessage.h"
 #include <QJsonObject>
+#include <QTimer>
 #include <QDebug>
 
 DayCameraControlDevice::DayCameraControlDevice(const QString& identifier, QObject* parent)
-    : TemplatedDevice<DayCameraData>(parent), m_identifier(identifier) {}
+    : TemplatedDevice<DayCameraData>(parent),
+      m_identifier(identifier),
+      m_communicationWatchdog(new QTimer(this))
+{
+    m_communicationWatchdog->setSingleShot(false);
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &DayCameraControlDevice::onCommunicationWatchdogTimeout);
+}
 
 DayCameraControlDevice::~DayCameraControlDevice() {
     shutdown();
@@ -19,13 +28,8 @@ void DayCameraControlDevice::setDependencies(Transport* transport, DayCameraProt
     m_transport->setParent(this);
     m_parser->setParent(this);
 
+    // Only listen to frame data, not port state
     connect(m_transport, &Transport::frameReceived, this, &DayCameraControlDevice::processFrame);
-    connect(m_transport, &Transport::connectionStateChanged, this, [this](bool connected) {
-        auto newData = std::make_shared<DayCameraData>(*data());
-        newData->isConnected = connected;
-        updateData(newData);
-        emit dayCameraDataChanged(*newData);
-    });
 }
 
 bool DayCameraControlDevice::initialize() {
@@ -41,14 +45,18 @@ bool DayCameraControlDevice::initialize() {
     qDebug() << m_identifier << "initialized successfully";
 
     setState(DeviceState::Online);
+    m_communicationWatchdog->start();
     getCameraStatus();
     return true;
 }
 
 void DayCameraControlDevice::shutdown() {
+    m_communicationWatchdog->stop();
+
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
     }
+
     setState(DeviceState::Offline);
 }
 
@@ -64,6 +72,10 @@ void DayCameraControlDevice::processFrame(const QByteArray& frame) {
 void DayCameraControlDevice::processMessage(const Message& message) {
     if (message.typeId() == Message::Type::DayCameraDataType) {
         auto const* dataMsg = static_cast<const DayCameraDataMessage*>(&message);
+
+        // We received valid data - device is connected and communicating
+        setConnectionState(true);
+        resetCommunicationWatchdog();
 
         // Merge with current data
         auto currentData = data();
@@ -152,4 +164,30 @@ void DayCameraControlDevice::setFocusPosition(quint16 position) {
 
 void DayCameraControlDevice::getCameraStatus() {
     sendCommand(0x00, 0xA7);
+}
+
+void DayCameraControlDevice::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void DayCameraControlDevice::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<DayCameraData>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+        emit dayCameraDataChanged(*newData);
+
+        if (connected) {
+            qDebug() << m_identifier << "connected";
+        } else {
+            qWarning() << m_identifier << "disconnected";
+        }
+    }
+}
+
+void DayCameraControlDevice::onCommunicationWatchdogTimeout() {
+    qWarning() << m_identifier << "Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
 }

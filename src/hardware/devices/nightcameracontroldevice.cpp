@@ -8,9 +8,15 @@
 NightCameraControlDevice::NightCameraControlDevice(const QString& identifier, QObject* parent)
     : TemplatedDevice<NightCameraData>(parent),
       m_identifier(identifier),
-      m_statusCheckTimer(new QTimer(this))
+      m_statusCheckTimer(new QTimer(this)),
+      m_communicationWatchdog(new QTimer(this))
 {
     connect(m_statusCheckTimer, &QTimer::timeout, this, &NightCameraControlDevice::checkCameraStatus);
+
+    m_communicationWatchdog->setSingleShot(false);
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &NightCameraControlDevice::onCommunicationWatchdogTimeout);
 }
 
 NightCameraControlDevice::~NightCameraControlDevice() {
@@ -24,19 +30,8 @@ void NightCameraControlDevice::setDependencies(Transport* transport, NightCamera
     m_transport->setParent(this);
     m_parser->setParent(this);
 
+    // Only listen to frame data, not port state
     connect(m_transport, &Transport::frameReceived, this, &NightCameraControlDevice::processFrame);
-    connect(m_transport, &Transport::connectionStateChanged, this, [this](bool connected) {
-        auto newData = std::make_shared<NightCameraData>(*data());
-        newData->isConnected = connected;
-        updateData(newData);
-        emit nightCameraDataChanged(*newData);
-
-        if (connected) {
-            m_statusCheckTimer->start(5000);
-        } else {
-            m_statusCheckTimer->stop();
-        }
-    });
 }
 
 bool NightCameraControlDevice::initialize() {
@@ -53,12 +48,14 @@ bool NightCameraControlDevice::initialize() {
 
     setState(DeviceState::Online);
     m_statusCheckTimer->start(5000);
+    m_communicationWatchdog->start();
     getCameraStatus();
     return true;
 }
 
 void NightCameraControlDevice::shutdown() {
     m_statusCheckTimer->stop();
+    m_communicationWatchdog->stop();
 
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
@@ -79,6 +76,10 @@ void NightCameraControlDevice::processFrame(const QByteArray& frame) {
 void NightCameraControlDevice::processMessage(const Message& message) {
     if (message.typeId() == Message::Type::NightCameraDataType) {
         auto const* dataMsg = static_cast<const NightCameraDataMessage*>(&message);
+
+        // We received valid data - device is connected and communicating
+        setConnectionState(true);
+        resetCommunicationWatchdog();
 
         // Merge with current data
         auto currentData = data();
@@ -141,4 +142,30 @@ void NightCameraControlDevice::getCameraStatus() {
 
 void NightCameraControlDevice::checkCameraStatus() {
     getCameraStatus();
+}
+
+void NightCameraControlDevice::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void NightCameraControlDevice::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<NightCameraData>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+        emit nightCameraDataChanged(*newData);
+
+        if (connected) {
+            qDebug() << m_identifier << "connected";
+        } else {
+            qWarning() << m_identifier << "disconnected";
+        }
+    }
+}
+
+void NightCameraControlDevice::onCommunicationWatchdogTimeout() {
+    qWarning() << m_identifier << "Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
 }
