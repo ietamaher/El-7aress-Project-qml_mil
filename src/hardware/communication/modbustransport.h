@@ -14,8 +14,8 @@ public:
     void sendFrame(const QByteArray& /*frame*/) override { /* no-op */ }
 
     // FIXED: Remove slaveId parameter - it should come from config
-    QModbusReply* sendReadRequest(const QModbusDataUnit &unit);
-    QModbusReply* sendWriteRequest(const QModbusDataUnit &unit);
+    Q_INVOKABLE QModbusReply* sendReadRequest(const QModbusDataUnit &unit);
+    Q_INVOKABLE QModbusReply* sendWriteRequest(const QModbusDataUnit &unit);
 
     // FIXED: Add method to get current slave ID
     int slaveId() const { return m_slaveId; }
