@@ -33,7 +33,10 @@ public:
     
     // Build command with checksum
     QByteArray buildCommand(const QString& command) const;
-    
+
+    // Set the pending command for response routing
+    void setPendingCommand(const QString& command);
+
     // Unit conversion functions
     double sensorCountsToMillimeters(int counts) const;
     int millimetersToSensorCounts(double millimeters) const;

@@ -101,6 +101,10 @@ QByteArray ServoActuatorProtocolParser::buildCommand(const QString& command) con
     return fullCommand.toLatin1();
 }
 
+void ServoActuatorProtocolParser::setPendingCommand(const QString& command) {
+    m_pendingCommand = command;
+}
+
 ActuatorStatus ServoActuatorProtocolParser::parseStatusRegister(const QString& hexStatus) const {
     ActuatorStatus status;
     

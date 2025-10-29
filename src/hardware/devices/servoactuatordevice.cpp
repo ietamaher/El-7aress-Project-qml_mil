@@ -75,6 +75,9 @@ void ServoActuatorDevice::shutdown() {
     m_communicationWatchdog->stop();
     m_commandQueue.clear();
     m_pendingCommand.clear();
+    if (m_parser) {
+        m_parser->setPendingCommand("");  // Clear parser's pending command
+    }
 
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
@@ -105,31 +108,33 @@ void ServoActuatorDevice::processMessage(const Message& message) {
         
     } else if (message.typeId() == Message::Type::ServoActuatorAckType) {
         auto const* ackMsg = static_cast<const ServoActuatorAckMessage*>(&message);
-        
+
         // Stop timeout timer
         m_commandTimeoutTimer->stop();
         m_pendingCommand.clear();
-        
+        m_parser->setPendingCommand("");  // Clear parser's pending command
+
         emit commandAcknowledged(ackMsg->command());
-        
+
         // Process next command if any
         if (!m_commandQueue.isEmpty()) {
-            QTimer::singleShot(INTER_COMMAND_DELAY_MS, this, 
+            QTimer::singleShot(INTER_COMMAND_DELAY_MS, this,
                                &ServoActuatorDevice::processNextCommand);
         }
         
     } else if (message.typeId() == Message::Type::ServoActuatorNackType) {
         auto const* nackMsg = static_cast<const ServoActuatorNackMessage*>(&message);
-        
+
         m_commandTimeoutTimer->stop();
         m_pendingCommand.clear();
-        
+        m_parser->setPendingCommand("");  // Clear parser's pending command
+
         emit commandError(QString("Command '%1' rejected: %2")
                           .arg(nackMsg->command(), nackMsg->errorDetails()));
-        
+
         // Process next command if any
         if (!m_commandQueue.isEmpty()) {
-            QTimer::singleShot(INTER_COMMAND_DELAY_MS, this, 
+            QTimer::singleShot(INTER_COMMAND_DELAY_MS, this,
                                &ServoActuatorDevice::processNextCommand);
         }
         
@@ -205,13 +210,11 @@ void ServoActuatorDevice::sendCommand(const QString& command) {
 
     // Build command with checksum using parser
     QByteArray fullCommand = m_parser->buildCommand(command);
-    
+
     m_pendingCommand = command;
+    m_parser->setPendingCommand(command);  // Set pending command in parser for response routing
     m_transport->sendFrame(fullCommand);
     m_commandTimeoutTimer->start(COMMAND_TIMEOUT_MS);
-    
-    // Store pending command in parser for response routing
-    m_parser->setProperty("pendingCommand", command);
 }
 
 void ServoActuatorDevice::processNextCommand() {
@@ -223,12 +226,13 @@ void ServoActuatorDevice::processNextCommand() {
 void ServoActuatorDevice::handleCommandTimeout() {
     qWarning() << m_identifier << "Timeout waiting for response to:" << m_pendingCommand;
     emit commandError(QString("Timeout on command: %1").arg(m_pendingCommand));
-    
+
     m_pendingCommand.clear();
-    
+    m_parser->setPendingCommand("");  // Clear parser's pending command
+
     // Try next command if any
     if (!m_commandQueue.isEmpty()) {
-        QTimer::singleShot(INTER_COMMAND_DELAY_MS, this, 
+        QTimer::singleShot(INTER_COMMAND_DELAY_MS, this,
                            &ServoActuatorDevice::processNextCommand);
     }
 }
