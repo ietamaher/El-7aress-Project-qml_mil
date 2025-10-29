@@ -71,15 +71,21 @@ private slots:
     void pollTimerTimeout();
     void onModbusReplyReady(QModbusReply* reply);
     void processMessage(const Message& message);
+    void onCommunicationWatchdogTimeout();
 
 private:
     void sendReadRequest();
+    void resetCommunicationWatchdog();
+    void setConnectionState(bool connected);
 
     QString m_identifier;
     Transport* m_transport = nullptr;
     ImuProtocolParser* m_parser = nullptr;
 
     QTimer* m_pollTimer;
+    QTimer* m_communicationWatchdog = nullptr;
+
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };
 
 #endif // IMUDEVICE_H

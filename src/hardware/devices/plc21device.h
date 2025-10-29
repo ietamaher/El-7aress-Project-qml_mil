@@ -74,18 +74,24 @@ private slots:
     void pollTimerTimeout();
     void onModbusReplyReady(QModbusReply* reply);
     void processMessage(const Message& message);
+    void onCommunicationWatchdogTimeout();
 
 private:
     void sendReadRequest(int startAddress, int count, bool isDiscreteInputs = true);
     void sendWriteRequest(int startAddress, const QVector<bool>& values);
     void mergePartialData(const Plc21PanelData& partialData);
+    void resetCommunicationWatchdog();
+    void setConnectionState(bool connected);
 
     QString m_identifier;
     Transport* m_transport = nullptr;
     Plc21ProtocolParser* m_parser = nullptr;
 
     QTimer* m_pollTimer;
+    QTimer* m_communicationWatchdog = nullptr;
     QVector<bool> m_digitalOutputs; // Cached output state for writing
+
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };
 
 #endif // PLC21DEVICE_H
