@@ -48,18 +48,13 @@ bool NightCameraControlDevice::initialize() {
         return false;
     }
 
-    QJsonObject config = property("config").toJsonObject();
-    config["baudRate"] = 57600;
+    // Transport should already be opened by SystemController
+    qDebug() << m_identifier << "initialized successfully";
 
-    if (m_transport->open(config)) {
-        setState(DeviceState::Online);
-        m_statusCheckTimer->start(5000);
-        getCameraStatus();
-        return true;
-    }
-
-    setState(DeviceState::Error);
-    return false;
+    setState(DeviceState::Online);
+    m_statusCheckTimer->start(5000);
+    getCameraStatus();
+    return true;
 }
 
 void NightCameraControlDevice::shutdown() {

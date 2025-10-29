@@ -41,24 +41,20 @@ void LRFDevice::setDependencies(Transport* transport, LrfProtocolParser* parser)
 
 bool LRFDevice::initialize() {
     setState(DeviceState::Initializing);
-    
-    QJsonObject config = property("config").toJsonObject();
-    config["baudRate"] = 115200; // LRF has fixed baud rate
-    
+
     // Safety check
-    if (!m_transport) {
+    if (!m_transport || !m_parser) {
+        qCritical() << "LRF missing dependencies!";
         setState(DeviceState::Error);
         return false;
     }
 
-    if (m_transport->open(config)) {
-        setState(DeviceState::Online);
-        sendSelfCheck(); // Initial status check
-        return true;
-    }
-    
-    setState(DeviceState::Error);
-    return false;
+    // Transport should already be opened by SystemController
+    qDebug() << "LRF initialized successfully";
+
+    setState(DeviceState::Online);
+    sendSelfCheck(); // Initial status check
+    return true;
 }
 
 void LRFDevice::shutdown() {

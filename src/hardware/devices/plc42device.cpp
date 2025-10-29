@@ -47,26 +47,20 @@ bool Plc42Device::initialize() {
         return false;
     }
 
-    // Get configuration from device property
+    // Transport should already be opened by SystemController
+    qDebug() << m_identifier << "initializing...";
+
+    // Get poll interval from config (default 50ms)
     QJsonObject config = property("config").toJsonObject();
     int pollInterval = config["pollIntervalMs"].toInt(50);
 
-    qDebug() << m_identifier << "initializing with poll interval:" << pollInterval << "ms";
+    setState(DeviceState::Online);
 
-    // Open transport
-    if (m_transport->open(config)) {
-        setState(DeviceState::Online);
+    // Start polling
+    m_pollTimer->start(pollInterval);
 
-        // Start polling
-        m_pollTimer->start(pollInterval);
-
-        qDebug() << m_identifier << "initialized successfully";
-        return true;
-    }
-
-    qCritical() << m_identifier << "failed to initialize transport";
-    setState(DeviceState::Error);
-    return false;
+    qDebug() << m_identifier << "initialized successfully with poll interval:" << pollInterval << "ms";
+    return true;
 }
 
 void Plc42Device::shutdown() {
