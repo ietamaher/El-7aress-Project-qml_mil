@@ -56,7 +56,6 @@
 #include "daycameradatamodel.h"
 #include "gyrodatamodel.h"
 #include "joystickdatamodel.h"
-#include "lensdatamodel.h"
 #include "lrfdatamodel.h"
 #include "radardatamodel.h"
 #include "nightcameradatamodel.h"
@@ -670,13 +669,7 @@ public slots:
      * @param gyroData The new gyroscope data.
      */
     void onGyroDataChanged(const ImuData &gyroData);
-    
-    /**
-     * @brief Handles changes in lens data.
-     * @param lensData The new lens data.
-     */
-    void onLensDataChanged(const LensData &lensData);
-    
+     
     /**
      * @brief Handles changes in night camera data.
      * @param nightData The new night camera data.

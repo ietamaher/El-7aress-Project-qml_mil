@@ -5,7 +5,6 @@
 #include "hardware/devices/cameravideostreamdevice.h"
 #include "hardware/devices/imudevice.h"
 #include "hardware/devices/joystickdevice.h"
-#include "hardware/devices/lensdevice.h"
 #include "hardware/devices/lrfdevice.h"
 #include "hardware/devices/nightcameracontroldevice.h"
 #include "hardware/devices/plc21device.h"
@@ -33,7 +32,6 @@
 #include "models/domain/nightcameradatamodel.h"
 #include "models/domain/gyrodatamodel.h"
 #include "models/domain/joystickdatamodel.h"
-#include "models/domain/lensdatamodel.h"
 #include "models/domain/lrfdatamodel.h"
 #include "models/domain/radardatamodel.h"
 #include "models/domain/plc21datamodel.h"
@@ -190,9 +188,6 @@ void SystemController::initializeHardware()
     m_joystickDevice = new JoystickDevice(this);
     m_joystickDevice->setParser(m_joystickParser);
 
-    // Lens (unchanged - not refactored yet)
-    m_lensDevice = new LensDevice(this);
-
     // LRF (Serial binary protocol)
     m_lrfDevice = new LRFDevice(this);
     m_lrfDevice->setDependencies(m_lrfTransport, m_lrfParser);
@@ -236,7 +231,6 @@ void SystemController::initializeHardware()
     m_dayCamControlModel = new DayCameraDataModel(this);
     m_gyroModel = new GyroDataModel(this);
     m_joystickModel = new JoystickDataModel(this);
-    m_lensModel = new LensDataModel(this);
     m_lrfModel = new LrfDataModel(this);
     m_nightCamControlModel = new NightCameraDataModel(this);
     m_plc21Model = new Plc21DataModel(this);
@@ -257,7 +251,7 @@ void SystemController::initializeHardware()
     // 6. Create Hardware Controllers
     m_gimbalController = new GimbalController(m_servoAzDevice, m_servoElDevice, m_plc42Device, m_systemStateModel, this);
     m_weaponController = new WeaponController(m_systemStateModel, m_servoActuatorDevice, m_plc42Device, this);
-    m_cameraController = new CameraController(m_dayCamControl, m_dayVideoProcessor, m_nightCamControl, m_nightVideoProcessor, m_lensDevice, m_systemStateModel);
+    m_cameraController = new CameraController(m_dayCamControl, m_dayVideoProcessor, m_nightCamControl, m_nightVideoProcessor, m_systemStateModel);
     m_joystickController = new JoystickController(m_joystickModel, m_systemStateModel, m_gimbalController, m_cameraController, m_weaponController, this);
 
     qInfo() << "  ✓ Hardware controllers created";
@@ -451,12 +445,12 @@ void SystemController::startSystem()
     m_lrfTransport->open(lrfTransportConfig);
 
     // Radar Transport (Serial NMEA 0183)
-    const auto& radarConf = DeviceConfiguration::radar();
+    /*const auto& radarConf = DeviceConfiguration::radar();
     QJsonObject radarTransportConfig;
     radarTransportConfig["port"] = radarConf.port;
     radarTransportConfig["baudRate"] = radarConf.baudRate;
     radarTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
-    m_radarTransport->open(radarTransportConfig);
+    m_radarTransport->open(radarTransportConfig);*/
 
     qInfo() << "  ✓ Transport connections opened";
 
@@ -645,8 +639,6 @@ void SystemController::connectDevicesToModels()
     connect(m_joystickDevice, &JoystickDevice::hatMoved,
             m_joystickModel, &JoystickDataModel::onRawHatMoved);
 
-    connect(m_lensDevice, &LensDevice::lensDataChanged,
-            m_lensModel, &LensDataModel::updateData);
 
     // LRFDevice uses shared_ptr, need to dereference for model
     connect(m_lrfDevice, &LRFDevice::lrfDataChanged,
@@ -695,9 +687,6 @@ void SystemController::connectModelsToSystemState()
             m_systemStateModel, &SystemStateModel::onJoystickButtonChanged);
     connect(m_joystickModel, &JoystickDataModel::hatMoved,
             m_systemStateModel, &SystemStateModel::onJoystickHatChanged);
-
-    connect(m_lensModel, &LensDataModel::dataChanged,
-            m_systemStateModel, &SystemStateModel::onLensDataChanged);
 
     connect(m_lrfModel, &LrfDataModel::dataChanged,
             m_systemStateModel, &SystemStateModel::onLrfDataChanged);

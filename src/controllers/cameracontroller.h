@@ -10,7 +10,6 @@
 class DayCameraControlDevice;
 class NightCameraControlDevice;
 class CameraVideoStreamDevice; // Replaces pipeline devices
-class LensDevice;
 class SystemStateModel;
  
 
@@ -23,7 +22,6 @@ public:
                               CameraVideoStreamDevice* dayProcessor,         
                               NightCameraControlDevice* nightControl,
                               CameraVideoStreamDevice* nightProcessor,       
-                              LensDevice* lensDevice,
                               SystemStateModel* stateModel,
                               QObject* parent = nullptr);
     ~CameraController() override;
@@ -73,7 +71,6 @@ private:
     QPointer<CameraVideoStreamDevice>            m_dayProcessor; // Changed
     QPointer<NightCameraControlDevice>  m_nightControl;
     QPointer<CameraVideoStreamDevice>            m_nightProcessor; // Changed
-    QPointer<LensDevice>                m_lensDevice;
     QPointer<SystemStateModel>          m_stateModel;
 
     // --- Internal State ---

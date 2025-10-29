@@ -76,21 +76,26 @@ struct NightCameraData {
  */
 struct RadarData {
     bool isConnected = false;
-    quint32 id = 0;                     // Unique identifier for the tracked target
-    float azimuthDegrees = 0.0f;        // Target's bearing from the vessel in degrees
-    float rangeMeters = 0.0f;           // Distance to the target in meters
-    float relativeCourseDegrees = 0.0f; // Target's course relative to the vessel
-    float relativeSpeedMPS = 0.0f;      // Target's speed relative to the vessel (m/s)
+    quint32 id = 0;
+    float azimuthDegrees = 0.0f;
+    float rangeMeters = 0.0f;
+    float relativeCourseDegrees = 0.0f;
+    float relativeSpeedMPS = 0.0f;
+
+    bool operator==(const RadarData &other) const {
+        return (isConnected == other.isConnected &&
+                id == other.id &&
+                qFuzzyCompare(azimuthDegrees, other.azimuthDegrees) &&
+                qFuzzyCompare(rangeMeters, other.rangeMeters) &&
+                qFuzzyCompare(relativeCourseDegrees, other.relativeCourseDegrees) &&
+                qFuzzyCompare(relativeSpeedMPS, other.relativeSpeedMPS));
+    }
 
     bool operator!=(const RadarData &other) const {
-        return (isConnected != other.isConnected ||
-                id != other.id ||
-                !qFuzzyCompare(azimuthDegrees, other.azimuthDegrees) ||
-                !qFuzzyCompare(rangeMeters, other.rangeMeters) ||
-                !qFuzzyCompare(relativeCourseDegrees, other.relativeCourseDegrees) ||
-                !qFuzzyCompare(relativeSpeedMPS, other.relativeSpeedMPS));
+        return !(*this == other);
     }
 };
+
 
 /**
  * @brief Laser Range Finder data structure
@@ -177,7 +182,7 @@ struct ServoDriverData {
     float motorTemp = 0.0f;
     float driverTemp = 0.0f;
     bool fault = false;
-    
+
 
     bool operator!=(const ServoDriverData &other) const {
         return (isConnected != other.isConnected ||

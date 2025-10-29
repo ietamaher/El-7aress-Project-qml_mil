@@ -11,11 +11,21 @@ LRFDevice::LRFDevice(QObject* parent)
     : TemplatedDevice<LrfData>(parent),
       m_transport(nullptr),
       m_parser(nullptr),
-      m_commandResponseTimer(new QTimer(this))
+      m_commandResponseTimer(new QTimer(this)),
+      m_statusCheckTimer(new QTimer(this)),
+      m_communicationWatchdog(new QTimer(this))
 {
+     connect(m_statusCheckTimer, &QTimer::timeout, this, &LRFDevice::checkLrfStatus);
+
     m_commandResponseTimer->setSingleShot(true);
     connect(m_commandResponseTimer, &QTimer::timeout, 
             this, &LRFDevice::handleCommandResponseTimeout);
+
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    m_communicationWatchdog->setSingleShot(true); // It only fires once per interval
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &LRFDevice::onCommunicationWatchdogTimeout);            
+
 }
 
 LRFDevice::~LRFDevice() {
@@ -53,11 +63,15 @@ bool LRFDevice::initialize() {
     qDebug() << "LRF initialized successfully";
 
     setState(DeviceState::Online);
+    m_statusCheckTimer->start(5000); // Check status every 5 seconds
+    m_communicationWatchdog->start();
     sendSelfCheck(); // Initial status check
     return true;
 }
 
 void LRFDevice::shutdown() {
+    m_statusCheckTimer->stop();
+    m_communicationWatchdog->stop();    
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
     }
@@ -112,6 +126,9 @@ void LRFDevice::sendCommand(quint8 commandCode) {
 
 void LRFDevice::processFrame(const QByteArray& frame) {
     if (!m_parser) return;
+
+    setConnectionState(true);
+    resetCommunicationWatchdog();
     
     const auto messages = m_parser->parse(frame);
     if (!messages.empty()) {
@@ -150,3 +167,33 @@ void LRFDevice::handleCommandResponseTimeout() {
     emit lrfDataChanged(newData);
     emit responseTimeout();
 }
+
+void LRFDevice::onCommunicationWatchdogTimeout() {
+    qWarning() << "LRF Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
+}
+void LRFDevice::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void LRFDevice::checkLrfStatus() {
+    sendSelfCheck();
+}
+
+void LRFDevice::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<LrfData>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+        emit lrfDataChanged(newData);
+
+        if (connected) {
+            qDebug() << "LRF connected";
+        } else {
+            qWarning() << "LRF disconnected";
+        }
+    }
+}
+

@@ -1,5 +1,5 @@
 #pragma once
-#include "interfaces/Transport.h"
+#include "hardware/interfaces/Transport.h"
 #include <QtSerialPort/QSerialPort>
 #include <QJsonObject>
 #include <QTimer>

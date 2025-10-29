@@ -54,13 +54,21 @@ private slots:
     void processFrame(const QByteArray& frame);
     void processMessage(const Message& message);
     void handleCommandResponseTimeout();
-
+    void checkLrfStatus();
+    void onCommunicationWatchdogTimeout();
 private:
     void sendCommand(quint8 commandCode);
+    void resetCommunicationWatchdog();
+    void setConnectionState(bool connected);
 
     Transport* m_transport;
     LrfProtocolParser* m_parser;
     QTimer* m_commandResponseTimer;
+
+    QTimer* m_statusCheckTimer = nullptr;
+    QTimer* m_communicationWatchdog = nullptr;
+
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 10000;  // 3 seconds without data = disconnected
 };
 
 #endif // LRFDEVICE_H

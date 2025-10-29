@@ -57,7 +57,7 @@ private:
     QTimer* m_statusCheckTimer = nullptr;
     QTimer* m_communicationWatchdog = nullptr;
 
-    static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 10000;  // 3 seconds without data = disconnected
 };
 
 #endif // NIGHTCAMERACONTROLDEVICE_H

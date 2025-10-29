@@ -14,16 +14,16 @@
     },
     "nightCamera": {
       "devicePath": "/dev/video2",
-      "controlPort": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_56D1123075-if00"
+      "controlPort": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if02"
     }
   },
   "imu": {
-    "port": "/dev/ttyUSB2",
+    "port": "/dev/serial/by-id/usb-WCH2",      
     "baudRate": 115200,
     "slaveId": 1
   },
   "lrf": {
-    "port": "/dev/ttyUSB1",
+    "port": "/dev/serial/by-id/usb-WCH1",
     "baudRate": 115200
   },
   "plc": {
@@ -57,7 +57,11 @@
     }
   },
   "actuator": {
-    "port": "/dev/ttyUSB0",
+    "port": "/dev/serial/by-id/usb-WCH0",
+    "baudRate": 115200
+  },
+  "radar": {
+    "port": "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A9J5K2L4-if00-port0",
     "baudRate": 115200
   }
 }

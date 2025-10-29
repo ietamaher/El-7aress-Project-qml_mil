@@ -52,16 +52,16 @@ QModbusReply* ModbusTransport::sendReadRequest(const QModbusDataUnit &unit) {
         return nullptr;
     }
 
-    qDebug() << "ModbusTransport: Sending read request to slave" << m_slaveId
-             << "address" << unit.startAddress() << "count" << unit.valueCount();
+    //qDebug() << "ModbusTransport: Sending read request to slave" << m_slaveId
+    //         << "address" << unit.startAddress() << "count" << unit.valueCount();
 
     QModbusReply *reply = m_client->sendReadRequest(unit, m_slaveId);
     if (reply) {
         connect(reply, &QModbusReply::finished, this, [this, reply]() {
             if (reply->error() == QModbusDevice::NoError) {
-                qDebug() << "ModbusTransport: Read reply received successfully from slave" << m_slaveId;
+                //qDebug() << "ModbusTransport: Read reply received successfully from slave" << m_slaveId;
             } else {
-                qWarning() << "ModbusTransport: Read reply error from slave" << m_slaveId << ":" << reply->errorString();
+                //qWarning() << "ModbusTransport: Read reply error from slave" << m_slaveId << ":" << reply->errorString();
             }
             emit modbusReplyReady(reply);
         });

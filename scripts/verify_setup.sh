@@ -31,8 +31,8 @@ fi
 
 # Check ttyUSB links
 echo "3. ttyUSB Links:"
-if ls /dev/ttyUSB* 1> /dev/null 2>&1; then
-    ls -la /dev/ttyUSB* | awk '{print "  ✓ " $9 " -> " $11}'
+if ls /dev/serial/by-id/usb-WCH* 1> /dev/null 2>&1; then
+    ls -la /dev/serial/by-id/usb-WCH* | awk '{print "  ✓ " $9 " -> " $11}'
     echo ""
 else
     echo "  ✗ No ttyUSB links found!"

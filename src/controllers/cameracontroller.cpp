@@ -1,7 +1,6 @@
 #include "cameracontroller.h"
 #include "hardware/devices/daycameracontroldevice.h"
 #include "hardware/devices/nightcameracontroldevice.h"
-#include "hardware/devices/lensdevice.h"
 #include "models/domain/systemstatemodel.h"
 #include "hardware/devices/cameravideostreamdevice.h" // Include the new processor header
 
@@ -14,7 +13,6 @@ CameraController::CameraController(DayCameraControlDevice* dayControl,
                                    CameraVideoStreamDevice* dayProcessor,        // Changed
                                    NightCameraControlDevice* nightControl,
                                    CameraVideoStreamDevice* nightProcessor,      // Changed
-                                   LensDevice* lensDevice,
                                    SystemStateModel* stateModel,
                                    QObject* parent)
     : QObject(parent),
@@ -22,7 +20,6 @@ CameraController::CameraController(DayCameraControlDevice* dayControl,
       m_dayProcessor(dayProcessor),     // Store processor pointer
       m_nightControl(nightControl),
       m_nightProcessor(nightProcessor), // Store processor pointer
-      m_lensDevice(lensDevice),
       m_stateModel(stateModel),
       m_isDayCameraActive(true),        // Default to day camera
       m_lutIndex(0)                     // Default LUT index

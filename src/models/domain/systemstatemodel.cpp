@@ -665,11 +665,6 @@ void SystemStateModel::onJoystickHatChanged(int hat, int direction)
     //LOG_TS_ELAPSED("SystemStateModel", "Processed model data");
 }
 
-void SystemStateModel::onLensDataChanged(const LensData &lensData)
-{
-    SystemStateData newData = m_currentStateData;
-     updateData(newData);
-}
 
 void SystemStateModel::onLrfDataChanged(const LrfData &lrfData)
 {

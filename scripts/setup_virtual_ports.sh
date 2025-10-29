@@ -92,7 +92,7 @@ echo "  ✓ Day Camera symlink created"
 
 # Night Camera - USB Single Serial
 sudo ln -sf /dev/ttyVIRT_NIGHT_CAM0 \
-     /dev/serial/by-id/usb-1a86_USB_Single_Serial_56D1123075-if00
+     /dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if02
 echo "  ✓ Night Camera symlink created"
 
 # PLC21 - WCH USB Quad Serial port 0 (if00) - different serial number
@@ -116,9 +116,9 @@ sudo ln -sf /dev/ttyVIRT_SERVO_EL0 \
 echo "  ✓ Servo Elevation symlink created"
 
 # Direct USB links (ttyUSB*)
-sudo ln -sf /dev/ttyVIRT_IMU0 /dev/ttyUSB2
-sudo ln -sf /dev/ttyVIRT_LRF0 /dev/ttyUSB1
-sudo ln -sf /dev/ttyVIRT_ACTUATOR0 /dev/ttyUSB0
+sudo ln -sf /dev/ttyVIRT_IMU0 /dev/serial/by-id/usb-WCH2
+sudo ln -sf /dev/ttyVIRT_LRF0 /dev/serial/by-id/usb-WCH1
+sudo ln -sf /dev/ttyVIRT_ACTUATOR0 /dev/serial/by-id/usb-WCH0
 echo "  ✓ ttyUSB symlinks created"
 
 # ============================================================================
@@ -128,7 +128,7 @@ echo -e "${YELLOW}[4/5] Setting permissions...${NC}"
 
 sudo chmod 666 /dev/ttyVIRT_* 2>/dev/null || true
 sudo chmod 666 /dev/pts/* 2>/dev/null || true
-sudo chmod 666 /dev/ttyUSB* 2>/dev/null || true
+sudo chmod 666 /dev/serial/by-id/usb-WCH* 2>/dev/null || true
 
 echo "  ✓ Permissions set"
 
@@ -147,7 +147,7 @@ ls -la /dev/serial/by-id/ 2>/dev/null && echo -e "${GREEN}  ✓ Symlinks created
 
 echo ""
 echo "ttyUSB Links:"
-ls -la /dev/ttyUSB* 2>/dev/null && echo -e "${GREEN}  ✓ ttyUSB links created${NC}" || echo -e "${RED}  ✗ ttyUSB links missing${NC}"
+ls -la /dev/serial/by-id/usb-WCH* 2>/dev/null && echo -e "${GREEN}  ✓ ttyUSB links created${NC}" || echo -e "${RED}  ✗ ttyUSB links missing${NC}"
 
 # ============================================================================
 # Port Mapping Reference
@@ -161,13 +161,13 @@ echo "Qt Application Side          ←→  Simulator Side"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Day Camera Control           ←→  /dev/ttyVIRT_DAY_CAM1"
 echo "Night Camera Control         ←→  /dev/ttyVIRT_NIGHT_CAM1"
-echo "IMU (/dev/ttyUSB2)          ←→  /dev/ttyVIRT_IMU1"
-echo "LRF (/dev/ttyUSB1)          ←→  /dev/ttyVIRT_LRF1"
+echo "IMU (/dev/serial/by-id/usb-WCH2)          ←→  /dev/ttyVIRT_IMU1"
+echo "LRF (/dev/serial/by-id/usb-WCH1)          ←→  /dev/ttyVIRT_LRF1"
 echo "PLC21 (Modbus, ID 31)       ←→  /dev/ttyVIRT_PLC21_1"
 echo "PLC42 (Modbus, ID 31)       ←→  /dev/ttyVIRT_PLC42_1"
 echo "Servo Az (Modbus, ID 2)     ←→  /dev/ttyVIRT_SERVO_AZ1"
 echo "Servo El (Modbus, ID 1)     ←→  /dev/ttyVIRT_SERVO_EL1"
-echo "Actuator (/dev/ttyUSB0)     ←→  /dev/ttyVIRT_ACTUATOR1"
+echo "Actuator (/dev/serial/by-id/usb-WCH0)     ←→  /dev/ttyVIRT_ACTUATOR1"
 echo ""
 echo -e "${GREEN}=========================================="
 echo "Setup Complete!"

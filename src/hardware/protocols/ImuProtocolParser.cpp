@@ -52,7 +52,7 @@ MessagePtr ImuProtocolParser::parseAllDataReply(const QModbusDataUnit& unit) {
     data.angRateZ_dps = parseFloat(unit, 16); // 0x03F8-0x03F9 (Yaw rate)
 
     // Yaw is not provided by SST810, remains 0
-    data.yawDeg = 0.0;
+    data.yawDeg = 25.0;
 
     return std::make_unique<ImuDataMessage>(data);
 }

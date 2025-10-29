@@ -53,14 +53,11 @@ SOURCES += \
     src/controllers/windagecontroller.cpp \
     src/controllers/zeroingcontroller.cpp \
     src/controllers/zonedefinitioncontroller.cpp \
-    src/hardware/devices/baseserialdevice.cpp \
     src/hardware/devices/cameravideostreamdevice.cpp \
     src/hardware/devices/daycameracontroldevice.cpp \
     src/hardware/devices/imudevice.cpp \
     src/hardware/devices/joystickdevice.cpp \
-    src/hardware/devices/lensdevice.cpp \
     src/hardware/devices/lrfdevice.cpp \
-    src/hardware/devices/modbusdevicebase.cpp \
     src/hardware/devices/nightcameracontroldevice.cpp \
     src/hardware/devices/plc21device.cpp \
     src/hardware/devices/plc42device.cpp \
@@ -146,14 +143,11 @@ HEADERS += \
     src/controllers/windagecontroller.h \
     src/controllers/zeroingcontroller.h \
     src/controllers/zonedefinitioncontroller.h \
-    src/hardware/devices/baseserialdevice.h \
     src/hardware/devices/cameravideostreamdevice.h \
     src/hardware/devices/daycameracontroldevice.h \
     src/hardware/devices/imudevice.h \
     src/hardware/devices/joystickdevice.h \
-    src/hardware/devices/lensdevice.h \
     src/hardware/devices/lrfdevice.h \
-    src/hardware/devices/modbusdevicebase.h \
     src/hardware/devices/nightcameracontroldevice.h \
     src/hardware/devices/plc21device.h \
     src/hardware/devices/plc42device.h \
@@ -167,7 +161,6 @@ HEADERS += \
     src/models/domain/daycameradatamodel.h \
     src/models/domain/gyrodatamodel.h \
     src/models/domain/joystickdatamodel.h \
-    src/models/domain/lensdatamodel.h \
     src/models/domain/lrfdatamodel.h \
     src/models/domain/nightcameradatamodel.h \
     src/models/domain/plc21datamodel.h \

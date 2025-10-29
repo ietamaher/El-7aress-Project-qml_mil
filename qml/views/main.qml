@@ -94,7 +94,6 @@ Window {
     // === ZEROING OVERLAY ===
     ZeroingOverlay {
         id: zeroingOverlay
-        anchors.centerIn: parent
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.topMargin: 150
@@ -105,7 +104,6 @@ Window {
     // === WINDAGE OVERLAY ===
     WindageOverlay {
         id: windageOverlay
-        anchors.centerIn: parent
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.topMargin: 150
@@ -124,7 +122,10 @@ Window {
 
     SystemStatusOverlay{
             id: systemStatusOverlay
-            //anchors.fill: parent
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.topMargin: 150
+            anchors.leftMargin: 10
             z: 100   // Above OSD
 
     }

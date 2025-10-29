@@ -7,6 +7,7 @@
 #include <QModbusReply>
 #include <QDebug>
 
+
 Plc21Device::Plc21Device(const QString& identifier, QObject* parent)
     : TemplatedDevice<Plc21PanelData>(parent),
       m_identifier(identifier),

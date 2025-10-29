@@ -398,7 +398,7 @@ Rectangle {
 
                             ListView {
                                 width: parent.width
-                                height: parent.height - 50
+                                height: parent.height
                                 clip: true
                                 model: viewModel ? viewModel.alarmsList : []
 
@@ -525,7 +525,7 @@ Rectangle {
                         width: 8
                         height: 8
                         radius: 4
-                        color: connected ? accent : "#606060"
+                        color: connected ? "#10b52e" : "#606060"
                         anchors.verticalCenter: parent.verticalCenter
 
                         // ✅ Pulse animation when connected
@@ -536,13 +536,13 @@ Rectangle {
                             NumberAnimation {
                                 from: 1.0
                                 to: 0.3
-                                duration: 800
+                                duration: 400
                                 easing.type: Easing.InOutQuad
                             }
                             NumberAnimation {
                                 from: 0.3
                                 to: 1.0
-                                duration: 800
+                                duration: 400
                                 easing.type: Easing.InOutQuad
                             }
                         }
@@ -555,13 +555,13 @@ Rectangle {
                             NumberAnimation {
                                 from: 1.0
                                 to: 1.3
-                                duration: 800
+                                duration: 400
                                 easing.type: Easing.InOutQuad
                             }
                             NumberAnimation {
                                 from: 1.3
                                 to: 1.0
-                                duration: 800
+                                duration: 400
                                 easing.type: Easing.InOutQuad
                             }
                         }
@@ -618,7 +618,7 @@ Rectangle {
 
         Text {
             text: label
-            font.pixelSize: 10
+            font.pixelSize: 12
             font.family: "Segoe UI"
             color: "#808080"
             width: 55
@@ -626,7 +626,7 @@ Rectangle {
 
         Text {
             text: value
-            font.pixelSize: 10
+            font.pixelSize: 12
             font.bold: true
             font.family: "Segoe UI"
             color: valueColor
