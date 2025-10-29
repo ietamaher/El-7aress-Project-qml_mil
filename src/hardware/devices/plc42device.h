@@ -80,19 +80,25 @@ private slots:
     void pollTimerTimeout();
     void onModbusReplyReady(QModbusReply* reply);
     void processMessage(const Message& message);
+    void onCommunicationWatchdogTimeout();
 
 private:
     void sendReadRequest(int startAddress, int count, bool isDiscreteInputs = true);
     void sendWriteHoldingRegisters();
     void mergePartialData(const Plc42Data& partialData);
+    void resetCommunicationWatchdog();
+    void setConnectionState(bool connected);
 
     QString m_identifier;
     Transport* m_transport = nullptr;
     Plc42ProtocolParser* m_parser = nullptr;
 
     QTimer* m_pollTimer;
+    QTimer* m_communicationWatchdog = nullptr;
     Plc42Data m_pendingWrites; // Data to be written on next write cycle
     bool m_hasPendingWrites = false;
+
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };
 
 #endif // PLC42DEVICE_H

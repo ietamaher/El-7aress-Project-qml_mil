@@ -11,13 +11,20 @@
 Plc21Device::Plc21Device(const QString& identifier, QObject* parent)
     : TemplatedDevice<Plc21PanelData>(parent),
       m_identifier(identifier),
-      m_pollTimer(new QTimer(this))
+      m_pollTimer(new QTimer(this)),
+      m_communicationWatchdog(new QTimer(this))
 {
     connect(m_pollTimer, &QTimer::timeout, this, &Plc21Device::pollTimerTimeout);
+
+    m_communicationWatchdog->setSingleShot(false);
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &Plc21Device::onCommunicationWatchdogTimeout);
 }
 
 Plc21Device::~Plc21Device() {
     m_pollTimer->stop();
+    m_communicationWatchdog->stop();
 }
 
 void Plc21Device::setDependencies(Transport* transport,
@@ -29,14 +36,7 @@ void Plc21Device::setDependencies(Transport* transport,
     m_transport->setParent(this);
     m_parser->setParent(this);
 
-    // Connect transport signals
-    connect(m_transport, &Transport::connectionStateChanged,
-            this, [this](bool connected) {
-        auto newData = std::make_shared<Plc21PanelData>(*data());
-        newData->isConnected = connected;
-        updateData(newData);
-        emit panelDataChanged(*newData);
-    });
+    // Don't listen to transport connectionStateChanged - we manage connection via watchdog
 }
 
 bool Plc21Device::initialize() {
@@ -57,8 +57,9 @@ bool Plc21Device::initialize() {
 
     setState(DeviceState::Online);
 
-    // Start polling
+    // Start polling and watchdog
     m_pollTimer->start(pollInterval);
+    m_communicationWatchdog->start();
 
     qDebug() << m_identifier << "initialized successfully with poll interval:" << pollInterval << "ms";
     return true;
@@ -66,6 +67,7 @@ bool Plc21Device::initialize() {
 
 void Plc21Device::shutdown() {
     m_pollTimer->stop();
+    m_communicationWatchdog->stop();
 
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
@@ -121,10 +123,7 @@ void Plc21Device::onModbusReplyReady(QModbusReply* reply) {
 
     if (reply->error() != QModbusDevice::NoError) {
         qWarning() << m_identifier << "Modbus error:" << reply->errorString();
-        auto newData = std::make_shared<Plc21PanelData>(*data());
-        newData->isConnected = false;
-        updateData(newData);
-        emit panelDataChanged(*newData);
+        setConnectionState(false);
         reply->deleteLater();
         return;
     }
@@ -149,9 +148,12 @@ void Plc21Device::processMessage(const Message& message) {
 }
 
 void Plc21Device::mergePartialData(const Plc21PanelData& partialData) {
+    // We received valid data - device is connected and communicating
+    setConnectionState(true);
+    resetCommunicationWatchdog();
+
     auto currentData = data();
     auto newData = std::make_shared<Plc21PanelData>(*currentData);
-    newData->isConnected = true;
 
     bool dataChanged = false;
 
@@ -253,4 +255,30 @@ void Plc21Device::sendWriteRequest(int startAddress, const QVector<bool>& values
 
 void Plc21Device::setPollInterval(int intervalMs) {
     m_pollTimer->setInterval(intervalMs);
+}
+
+void Plc21Device::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void Plc21Device::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<Plc21PanelData>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+        emit panelDataChanged(*newData);
+
+        if (connected) {
+            qDebug() << m_identifier << "connected";
+        } else {
+            qWarning() << m_identifier << "disconnected";
+        }
+    }
+}
+
+void Plc21Device::onCommunicationWatchdogTimeout() {
+    qWarning() << m_identifier << "Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
 }

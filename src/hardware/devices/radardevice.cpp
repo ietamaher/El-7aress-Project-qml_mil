@@ -7,11 +7,17 @@
 
 RadarDevice::RadarDevice(const QString& identifier, QObject* parent)
     : TemplatedDevice<RadarData>(parent),
-      m_identifier(identifier)
+      m_identifier(identifier),
+      m_communicationWatchdog(new QTimer(this))
 {
+    m_communicationWatchdog->setSingleShot(false);
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &RadarDevice::onCommunicationWatchdogTimeout);
 }
 
 RadarDevice::~RadarDevice() {
+    m_communicationWatchdog->stop();
     shutdown();
 }
 
@@ -28,14 +34,7 @@ void RadarDevice::setDependencies(Transport* transport,
     connect(m_transport, &Transport::frameReceived,
             this, &RadarDevice::processFrame);
 
-    connect(m_transport, &Transport::connectionStateChanged,
-            this, [this](bool connected) {
-        if (!connected) {
-            // Clear targets when disconnected
-            m_trackedTargets.clear();
-            emit radarPlotsUpdated(m_trackedTargets);
-        }
-    });
+    // Don't listen to transport connectionStateChanged - we manage connection via watchdog
 }
 
 bool RadarDevice::initialize() {
@@ -51,10 +50,13 @@ bool RadarDevice::initialize() {
     qDebug() << m_identifier << "initialized successfully";
 
     setState(DeviceState::Online);
+    m_communicationWatchdog->start();
     return true;
 }
 
 void RadarDevice::shutdown() {
+    m_communicationWatchdog->stop();
+
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
     }
@@ -82,12 +84,15 @@ void RadarDevice::processMessage(const Message& message) {
         auto const* plotMsg = static_cast<const RadarPlotMessage*>(&message);
         const RadarData& newPlot = plotMsg->data();
 
+        // We received valid data - device is connected and communicating
+        setConnectionState(true);
+        resetCommunicationWatchdog();
+
         // Update tracked targets
         updateTrackedTarget(newPlot);
 
-        // Update current data (for TemplatedDevice) - mark as connected when receiving valid data
+        // Update current data (for TemplatedDevice)
         auto currentData = std::make_shared<RadarData>(newPlot);
-        currentData->isConnected = true;
         updateData(currentData);
 
         // Emit signals
@@ -125,4 +130,32 @@ QVector<RadarData> RadarDevice::trackedTargets() const {
 void RadarDevice::clearTrackedTargets() {
     m_trackedTargets.clear();
     emit radarPlotsUpdated(m_trackedTargets);
+}
+
+void RadarDevice::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void RadarDevice::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<RadarData>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+
+        if (connected) {
+            qDebug() << m_identifier << "connected";
+        } else {
+            qWarning() << m_identifier << "disconnected";
+            // Clear targets when disconnected
+            m_trackedTargets.clear();
+            emit radarPlotsUpdated(m_trackedTargets);
+        }
+    }
+}
+
+void RadarDevice::onCommunicationWatchdogTimeout() {
+    qWarning() << m_identifier << "Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
 }

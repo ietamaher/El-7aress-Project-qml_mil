@@ -10,13 +10,20 @@
 ImuDevice::ImuDevice(const QString& identifier, QObject* parent)
     : TemplatedDevice<ImuData>(parent),
       m_identifier(identifier),
-      m_pollTimer(new QTimer(this))
+      m_pollTimer(new QTimer(this)),
+      m_communicationWatchdog(new QTimer(this))
 {
     connect(m_pollTimer, &QTimer::timeout, this, &ImuDevice::pollTimerTimeout);
+
+    m_communicationWatchdog->setSingleShot(false);
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &ImuDevice::onCommunicationWatchdogTimeout);
 }
 
 ImuDevice::~ImuDevice() {
     m_pollTimer->stop();
+    m_communicationWatchdog->stop();
 }
 
 void ImuDevice::setDependencies(Transport* transport,
@@ -28,14 +35,7 @@ void ImuDevice::setDependencies(Transport* transport,
     m_transport->setParent(this);
     m_parser->setParent(this);
 
-    // Connect transport signals
-    connect(m_transport, &Transport::connectionStateChanged,
-            this, [this](bool connected) {
-        auto newData = std::make_shared<ImuData>(*data());
-        newData->isConnected = connected;
-        updateData(newData);
-        emit imuDataChanged(*newData);
-    });
+    // Don't listen to transport connectionStateChanged - we manage connection via watchdog
 }
 
 bool ImuDevice::initialize() {
@@ -56,8 +56,9 @@ bool ImuDevice::initialize() {
 
     setState(DeviceState::Online);
 
-    // Start polling
+    // Start polling and watchdog
     m_pollTimer->start(pollInterval);
+    m_communicationWatchdog->start();
 
     qDebug() << m_identifier << "initialized successfully with poll interval:" << pollInterval << "ms";
     return true;
@@ -65,6 +66,7 @@ bool ImuDevice::initialize() {
 
 void ImuDevice::shutdown() {
     m_pollTimer->stop();
+    m_communicationWatchdog->stop();
 
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
@@ -112,10 +114,7 @@ void ImuDevice::onModbusReplyReady(QModbusReply* reply) {
 
     if (reply->error() != QModbusDevice::NoError) {
         qWarning() << m_identifier << "Modbus error:" << reply->errorString();
-        auto newData = std::make_shared<ImuData>(*data());
-        newData->isConnected = false;
-        updateData(newData);
-        emit imuDataChanged(*newData);
+        setConnectionState(false);
         reply->deleteLater();
         return;
     }
@@ -136,9 +135,12 @@ void ImuDevice::processMessage(const Message& message) {
     if (message.typeId() == Message::Type::ImuDataType) {
         auto const* dataMsg = static_cast<const ImuDataMessage*>(&message);
 
-        // Update with new data - mark as connected when receiving valid data
+        // We received valid data - device is connected and communicating
+        setConnectionState(true);
+        resetCommunicationWatchdog();
+
+        // Update with new data
         auto newData = std::make_shared<ImuData>(dataMsg->data());
-        newData->isConnected = true;
         updateData(newData);
         emit imuDataChanged(*newData);
     }
@@ -146,4 +148,30 @@ void ImuDevice::processMessage(const Message& message) {
 
 void ImuDevice::setPollInterval(int intervalMs) {
     m_pollTimer->setInterval(intervalMs);
+}
+
+void ImuDevice::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void ImuDevice::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<ImuData>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+        emit imuDataChanged(*newData);
+
+        if (connected) {
+            qDebug() << m_identifier << "connected";
+        } else {
+            qWarning() << m_identifier << "disconnected";
+        }
+    }
+}
+
+void ImuDevice::onCommunicationWatchdogTimeout() {
+    qWarning() << m_identifier << "Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
 }

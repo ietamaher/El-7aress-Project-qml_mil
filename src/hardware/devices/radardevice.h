@@ -28,6 +28,7 @@
 #include "../devices/TemplatedDevice.h"
 #include "../data/DataTypes.h"
 #include <QVector>
+#include <QTimer>
 
 class Transport;
 class RadarProtocolParser;
@@ -71,15 +72,21 @@ signals:
 private slots:
     void processFrame(const QByteArray& frame);
     void processMessage(const Message& message);
+    void onCommunicationWatchdogTimeout();
 
 private:
     void updateTrackedTarget(const RadarData& newPlot);
+    void resetCommunicationWatchdog();
+    void setConnectionState(bool connected);
 
     QString m_identifier;
     Transport* m_transport = nullptr;
     RadarProtocolParser* m_parser = nullptr;
 
+    QTimer* m_communicationWatchdog = nullptr;
     QVector<RadarData> m_trackedTargets; // Multiple tracked targets
+
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 10000;  // 10 seconds without data = disconnected
 };
 
 #endif // RADARDEVICE_H

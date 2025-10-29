@@ -10,13 +10,20 @@
 Plc42Device::Plc42Device(const QString& identifier, QObject* parent)
     : TemplatedDevice<Plc42Data>(parent),
       m_identifier(identifier),
-      m_pollTimer(new QTimer(this))
+      m_pollTimer(new QTimer(this)),
+      m_communicationWatchdog(new QTimer(this))
 {
     connect(m_pollTimer, &QTimer::timeout, this, &Plc42Device::pollTimerTimeout);
+
+    m_communicationWatchdog->setSingleShot(false);
+    m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
+    connect(m_communicationWatchdog, &QTimer::timeout,
+            this, &Plc42Device::onCommunicationWatchdogTimeout);
 }
 
 Plc42Device::~Plc42Device() {
     m_pollTimer->stop();
+    m_communicationWatchdog->stop();
 }
 
 void Plc42Device::setDependencies(Transport* transport,
@@ -28,14 +35,7 @@ void Plc42Device::setDependencies(Transport* transport,
     m_transport->setParent(this);
     m_parser->setParent(this);
 
-    // Connect transport signals
-    connect(m_transport, &Transport::connectionStateChanged,
-            this, [this](bool connected) {
-        auto newData = std::make_shared<Plc42Data>(*data());
-        newData->isConnected = connected;
-        updateData(newData);
-        emit plc42DataChanged(*newData);
-    });
+    // Don't listen to transport connectionStateChanged - we manage connection via watchdog
 }
 
 bool Plc42Device::initialize() {
@@ -56,8 +56,9 @@ bool Plc42Device::initialize() {
 
     setState(DeviceState::Online);
 
-    // Start polling
+    // Start polling and watchdog
     m_pollTimer->start(pollInterval);
+    m_communicationWatchdog->start();
 
     qDebug() << m_identifier << "initialized successfully with poll interval:" << pollInterval << "ms";
     return true;
@@ -65,6 +66,7 @@ bool Plc42Device::initialize() {
 
 void Plc42Device::shutdown() {
     m_pollTimer->stop();
+    m_communicationWatchdog->stop();
 
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
@@ -120,10 +122,7 @@ void Plc42Device::onModbusReplyReady(QModbusReply* reply) {
 
     if (reply->error() != QModbusDevice::NoError) {
         qWarning() << m_identifier << "Modbus error:" << reply->errorString();
-        auto newData = std::make_shared<Plc42Data>(*data());
-        newData->isConnected = false;
-        updateData(newData);
-        emit plc42DataChanged(*newData);
+        setConnectionState(false);
         reply->deleteLater();
         return;
     }
@@ -148,9 +147,12 @@ void Plc42Device::processMessage(const Message& message) {
 }
 
 void Plc42Device::mergePartialData(const Plc42Data& partialData) {
+    // We received valid data - device is connected and communicating
+    setConnectionState(true);
+    resetCommunicationWatchdog();
+
     auto currentData = data();
     auto newData = std::make_shared<Plc42Data>(*currentData);
-    newData->isConnected = true;
 
     bool dataChanged = false;
 
@@ -320,4 +322,30 @@ void Plc42Device::sendWriteHoldingRegisters() {
 
 void Plc42Device::setPollInterval(int intervalMs) {
     m_pollTimer->setInterval(intervalMs);
+}
+
+void Plc42Device::resetCommunicationWatchdog() {
+    m_communicationWatchdog->start();
+}
+
+void Plc42Device::setConnectionState(bool connected) {
+    auto currentData = data();
+    if (currentData->isConnected != connected) {
+        auto newData = std::make_shared<Plc42Data>(*currentData);
+        newData->isConnected = connected;
+        updateData(newData);
+        emit plc42DataChanged(*newData);
+
+        if (connected) {
+            qDebug() << m_identifier << "connected";
+        } else {
+            qWarning() << m_identifier << "disconnected";
+        }
+    }
+}
+
+void Plc42Device::onCommunicationWatchdogTimeout() {
+    qWarning() << m_identifier << "Communication timeout - no data received for"
+               << COMMUNICATION_TIMEOUT_MS << "ms";
+    setConnectionState(false);
 }
