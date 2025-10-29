@@ -44,14 +44,20 @@ private slots:
     void processFrame(const QByteArray& frame);
     void processMessage(const Message& message);
     void checkCameraStatus();
+    void onCommunicationWatchdogTimeout();
 
 private:
     void sendCommand(quint8 function, const QByteArray& data);
+    void resetCommunicationWatchdog();
+    void setConnectionState(bool connected);
 
     QString m_identifier;
     Transport* m_transport = nullptr;
     NightCameraProtocolParser* m_parser = nullptr;
     QTimer* m_statusCheckTimer = nullptr;
+    QTimer* m_communicationWatchdog = nullptr;
+
+    static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };
 
 #endif // NIGHTCAMERACONTROLDEVICE_H

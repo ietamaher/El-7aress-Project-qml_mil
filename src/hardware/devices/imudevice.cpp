@@ -136,8 +136,9 @@ void ImuDevice::processMessage(const Message& message) {
     if (message.typeId() == Message::Type::ImuDataType) {
         auto const* dataMsg = static_cast<const ImuDataMessage*>(&message);
 
-        // Update with new data
+        // Update with new data - mark as connected when receiving valid data
         auto newData = std::make_shared<ImuData>(dataMsg->data());
+        newData->isConnected = true;
         updateData(newData);
         emit imuDataChanged(*newData);
     }
