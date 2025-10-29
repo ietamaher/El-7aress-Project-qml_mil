@@ -18,10 +18,14 @@ bool ModbusTransport::open(const QJsonObject& config) {
 
     // FIXED: Read slave ID from config
     m_slaveId = config["slaveId"].toInt(1);
-    qDebug() << "ModbusTransport: Setting slave ID to" << m_slaveId;
+    QString port = config["port"].toString();
+    int baudRate = config["baudRate"].toInt(9600);
 
-    m_client->setConnectionParameter(QModbusDevice::SerialPortNameParameter, config["port"].toString());
-    m_client->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, config["baudRate"].toInt(9600));
+    qDebug() << "ModbusTransport: Setting slave ID to" << m_slaveId;
+    qDebug() << "ModbusTransport: Opening port" << port << "at" << baudRate << "baud";
+
+    m_client->setConnectionParameter(QModbusDevice::SerialPortNameParameter, port);
+    m_client->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, baudRate);
     m_client->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, QSerialPort::Data8);
     m_client->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, QSerialPort::OneStop);
     m_client->setConnectionParameter(QModbusDevice::SerialParityParameter,
@@ -31,11 +35,14 @@ bool ModbusTransport::open(const QJsonObject& config) {
     m_client->setNumberOfRetries(config["retries"].toInt(3));
 
     if (!m_client->connectDevice()) {
-        emit linkError(QString("ModbusTransport: Failed to connect - %1").arg(m_client->errorString()));
+        QString error = QString("ModbusTransport: Failed to connect to %1 (slave %2) - %3")
+                        .arg(port).arg(m_slaveId).arg(m_client->errorString());
+        qCritical() << error;
+        emit linkError(error);
         return false;
     }
 
-    qDebug() << "ModbusTransport: Connected successfully with slave ID" << m_slaveId;
+    qDebug() << "ModbusTransport: Connected successfully to" << port << "with slave ID" << m_slaveId;
     return true;
 }
 
@@ -99,8 +106,24 @@ QModbusReply* ModbusTransport::sendWriteRequest(const QModbusDataUnit &unit) {
 
 void ModbusTransport::onStateChanged(QModbusDevice::State state) {
     bool connected = (state == QModbusDevice::ConnectedState);
-    qDebug() << "ModbusTransport: State changed to" << (connected ? "Connected" : "Disconnected")
-             << "for slave" << m_slaveId;
+
+    QString stateStr;
+    switch (state) {
+        case QModbusDevice::UnconnectedState: stateStr = "Unconnected"; break;
+        case QModbusDevice::ConnectingState: stateStr = "Connecting"; break;
+        case QModbusDevice::ConnectedState: stateStr = "Connected"; break;
+        case QModbusDevice::ClosingState: stateStr = "Closing"; break;
+        default: stateStr = QString("Unknown(%1)").arg(state);
+    }
+
+    qDebug() << "ModbusTransport: State changed to" << stateStr << "for slave" << m_slaveId;
+
+    // If we failed to connect, log the error
+    if (state == QModbusDevice::UnconnectedState && m_client->error() != QModbusDevice::NoError) {
+        qWarning() << "ModbusTransport: Slave" << m_slaveId << "connection failed:"
+                   << m_client->errorString();
+    }
+
     emit connectionStateChanged(connected);
 }
 
