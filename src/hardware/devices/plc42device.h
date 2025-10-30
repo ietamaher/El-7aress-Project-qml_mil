@@ -89,6 +89,7 @@ private:
     void resetCommunicationWatchdog();
     void setConnectionState(bool connected);
     void sendNextPendingRequest();
+    void startPollCycle();  // Start a new poll cycle
 
     QString m_identifier;
     Transport* m_transport = nullptr;
@@ -102,6 +103,7 @@ private:
     // Request sequencing to prevent concurrent Modbus requests
     bool m_waitingForResponse = false;
     bool m_needsHoldingRegistersRead = false;
+    bool m_pollCycleActive = false;  // Track if a poll cycle is in progress
 
     static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };

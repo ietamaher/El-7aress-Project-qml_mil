@@ -54,12 +54,15 @@ bool Plc21Device::initialize() {
     // Get poll interval from config (default 50ms)
     QJsonObject config = property("config").toJsonObject();
     int pollInterval = config["pollIntervalMs"].toInt(50);
+    m_pollTimer->setInterval(pollInterval);
 
     setState(DeviceState::Online);
 
-    // Start polling and watchdog
-    m_pollTimer->start(pollInterval);
+    // Start watchdog
     m_communicationWatchdog->start();
+
+    // Start first poll cycle immediately
+    startPollCycle();
 
     qDebug() << m_identifier << "initialized successfully with poll interval:" << pollInterval << "ms";
     return true;
@@ -77,17 +80,22 @@ void Plc21Device::shutdown() {
 }
 
 void Plc21Device::pollTimerTimeout() {
-    // Don't send new requests if we're still waiting for a response
-    // This prevents "Cannot match response with open request" errors
-    if (m_waitingForResponse) {
+    // Timer fired - start a new poll cycle
+    startPollCycle();
+}
+
+void Plc21Device::startPollCycle() {
+    // Don't start a new cycle if one is already in progress
+    // This implements adaptive polling - we wait for the previous cycle to complete
+    if (m_pollCycleActive) {
         return;
     }
 
-    // Start the request sequence: first read digital inputs,
-    // then read holding registers after the first response arrives
+    m_pollCycleActive = true;
     m_needsHoldingRegistersRead = true;
     m_waitingForResponse = true;
 
+    // Start the request sequence: first read digital inputs
     sendReadRequest(Plc21Registers::DIGITAL_INPUTS_START_ADDR,
                     Plc21Registers::DIGITAL_INPUTS_COUNT,
                     true);
@@ -123,7 +131,10 @@ void Plc21Device::sendReadRequest(int startAddress, int count, bool isDiscreteIn
 void Plc21Device::onModbusReplyReady(QModbusReply* reply) {
     if (!reply || !m_parser) {
         if (reply) reply->deleteLater();
-        m_waitingForResponse = false;  // Reset flag even on error
+        m_waitingForResponse = false;
+        m_pollCycleActive = false;  // Abort cycle on error
+        m_needsHoldingRegistersRead = false;
+        m_pollTimer->start();  // Schedule retry
         return;
     }
 
@@ -131,8 +142,10 @@ void Plc21Device::onModbusReplyReady(QModbusReply* reply) {
         qWarning() << m_identifier << "Modbus error:" << reply->errorString();
         setConnectionState(false);
         reply->deleteLater();
-        m_waitingForResponse = false;  // Reset flag to allow next poll
-        m_needsHoldingRegistersRead = false;  // Cancel pending request
+        m_waitingForResponse = false;
+        m_pollCycleActive = false;  // Abort cycle on error
+        m_needsHoldingRegistersRead = false;
+        m_pollTimer->start();  // Schedule retry
         return;
     }
 
@@ -297,6 +310,13 @@ void Plc21Device::sendNextPendingRequest() {
         sendReadRequest(Plc21Registers::ANALOG_INPUTS_START_ADDR,
                         Plc21Registers::ANALOG_INPUTS_COUNT,
                         false);
+    } else {
+        // Poll cycle complete - mark as inactive and schedule next cycle
+        m_pollCycleActive = false;
+
+        // Start timer for next poll cycle (adaptive polling)
+        // Timer will fire after the configured interval
+        m_pollTimer->start();
     }
 }
 
