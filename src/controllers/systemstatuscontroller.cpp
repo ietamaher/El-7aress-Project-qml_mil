@@ -112,6 +112,7 @@ void SystemStatusController::onSystemStateChanged(const SystemStateData& data)
         data.lrfDistance,
         data.lrfTemp,
         data.lrfLaserCount,
+        data.lrfSystemStatus,
         data.lrfFault,
         data.lrfNoEcho,
         data.lrfLaserNotOut,
