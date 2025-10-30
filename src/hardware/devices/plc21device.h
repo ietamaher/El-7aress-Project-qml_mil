@@ -82,6 +82,7 @@ private:
     void mergePartialData(const Plc21PanelData& partialData);
     void resetCommunicationWatchdog();
     void setConnectionState(bool connected);
+    void sendNextPendingRequest();
 
     QString m_identifier;
     Transport* m_transport = nullptr;
@@ -90,6 +91,10 @@ private:
     QTimer* m_pollTimer;
     QTimer* m_communicationWatchdog = nullptr;
     QVector<bool> m_digitalOutputs; // Cached output state for writing
+
+    // Request sequencing to prevent concurrent Modbus requests
+    bool m_waitingForResponse = false;
+    bool m_needsHoldingRegistersRead = false;
 
     static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };

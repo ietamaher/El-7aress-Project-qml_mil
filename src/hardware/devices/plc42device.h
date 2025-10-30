@@ -88,6 +88,7 @@ private:
     void mergePartialData(const Plc42Data& partialData);
     void resetCommunicationWatchdog();
     void setConnectionState(bool connected);
+    void sendNextPendingRequest();
 
     QString m_identifier;
     Transport* m_transport = nullptr;
@@ -97,6 +98,10 @@ private:
     QTimer* m_communicationWatchdog = nullptr;
     Plc42Data m_pendingWrites; // Data to be written on next write cycle
     bool m_hasPendingWrites = false;
+
+    // Request sequencing to prevent concurrent Modbus requests
+    bool m_waitingForResponse = false;
+    bool m_needsHoldingRegistersRead = false;
 
     static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
 };
