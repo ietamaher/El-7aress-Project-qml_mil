@@ -1327,3 +1327,1195 @@ Use the checklist in **Appendix I - Operator Maintenance Log Template**.
 
 ---
 
+# LESSON 3 - BASIC OPERATION / FIRE CONTROL UNIT FUNCTIONS
+
+**Duration**: 4 hours
+**Type**: Classroom + Practical
+**References**: Operator manual, system startup checklist
+
+---
+
+## INTRODUCTION
+
+This lesson teaches the fundamental skills required to operate the El 7arress RCWS. You will learn system startup procedures, Control Panel operations, joystick control, camera operations, and basic gimbal movement.
+
+---
+
+## LEARNING OBJECTIVES
+
+By the end of this lesson, you will be able to:
+- Perform system startup procedure
+- Operate the Control Panel buttons and switches
+- Control gimbal movement using the joystick
+- Switch between day and thermal cameras
+- Operate camera zoom controls
+
+---
+
+## 3.1 SYSTEM STARTUP PROCEDURE
+
+### **Prerequisites**
+
+Before starting the system, verify:
+- [ ] Walk-around inspection completed (Lesson 2)
+- [ ] All personnel clear of gimbal movement area
+- [ ] Platform stable (vehicle parked with brake set, or ship in acceptable sea state)
+- [ ] Power available (battery charged or external power connected)
+- [ ] Communication established with command (if required)
+- [ ] Weapon cleared and safe (see Appendix A)
+- [ ] Emergency stop button not engaged (rotated to release position)
+
+### **Startup Sequence**
+
+Follow this sequence exactly:
+
+#### **STEP 1: Apply Power**
+
+**Action**: Turn on main power switch (platform-specific location)
+
+**Expected Result**:
+- Power indicator lights illuminate
+- System begins boot sequence
+- Display screen powers on and shows boot logo
+
+**Duration**: 5-10 seconds
+
+**Troubleshooting**:
+- If no power, check circuit breakers and battery voltage
+- If intermittent power, check cable connections
+
+---
+
+#### **STEP 2: Enable Station**
+
+**Action**: On Control Panel, move **STATION ENABLE** switch to ON position
+
+**Expected Result**:
+- "STATION ENABLE" indicator light illuminates (green)
+- System begins initialization sequence
+- Display shows "INITIALIZING..." message
+
+**Duration**: 10-15 seconds
+
+**Troubleshooting**:
+- If Station Enable switch does not engage, check emergency stop is released
+- If system does not initialize, check device connections
+
+---
+
+#### **STEP 3: System Initialization**
+
+**Action**: WAIT - Do not touch controls during initialization
+
+**Process**:
+1. System loads configuration files
+2. Establishes communication with all devices:
+   - Day camera
+   - Thermal camera
+   - Laser Range Finder
+   - Gimbal Drive System (azimuth and elevation servos)
+   - Gyroscope/IMU
+   - Weapon actuator
+   - Control Panel
+   - Joystick
+3. Performs self-test of critical systems
+4. Loads last saved configuration (zones, reticle settings, etc.)
+
+**Display Messages** (examples):
+```
+INITIALIZING SYSTEM...
+Connecting to devices...
+  [✓] Day Camera
+  [✓] Thermal Camera
+  [✓] Laser Range Finder
+  [✓] Gimbal Drive System
+  [✓] Gyroscope/IMU
+  [✓] Weapon Actuator
+  [✓] Control Panel
+  [✓] Joystick
+
+Loading configuration...
+Running self-test...
+  [✓] Gimbal movement test
+  [✓] Camera video feed test
+  [✓] Safety interlocks test
+
+SYSTEM READY
+```
+
+**Duration**: 30-45 seconds
+
+**Expected Result**:
+- All device status indicators show GREEN (connected)
+- "READY" indicator light illuminates on Control Panel
+- Display shows live camera feed with HUD overlay
+- System enters MANUAL mode by default
+- Camera defaults to DAY camera (or last used)
+
+**Troubleshooting**:
+- If any device shows RED (failed), see Lesson 14 - Troubleshooting
+- If initialization hangs (>60 seconds), perform system restart
+
+---
+
+#### **STEP 4: Verify System Status**
+
+**Action**: Verify all systems operational
+
+**Check**:
+1. **Video Feed**: Live image displayed on screen
+2. **HUD Overlay**: Azimuth, elevation, and status displayed
+3. **Gimbal Position**: Current position shown (should be at home/park position)
+4. **Device Status**: All icons GREEN
+5. **Control Panel Indicators**:
+   - POWER: Green
+   - READY: Green
+   - ARMED: OFF (red light not illuminated)
+   - FAULT: OFF
+
+**Expected Gimbal Home Position** (platform-specific):
+- Azimuth: 0° (forward) or last position
+- Elevation: 0° (level) or last position
+
+---
+
+#### **STEP 5: Perform Function Test**
+
+**Action**: Test basic functions before operational use
+
+**A. Joystick Test**:
+1. Move joystick gently left/right
+2. Verify gimbal moves smoothly in azimuth
+3. Move joystick gently up/down
+4. Verify gimbal moves smoothly in elevation
+5. Release joystick - verify it centers and gimbal stops
+
+**B. Camera Test**:
+1. Press camera select button/switch
+2. Verify camera switches from DAY to THERMAL
+3. Press again to return to DAY
+
+**C. Zoom Test**:
+1. Press and hold Zoom In button (Button 6)
+2. Verify image zooms in
+3. Release - verify zoom stops
+4. Press and hold Zoom Out button (Button 8)
+5. Verify image zooms out
+6. Release - verify zoom stops
+
+**D. Emergency Stop Test**:
+1. **ANNOUNCE**: "Testing emergency stop"
+2. While gimbal is moving slowly, press EMERGENCY STOP button
+3. Verify gimbal stops immediately
+4. Rotate emergency stop button to release
+5. Verify system returns to READY state
+
+**All tests must pass before proceeding to operational use.**
+
+---
+
+#### **STEP 6: System Ready for Operation**
+
+**Action**: System is now ready for operational use
+
+**Status**:
+- System in MANUAL mode
+- Weapon SAFE (Master Arm OFF)
+- Ready to perform surveillance or engagement tasks
+
+---
+
+### **Startup Checklist**
+
+Use this checklist for every startup:
+
+```
+EL 7ARRESS RCWS - STARTUP CHECKLIST
+
+Date: ____________  Time: ____________  Operator: ____________
+
+PRE-STARTUP
+[ ] Walk-around inspection completed
+[ ] Personnel clear of gimbal
+[ ] Platform stable
+[ ] Power available
+[ ] Communication established
+[ ] Weapon cleared
+[ ] Emergency stop released
+
+STARTUP SEQUENCE
+[ ] Main power ON
+[ ] Station Enable ON
+[ ] System initialization complete (READY light on)
+[ ] All devices connected (all GREEN)
+[ ] Video feed displayed
+[ ] HUD overlay active
+
+FUNCTION TEST
+[ ] Joystick - Azimuth movement OK
+[ ] Joystick - Elevation movement OK
+[ ] Joystick - Centers correctly
+[ ] Camera switch - Day/Thermal toggle OK
+[ ] Zoom In - Functional
+[ ] Zoom Out - Functional
+[ ] Emergency stop - Functional and released
+
+SYSTEM STATUS
+[ ] READY indicator: ON
+[ ] ARMED indicator: OFF
+[ ] FAULT indicator: OFF
+[ ] Mode: MANUAL
+[ ] No discrepancies
+
+OPERATOR SIGNATURE: ________________  TIME: __________
+
+NOTES/DISCREPANCIES:
+___________________________________________________________
+___________________________________________________________
+```
+
+---
+
+## 3.2 CONTROL PANEL OPERATIONS
+
+### **Control Panel Layout Review**
+
+Refer to Lesson 2 for detailed Control Panel description. The following are the most commonly used controls:
+
+### **3.2.1 Station Enable Switch**
+
+**Type**: Toggle switch (ON/OFF)
+
+**Function**: Master power control for weapon system
+
+**Positions**:
+- **OFF**: System powered down or in standby
+  - Gimbal cannot move
+  - Weapon cannot fire
+  - Cameras may still operate (depending on configuration)
+
+- **ON**: System enabled and operational
+  - Gimbal can move
+  - Weapon can fire (if other conditions met)
+  - All systems active
+
+**Indicator**: Green light when ON
+
+**Usage**:
+- Switch to ON during startup (after main power applied)
+- Switch to OFF during shutdown or when pausing operations
+
+**Safety Note**: Station Enable does NOT make the weapon hot. Master Arm (separate control) is required for weapon fire.
+
+---
+
+### **3.2.2 Emergency Stop Button**
+
+**Type**: Mushroom push-button (push to activate, twist to release)
+
+**Function**: Immediately halts all system motion
+
+**Appearance**: Large RED button, easily accessible
+
+**When to Use**:
+- ANY unsafe condition
+- Personnel in danger
+- Equipment malfunction
+- Uncontrolled motion
+- **IMMEDIATELY** when in doubt
+
+**Effect of Activation**:
+1. All gimbal motion stops instantly
+2. Weapon fire inhibited
+3. System enters EMERGENCY state
+4. "EMERGENCY" indicator light ON (red)
+5. Audible alarm may sound
+
+**Recovery Procedure**:
+1. Identify and correct the unsafe condition
+2. Ensure all personnel safe and clear
+3. Twist emergency stop button clockwise to release
+4. System performs self-check
+5. If self-check passes, "READY" indicator returns to green
+6. Resume operations
+
+**Important**: If emergency stop was activated due to equipment malfunction, DO NOT release until maintenance personnel have inspected and cleared the system.
+
+---
+
+### **3.2.3 Master Arm Switch**
+
+**Type**: Toggle switch or momentary button (configuration varies by platform)
+
+**Function**: Gates weapon fire - prevents accidental discharge
+
+**Positions** (if toggle switch):
+- **SAFE**: Weapon cannot fire (even if fire button pressed)
+- **ARMED**: Weapon can fire (if other conditions met)
+
+**OR** (if momentary button):
+- **Released**: Weapon safe
+- **Pressed and Held**: Weapon armed
+
+**Indicator**: Red "ARMED" light when armed
+
+**Usage**:
+- Keep in SAFE position until ready to engage target
+- Move to ARMED only when:
+  - Target positively identified
+  - Fire authorization received
+  - Ready to fire immediately
+- Return to SAFE after engagement complete
+
+**Safety Notes**:
+- Master Arm alone does NOT fire the weapon
+- Fire button (on joystick) must still be pressed
+- Some configurations require BOTH Master Arm switch AND joystick trigger stage 1
+
+**Alternative Configuration**:
+Some platforms use **Joystick Button 0** (trigger stage 1) as Master Arm instead of a Control Panel switch. Check your platform-specific configuration.
+
+---
+
+### **3.2.4 Indicator Lights**
+
+Refer to Lesson 2, Section 2.7 for complete indicator descriptions.
+
+**Monitor these lights continuously during operation**:
+
+- **POWER** (Green): System has power
+- **READY** (Green): System initialized and functional
+- **ARMED** (Red): Master Arm engaged - weapon hot
+- **FAULT** (Amber): System fault detected - check status display
+- **ZONE VIOLATION** (Red Flashing): Aiming into no-fire zone
+- **TRACKING** (Green): Tracking mode active
+- **EMERGENCY** (Red): Emergency stop activated
+
+**Response to Indicator Lights**:
+
+| Light | Status | Action |
+|-------|--------|--------|
+| FAULT (Amber) ON | System fault | Check system status display (Lesson 11), refer to troubleshooting (Lesson 14) |
+| ZONE VIOLATION (Red Flashing) | Aiming into no-fire zone | Immediately move gimbal away from restricted zone, do NOT fire |
+| EMERGENCY (Red) ON | Emergency stop engaged | Identify cause, correct, release emergency stop |
+| READY (Green) OFF during operation | System not ready | Check system status, may need restart |
+
+---
+
+### **3.2.5 Menu Navigation Buttons**
+
+**Buttons**:
+- **MENU/VAL**: Menu access and selection confirmation
+- **UP** (▲): Navigate up or increase value
+- **DOWN** (▼): Navigate down or decrease value
+
+**Function**: Access system menus for configuration and settings
+
+**Usage** (detailed in Lesson 4):
+1. Press **MENU/VAL** to open main menu
+2. Press **UP** or **DOWN** to highlight menu option
+3. Press **MENU/VAL** to select highlighted option
+4. Use **UP/DOWN** to adjust values or select submenu items
+5. Press **MENU/VAL** to confirm selection
+6. Navigate to "Return ..." or press **MENU/VAL** when not on a menu item to exit
+
+**Common Menu Tasks**:
+- Change reticle type
+- Adjust colors
+- Access zeroing procedures
+- View system status
+- Define zones
+- Shutdown system
+
+---
+
+### **3.2.6 Additional Switches (Platform-Specific)**
+
+Depending on platform configuration, the Control Panel may include:
+
+- **Camera Select Switch**: Toggle between day and thermal cameras
+- **LRF Trigger**: Fire laser range finder
+- **Mode Select Switch**: Cycle through motion modes (Manual, Scan, etc.)
+- **Lighting Controls**: Panel backlighting, display brightness
+
+**Refer to your platform-specific supplement for additional controls.**
+
+---
+
+## 3.3 JOYSTICK CONTROL BASICS
+
+### **Joystick Overview**
+
+The operator joystick is the primary interface for aiming the weapon system and controlling engagement.
+
+**Joystick Type**: Flight-style control stick (HOTAS design - Hands On Throttle And Stick)
+
+**Primary Functions**:
+- Gimbal aiming (azimuth and elevation)
+- Weapon engagement (trigger)
+- Camera controls (zoom, thermal palettes)
+- Tracking controls
+- Mode selection
+
+---
+
+### **3.3.1 Main Stick Axes**
+
+**Two axes of motion**:
+
+#### **X-Axis: Azimuth Control (Left/Right)**
+
+**Function**: Controls gimbal azimuth (horizontal rotation)
+
+**Operation**:
+- Push stick LEFT → Gimbal rotates LEFT (counterclockwise)
+- Push stick RIGHT → Gimbal rotates RIGHT (clockwise)
+- Return stick to CENTER → Gimbal stops
+
+**Control Type**: Velocity control (rate control)
+- Small stick deflection = slow gimbal movement
+- Large stick deflection = fast gimbal movement
+- Stick centered = gimbal stopped
+
+**Velocity Scaling**: Stick deflection × 10.0 degrees/second
+- Stick at 50% deflection = 5°/second gimbal speed
+- Stick at 100% deflection (full) = 10°/second gimbal speed
+
+**Range**: -1.0 (full left) to +1.0 (full right), normalized
+
+---
+
+#### **Y-Axis: Elevation Control (Up/Down)**
+
+**Function**: Controls gimbal elevation (vertical movement)
+
+**Operation**:
+- Push stick FORWARD (away from you) → Gimbal tilts DOWN
+- Pull stick BACK (toward you) → Gimbal tilts UP
+- Return stick to CENTER → Gimbal stops
+
+**Control Type**: Velocity control (rate control)
+- Small stick deflection = slow gimbal movement
+- Large stick deflection = fast gimbal movement
+- Stick centered = gimbal stopped
+
+**Velocity Scaling**: Stick deflection × 10.0 degrees/second (inverted)
+- Stick at 50% deflection = 5°/second gimbal speed
+- Stick at 100% deflection (full) = 10°/second gimbal speed
+
+**Range**: -1.0 (full forward) to +1.0 (full back), normalized
+
+**Note**: Y-axis is inverted - pushing forward moves gimbal down. This is standard for flight-style controls.
+
+---
+
+### **3.3.2 Joystick Technique**
+
+**Proper Grip**:
+1. Grip joystick comfortably but firmly
+2. Wrist relaxed
+3. Forearm supported on armrest (if available)
+4. Index finger on trigger
+5. Thumb on hat switch (D-Pad)
+6. Other fingers wrapped around grip
+
+**Smooth Control**:
+- Use small, smooth movements
+- Avoid jerky or rapid stick movements
+- Anticipate gimbal inertia (gimbal takes time to start/stop)
+- Center stick gently to stop motion (don't release abruptly)
+
+**Precision Aiming**:
+- Use small stick deflections (10-30%) for precision
+- Use larger deflections (50-100%) for rapid slewing
+- Practice smooth transitions between fast slewing and precision aiming
+
+**Common Mistakes**:
+- ❌ Gripping too tightly (causes fatigue and jerky control)
+- ❌ Over-controlling (excessive stick movements)
+- ❌ Not centering stick (gimbal continues moving)
+- ❌ Releasing stick abruptly (causes oscillation)
+
+---
+
+### **3.3.3 Primary Buttons (Basic Operations)**
+
+For this lesson, we focus on essential buttons. Advanced buttons covered in Lesson 8.
+
+#### **Button 0: Master Arm**
+
+**Location**: Trigger stage 1 (half-pull on trigger)
+
+**Function**: Arms weapon system (alternative to Control Panel Master Arm switch)
+
+**Operation**:
+- Pull trigger halfway → Master Arm engaged, "ARMED" light ON
+- Release → Master Arm disengaged, "ARMED" light OFF
+
+**Usage**: Hold at stage 1 when ready to fire, then pull fully to stage 2 to fire weapon.
+
+**Safety**: Do NOT engage Master Arm unless ready to fire immediately.
+
+---
+
+#### **Button 5: Fire Weapon**
+
+**Location**: Trigger stage 2 (full-pull on trigger)
+
+**Function**: Fires weapon
+
+**Operation**:
+- With Master Arm engaged (trigger stage 1), pull trigger fully → Weapon fires
+- Release → Weapon stops firing
+
+**Safety Requirements** (ALL must be true):
+- Station Enable ON
+- Master Arm engaged (Button 0 or Control Panel switch)
+- Not in no-fire zone
+- Safety interlocks satisfied
+
+**Firing Modes**:
+- Single-shot: Quick trigger press (weapon fires one round)
+- Burst/Auto: Hold trigger (weapon fires continuously, per weapon configuration)
+
+**Safety**: Keep finger OFF trigger until ready to fire.
+
+---
+
+#### **Button 6: Zoom In**
+
+**Location**: Top of joystick grip (varies by model)
+
+**Function**: Increases camera magnification (zooms in)
+
+**Operation**:
+- Press and HOLD → Camera zooms in continuously
+- Release → Zoom stops at current level
+
+**Speed**: Continuous smooth zoom while held
+
+**Works on**: Both day camera and thermal camera
+
+**Usage**: Use to magnify distant targets for identification or precision aiming.
+
+---
+
+#### **Button 8: Zoom Out**
+
+**Location**: Top of joystick grip (opposite side from Zoom In)
+
+**Function**: Decreases camera magnification (zooms out)
+
+**Operation**:
+- Press and HOLD → Camera zooms out continuously
+- Release → Zoom stops at current level
+
+**Speed**: Continuous smooth zoom while held
+
+**Works on**: Both day camera and thermal camera
+
+**Usage**: Use to widen field of view for situational awareness or target search.
+
+---
+
+#### **Button 3: Dead Man Switch**
+
+**Location**: Side of joystick grip (easy to reach with middle finger)
+
+**Function**: Safety interlock for critical operations
+
+**Operation**:
+- Press and HOLD → Dead Man Switch active
+- Release → Dead Man Switch inactive
+
+**Required For**:
+- Lead Angle Compensation (LAC) toggle (Button 2)
+- Some tracking operations (recommended)
+- Other critical fire control functions
+
+**Purpose**: Prevents accidental activation of critical functions. Operator must be actively holding joystick to perform these operations.
+
+**Usage**: Hold this button when performing LAC or other safety-critical operations.
+
+---
+
+### **3.3.4 Hat Switch (D-Pad)**
+
+**Location**: Top of joystick, under thumb
+
+**Type**: 8-way directional pad (UP, DOWN, LEFT, RIGHT, and diagonals)
+
+**Function**: Adjusts tracking acquisition box size (during tracking acquisition phase)
+
+**Operation**:
+- Press UP → Decrease box height
+- Press DOWN → Increase box height
+- Press LEFT → Decrease box width
+- Press RIGHT → Increase box width
+
+**When Active**: ONLY during Tracking Acquisition phase (Lesson 5)
+
+**Effect**: ±4 pixels per press
+
+**Note**: Hat switch has no effect in Manual mode or other modes. It is specific to tracking operations.
+
+---
+
+## 3.4 BASIC GIMBAL MOVEMENT
+
+### **Exercise 3.4.1: Straight-Line Movement**
+
+**Objective**: Learn to move gimbal smoothly in straight lines (azimuth-only or elevation-only)
+
+**Procedure**:
+
+**A. Azimuth Movement (Left/Right)**
+
+1. Note current azimuth on HUD (e.g., AZ: 0.0°)
+2. Gently push joystick LEFT (20% deflection)
+3. Observe gimbal rotating left, azimuth decreasing
+4. Hold for 3 seconds
+5. Gently center joystick
+6. Observe gimbal stopping
+7. Note final azimuth (e.g., AZ: 350.0° - moved 10° left)
+8. Repeat in RIGHT direction
+
+**B. Elevation Movement (Up/Down)**
+
+1. Note current elevation on HUD (e.g., EL: 0.0°)
+2. Gently pull joystick BACK (toward you) 20% deflection
+3. Observe gimbal tilting up, elevation increasing
+4. Hold for 3 seconds
+5. Gently center joystick
+6. Observe gimbal stopping
+7. Note final elevation (e.g., EL: 5.0° - moved 5° up)
+8. Repeat in DOWN direction (push stick forward)
+
+**Success Criteria**:
+- Gimbal moves smoothly without jerking
+- Gimbal stops when stick centered
+- Can control direction and speed
+
+---
+
+### **Exercise 3.4.2: Diagonal Movement**
+
+**Objective**: Learn to move gimbal in both axes simultaneously
+
+**Procedure**:
+
+1. Start at AZ: 0°, EL: 0°
+2. Push joystick DIAGONALLY (e.g., right and back = right/up)
+3. Observe gimbal moving right AND up simultaneously
+4. Hold for 3 seconds
+5. Center joystick
+6. Observe gimbal stopping
+7. Note final position (e.g., AZ: 10°, EL: 5°)
+8. Practice all four diagonal directions:
+   - Right/Up (push right and back)
+   - Right/Down (push right and forward)
+   - Left/Up (push left and back)
+   - Left/Down (push left and forward)
+
+**Success Criteria**:
+- Smooth diagonal motion
+- Coordinated movement in both axes
+- Predictable direction control
+
+---
+
+### **Exercise 3.4.3: Target Centering**
+
+**Objective**: Learn to place reticle on a target
+
+**Setup**: Use a visible target or landmark (e.g., distant building, vehicle, terrain feature)
+
+**Procedure**:
+
+1. Identify target visually on screen (not centered)
+2. Estimate direction to move gimbal (left/right, up/down)
+3. Move joystick in appropriate direction
+4. Observe target moving toward center of screen
+5. As target approaches reticle, reduce stick deflection (slow down)
+6. Make fine adjustments with small stick movements
+7. Center reticle on target
+8. Hold position for 3 seconds
+
+**Success Criteria**:
+- Target centered on reticle within ±2° (azimuth and elevation)
+- Smooth approach (no overshooting)
+- Stable hold on target
+
+**Practice**: Repeat with different targets at varying distances and angles
+
+---
+
+### **Exercise 3.4.4: Rapid Slew and Stop**
+
+**Objective**: Learn to quickly move gimbal to new direction and stop precisely
+
+**Procedure**:
+
+1. Start at AZ: 0°, EL: 0°
+2. Rapidly push joystick to 100% deflection in one direction (e.g., right)
+3. Observe gimbal moving at maximum speed (~10°/second)
+4. After 2 seconds, rapidly center joystick
+5. Observe gimbal stopping
+6. Note final position (e.g., AZ: 20°)
+7. Practice rapid slews in all directions
+
+**Success Criteria**:
+- Gimbal reaches maximum speed
+- Stops cleanly without oscillation
+- No overshoot beyond intended position
+
+**Common Issues**:
+- If gimbal oscillates after stop: Released stick too abruptly - center more gently
+- If gimbal overshoots: Anticipated stop too late - center earlier
+
+---
+
+### **3.4.5 Gimbal Movement Limits**
+
+**Azimuth Limits**:
+- **Range**: 360° continuous rotation (no limits)
+- **Behavior**: Gimbal can rotate continuously in either direction
+- **Display**: Azimuth wraps around (359° → 0° or 0° → 359°)
+
+**Elevation Limits**:
+- **Range**: -20° (down) to +60° (up)
+- **Behavior**: Gimbal stops at limits (hard stops)
+- **Effect**: If stick held beyond limit, gimbal stays at limit (cannot move further)
+
+**No-Traverse Zone Limits** (if configured):
+- Gimbal stops at zone boundary
+- Warning displayed on screen
+- Cannot move into restricted area
+
+**Safety**: If gimbal stops unexpectedly, check for:
+- Elevation limit reached
+- No-traverse zone boundary
+- Physical obstruction (emergency stop immediately if suspected)
+
+---
+
+## 3.5 CAMERA OPERATIONS
+
+### **3.5.1 Camera Selection (Day/Thermal Toggle)**
+
+**Two cameras available**:
+1. **Day Camera**: Visible spectrum, color, high resolution, 20x optical zoom
+2. **Thermal Camera**: Infrared, heat signatures, see through smoke, 2x digital zoom
+
+**Toggle Method** (platform-specific - check your configuration):
+
+**Option A: Control Panel Switch**
+- Camera Select switch
+- Toggle to "DAY" or "THERMAL" position
+
+**Option B: Joystick Button**
+- Press designated camera toggle button (varies by platform)
+
+**Option C: Menu Selection**
+- Not recommended during operations (too slow)
+
+**Display Indication**:
+- Bottom of screen shows: "Camera: DAY" or "Camera: THERMAL"
+- Camera icon changes color/style
+
+**When to Use Each Camera**:
+
+| Camera | Best For | Limitations |
+|--------|----------|-------------|
+| **Day Camera** | Daylight operations, color identification, long-range (with zoom), precise aiming | Poor in low light, cannot see through smoke/dust |
+| **Thermal Camera** | Night operations, low visibility, heat signature detection, camouflaged targets | Lower resolution, cannot see through glass, less precise |
+
+**Typical Usage**:
+- **Day**: Primary camera for daylight operations
+- **Thermal**: Night operations and low visibility conditions
+- **Toggle between**: Use thermal to detect targets, switch to day for identification (if light permits)
+
+---
+
+### **3.5.2 Zoom Controls**
+
+**Purpose**: Magnify image for target identification or precision aiming
+
+#### **Zoom In (Button 6)**
+
+**Operation**:
+1. Press and HOLD Button 6
+2. Image zooms in (magnifies) continuously
+3. Release when desired zoom level reached
+
+**Effect**:
+- Field of View (FOV) decreases (narrower view)
+- Targets appear larger
+- Better for identification and precision
+
+**Display**:
+- "ZOOM: xx.x" indicator increases
+- "FOV: xx.x°" indicator decreases
+
+**Maximum Zoom**:
+- Day camera: 20x optical zoom (FOV narrows to ~3°)
+- Thermal camera: 2x digital zoom (FOV narrows to ~12°)
+
+---
+
+#### **Zoom Out (Button 8)**
+
+**Operation**:
+1. Press and HOLD Button 8
+2. Image zooms out (widens) continuously
+3. Release when desired zoom level reached
+
+**Effect**:
+- Field of View (FOV) increases (wider view)
+- More situational awareness
+- Better for search and tracking
+
+**Display**:
+- "ZOOM: xx.x" indicator decreases
+- "FOV: xx.x°" indicator increases
+
+**Minimum Zoom**:
+- Day camera: 1x (FOV widens to ~60°)
+- Thermal camera: 1x (FOV widens to ~24°)
+
+---
+
+#### **Zoom Usage Tips**
+
+**General Guidelines**:
+- **Zoom Out** for search and situational awareness
+- **Zoom In** for target identification and engagement
+- **Intermediate Zoom** for tracking (balance between FOV and detail)
+
+**Lead Angle Compensation Considerations**:
+- LAC requires sufficient FOV to calculate target velocity
+- If zoomed in too far, LAC may display "ZOOM OUT" warning
+- Recommend max zoom of 10x when using LAC on moving targets
+
+**Tracking Considerations**:
+- Wide FOV (zoomed out) makes tracking acquisition easier (larger search area)
+- Narrow FOV (zoomed in) provides better tracking accuracy but increases risk of losing target
+
+---
+
+### **3.5.3 Thermal Camera Palette Selection (LUT)**
+
+**Function**: Changes thermal image color scheme for different viewing preferences and target contrast
+
+**LUT** = Look-Up Table (color palette)
+
+**Available Palettes**: 13 palettes (numbered 0-12)
+
+**Common Palettes**:
+- **White Hot**: Hot objects appear white, cold objects black (high contrast)
+- **Black Hot**: Hot objects appear black, cold objects white (reverse contrast)
+- **Rainbow**: Color gradient from blue (cold) to red (hot)
+- **Iron**: Red/yellow/white scale (popular for target detection)
+- **Lava**: Red/orange/yellow scale (high visibility)
+- **Sepia**: Brown tones (easy on eyes)
+- **And others...**
+
+---
+
+#### **LUT Controls**
+
+**Next LUT (Button 7)**:
+
+**Operation**:
+1. Press Button 7
+2. Palette advances to next LUT (e.g., LUT 0 → LUT 1)
+3. Repeat to cycle through all palettes
+
+**Cycling**: LUT 12 → wraps to LUT 0
+
+---
+
+**Previous LUT (Button 9)**:
+
+**Operation**:
+1. Press Button 9
+2. Palette goes to previous LUT (e.g., LUT 1 → LUT 0)
+3. Repeat to cycle backward through palettes
+
+**Cycling**: LUT 0 → wraps to LUT 12
+
+---
+
+#### **When to Use LUT Selection**
+
+**Situation-Dependent**:
+- **High contrast targets** (vehicle vs. sky): White Hot or Black Hot
+- **Target detection in clutter**: Iron or Lava (colors help distinguish heat sources)
+- **Prolonged viewing**: Sepia or Rainbow (less eye strain)
+- **Personal preference**: Experiment to find what works best
+
+**Active Only on Thermal Camera**:
+- LUT buttons have NO effect when day camera is selected
+- When you switch to thermal camera, last-used LUT is active
+
+**Best Practice**: Set preferred LUT during setup/training, memorize palette order for quick switching.
+
+---
+
+### **3.5.4 Camera Focus**
+
+**Day Camera**:
+- **Auto-focus**: Enabled by default (focus adjusts automatically)
+- **Manual focus**: Not available in standard configuration
+- Generally requires no operator input
+
+**Thermal Camera**:
+- **Fixed focus**: Thermal cameras typically have fixed focus (no adjustment needed)
+- Focus-free operation
+
+**If image is blurry**:
+- Day camera: May be auto-focus issue - zoom in/out to trigger refocus
+- Thermal camera: May be dirty lens - clean lens per maintenance procedures
+- Either camera: May be fog/condensation on lens - wipe lens
+
+---
+
+## 3.6 BASIC OPERATION EXERCISES
+
+### **Exercise 3.6.1: Startup and Shutdown**
+
+**Objective**: Perform complete startup and shutdown cycle
+
+**Procedure**:
+1. Perform walk-around inspection (Lesson 2)
+2. Execute startup sequence (Section 3.1)
+3. Verify all systems operational
+4. Perform function tests
+5. Operate system for 5 minutes (practice gimbal movement and camera controls)
+6. Execute shutdown sequence (Section 3.7 - see below)
+
+**Repeat until proficient** (no errors, completed in standard time)
+
+---
+
+### **Exercise 3.6.2: Target Acquisition Drill**
+
+**Objective**: Quickly acquire and center multiple targets
+
+**Setup**: Instructor identifies 5 targets (landmarks, objects, etc.)
+
+**Procedure** (for each target):
+1. Instructor calls out target description (e.g., "white building, 2 o'clock")
+2. Locate target on screen
+3. Slew gimbal rapidly to target
+4. Fine-adjust to center reticle on target
+5. Hold for 3 seconds
+6. Instructor confirms or corrects
+7. Repeat for next target
+
+**Scoring**:
+- Time to acquire each target (goal: <10 seconds)
+- Accuracy (goal: reticle within ±2° of target center)
+
+---
+
+### **Exercise 3.6.3: Camera and Zoom Proficiency**
+
+**Objective**: Demonstrate smooth operation of camera controls
+
+**Procedure**:
+1. Start with day camera, wide FOV (zoomed out)
+2. Identify distant target
+3. Zoom in smoothly to maximum (20x)
+4. Center reticle precisely on target
+5. Zoom out smoothly to minimum (1x)
+6. Switch to thermal camera
+7. Locate same target on thermal
+8. Cycle through 3 different LUT palettes (observe target contrast changes)
+9. Select best LUT for target visibility
+10. Switch back to day camera
+
+**Evaluation**:
+- Smooth zoom (no jerky movements)
+- Camera switching without losing target orientation
+- Appropriate LUT selection for conditions
+
+---
+
+### **Exercise 3.6.4: Emergency Stop Response**
+
+**Objective**: React quickly to emergency conditions
+
+**Procedure**:
+1. Operate gimbal normally (moving in any direction)
+2. Instructor calls "EMERGENCY STOP" (simulating unsafe condition)
+3. Immediately press emergency stop button
+4. Verify gimbal stops
+5. Instructor clears emergency
+6. Release emergency stop
+7. Verify system returns to READY
+8. Resume operations
+
+**Scoring**:
+- Reaction time (goal: <2 seconds from command to button press)
+- Correct procedure (press, verify stop, release only when cleared)
+
+---
+
+## 3.7 SYSTEM SHUTDOWN PROCEDURE
+
+### **When to Shut Down**
+
+- End of operational period
+- System maintenance required
+- Prolonged inactivity
+- Emergency evacuation
+
+### **Shutdown Sequence**
+
+#### **STEP 1: Ensure Weapon Safe**
+
+**Actions**:
+1. Master Arm to SAFE (release Button 0 or toggle Control Panel switch)
+2. Verify "ARMED" light is OFF
+3. Clear weapon per Appendix A procedures
+4. Remove ammunition (if applicable)
+
+---
+
+#### **STEP 2: Park Gimbal (Optional but Recommended)**
+
+**Actions**:
+1. Slew gimbal to park position (platform-specific):
+   - Typical: Azimuth 0° (forward), Elevation 0° (level)
+   - Or: Stow position if platform has stowed configuration
+2. Verify gimbal stopped at park position
+
+**Purpose**: Protects gimbal and weapon from weather, reduces wear
+
+---
+
+#### **STEP 3: Save Configuration (If Changes Made)**
+
+**If you made configuration changes** (zones, settings, etc.):
+1. Access main menu (MENU/VAL button)
+2. Navigate to save configuration option (Lesson 4 details)
+3. Confirm save
+4. Exit menu
+
+**If no changes made**: Skip this step
+
+---
+
+#### **STEP 4: Disable Station**
+
+**Actions**:
+1. Move **STATION ENABLE** switch to OFF position
+2. Verify "READY" light turns OFF
+3. Gimbal becomes unpowered (cannot move)
+
+---
+
+#### **STEP 5: Power Off**
+
+**Actions**:
+1. Turn off main power switch (platform-specific location)
+2. Display screen turns off
+3. All indicators turn off
+4. System fully powered down
+
+---
+
+#### **STEP 6: Post-Shutdown Inspection**
+
+**Actions**:
+1. Verify gimbal in park position
+2. Install lens covers (if available)
+3. Secure all covers and panels
+4. Note any discrepancies in maintenance log
+5. Perform post-operation checklist (Lesson 13)
+
+---
+
+### **Shutdown Checklist**
+
+```
+EL 7ARRESS RCWS - SHUTDOWN CHECKLIST
+
+Date: ____________  Time: ____________  Operator: ____________
+
+PRE-SHUTDOWN
+[ ] Operations complete
+[ ] Weapon safe and clear
+[ ] Ammunition removed (if applicable)
+[ ] Configuration saved (if changes made)
+
+SHUTDOWN SEQUENCE
+[ ] Master Arm to SAFE (ARMED light OFF)
+[ ] Gimbal parked at stow position
+[ ] Station Enable OFF (READY light OFF)
+[ ] Main power OFF
+[ ] All indicators OFF
+
+POST-SHUTDOWN
+[ ] Lens covers installed
+[ ] Covers and panels secured
+[ ] Maintenance log updated
+[ ] No discrepancies (or discrepancies noted)
+[ ] Area policed
+
+OPERATOR SIGNATURE: ________________  TIME: __________
+
+NOTES/DISCREPANCIES:
+___________________________________________________________
+___________________________________________________________
+```
+
+---
+
+### **Alternative Shutdown: Menu Shutdown System**
+
+**Purpose**: Software-initiated shutdown (powers down computer and optionally the platform)
+
+**Procedure**:
+1. Ensure weapon safe and clear
+2. Access main menu (MENU/VAL button)
+3. Navigate to "System" section
+4. Select "Shutdown System"
+5. Confirm shutdown
+6. System quits application and may issue platform shutdown command
+
+**Use Case**: Normal end-of-day shutdown
+
+**Warning**: This shutdown method may power down the entire platform (vehicle/ship computer). Ensure all other systems are secured before using.
+
+---
+
+## LESSON 3 SUMMARY
+
+**Key Points**:
+1. Always perform walk-around inspection before startup
+2. Follow startup sequence exactly - do not skip steps
+3. Station Enable and Master Arm are separate safety controls
+4. Emergency stop immediately accessible - use without hesitation for any unsafe condition
+5. Joystick uses velocity control - stick position controls gimbal speed
+6. Azimuth is continuous (360°), elevation is limited (-20° to +60°)
+7. Day camera for daylight and precision, thermal camera for night and low visibility
+8. Zoom: zoom out for search, zoom in for identification and engagement
+9. Thermal LUT palettes improve target visibility - experiment to find best for conditions
+10. Shutdown includes weapon safe, gimbal park, configuration save, and power off
+
+**Skills Practiced**:
+- System startup and shutdown
+- Control Panel button/switch operation
+- Joystick gimbal control (azimuth, elevation, diagonal)
+- Target centering and tracking
+- Camera switching (day/thermal)
+- Zoom control
+- Thermal palette (LUT) selection
+- Emergency stop response
+
+**Next Lesson**: Menu Functions (Configuration and Settings)
+
+---
+
