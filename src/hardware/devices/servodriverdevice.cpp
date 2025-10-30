@@ -62,6 +62,9 @@ bool ServoDriverDevice::initialize() {
 
     setState(DeviceState::Online);
 
+    // Start communication watchdog to detect connection issues
+    m_communicationWatchdog->start();
+
     // Start polling
     m_pollTimer->start(pollInterval);
     m_temperatureTimer->setInterval(tempInterval);
