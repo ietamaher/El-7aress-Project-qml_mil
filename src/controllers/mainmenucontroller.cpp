@@ -37,7 +37,6 @@ QStringList MainMenuController::buildMainMenuOptions() const
     options << "--- RETICLE & DISPLAY ---"
             << "Personalize Reticle"
             << "Personalize Colors"
-            << "Adjust Brightness"
             << "--- BALLISTICS ---"
             << "Zeroing"
             << "Clear Active Zero"
@@ -46,6 +45,7 @@ QStringList MainMenuController::buildMainMenuOptions() const
             << "--- SYSTEM ---"
             << "Zone Definitions"
             << "System Status"
+            << "Shutdown System"
             << "--- INFO ---"
             << "Help/About"
             << "Return ...";
@@ -97,10 +97,6 @@ void MainMenuController::handleMenuOptionSelected(const QString& option)
         emit personalizeColorsRequested();
         emit menuFinished();
     }
-    else if (option == "Adjust Brightness") {
-        emit adjustBrightnessRequested();
-        emit menuFinished();
-    }
     else if (option == "Zeroing") {
         emit zeroingRequested();
         // ❌ DON'T emit menuFinished() - zeroing is a procedure
@@ -124,6 +120,10 @@ void MainMenuController::handleMenuOptionSelected(const QString& option)
     else if (option == "System Status") {
         emit systemStatusRequested();
        // emit menuFinished();
+    }
+    else if (option == "Shutdown System") {
+        emit shutdownSystemRequested();
+        emit menuFinished();
     }
     else if (option == "Radar Target List") {
         emit radarTargetListRequested();

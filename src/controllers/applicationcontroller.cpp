@@ -9,6 +9,8 @@
 #include "controllers/aboutcontroller.h"
 #include "models/domain/systemstatemodel.h"
 #include <QDebug>
+#include <QCoreApplication>
+#include <QProcess>
 
 ApplicationController::ApplicationController(QObject *parent)
     : QObject(parent)
@@ -99,8 +101,6 @@ void ApplicationController::initialize()
             this, &ApplicationController::handlePersonalizeReticle);
     connect(m_mainMenuController, &MainMenuController::personalizeColorsRequested,
             this, &ApplicationController::handlePersonalizeColors);
-    connect(m_mainMenuController, &MainMenuController::adjustBrightnessRequested,
-            this, &ApplicationController::handleAdjustBrightness);
     connect(m_mainMenuController, &MainMenuController::zeroingRequested,
             this, &ApplicationController::handleZeroing);
     connect(m_mainMenuController, &MainMenuController::clearZeroRequested,
@@ -113,6 +113,8 @@ void ApplicationController::initialize()
             this, &ApplicationController::handleZoneDefinitions);
     connect(m_mainMenuController, &MainMenuController::systemStatusRequested,
             this, &ApplicationController::handleSystemStatus);
+    connect(m_mainMenuController, &MainMenuController::shutdownSystemRequested,
+            this, &ApplicationController::handleShutdown);
     connect(m_mainMenuController, &MainMenuController::radarTargetListRequested,
             this, &ApplicationController::handleRadarTargetList);
     connect(m_mainMenuController, &MainMenuController::helpAboutRequested,
@@ -405,15 +407,6 @@ void ApplicationController::handlePersonalizeColors()
     setMenuState(MenuState::ColorMenu);
 }
 
-void ApplicationController::handleAdjustBrightness()
-{
-    qDebug() << "ApplicationController: Adjust Brightness requested";
-    hideAllMenus();
-    setMenuState(MenuState::BrightnessAdjust);
-    // TODO: Show brightness adjustment UI
-    showMainMenu();
-}
-
 void ApplicationController::handleZeroing()
 {
     qDebug() << "ApplicationController: Zeroing requested";
@@ -462,6 +455,18 @@ void ApplicationController::handleSystemStatus()
     hideAllMenus();
     m_systemStatusController->show();
     setMenuState(MenuState::SystemStatus);
+}
+
+void ApplicationController::handleShutdown()
+{
+    qDebug() << "ApplicationController: Shutdown System requested";
+    hideAllMenus();
+
+    // Quit the application
+    QCoreApplication::quit();
+
+    // Execute system shutdown command (Linux)
+    QProcess::startDetached("shutdown", QStringList() << "-h" << "now");
 }
 
 void ApplicationController::handleRadarTargetList()

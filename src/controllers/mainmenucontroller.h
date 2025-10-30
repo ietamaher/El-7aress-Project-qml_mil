@@ -29,13 +29,13 @@ signals:
     // Events for the root controller to listen to
     void personalizeReticleRequested();
     void personalizeColorsRequested();
-    void adjustBrightnessRequested();
     void zeroingRequested();
     void clearZeroRequested();
     void windageRequested();
     void clearWindageRequested();
     void zoneDefinitionsRequested();
     void systemStatusRequested();
+    void shutdownSystemRequested();
     void helpAboutRequested();
     void radarTargetListRequested();
 
