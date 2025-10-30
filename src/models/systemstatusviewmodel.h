@@ -66,6 +66,7 @@ class SystemStatusViewModel : public QObject
     Q_PROPERTY(QString lrfDistanceText READ lrfDistanceText NOTIFY lrfDistanceTextChanged)
     Q_PROPERTY(QString lrfTempText READ lrfTempText NOTIFY lrfTempTextChanged)
     Q_PROPERTY(QString lrfLaserCountText READ lrfLaserCountText NOTIFY lrfLaserCountTextChanged)
+    Q_PROPERTY(QString lrfRawStatusByteText READ lrfRawStatusByteText NOTIFY lrfRawStatusByteTextChanged)
     Q_PROPERTY(bool lrfFault READ lrfFault NOTIFY lrfFaultChanged)
     Q_PROPERTY(QString lrfFaultText READ lrfFaultText NOTIFY lrfFaultTextChanged)
 
@@ -172,6 +173,7 @@ public:
     QString lrfDistanceText() const { return m_lrfDistanceText; }
     QString lrfTempText() const { return m_lrfTempText; }
     QString lrfLaserCountText() const { return m_lrfLaserCountText; }
+    QString lrfRawStatusByteText() const { return m_lrfRawStatusByteText; }
     bool lrfFault() const { return m_lrfFault; }
     QString lrfFaultText() const { return m_lrfFaultText; }
 
@@ -250,7 +252,7 @@ public slots:
     void updateImu(bool connected, double roll, double pitch, double yaw, double temp);
 
     void updateLrf(bool connected, float distance, float temp, quint32 laserCount,
-                   bool fault, bool noEcho, bool laserNotOut, bool overTemp);
+                   quint8 rawStatusByte, bool fault, bool noEcho, bool laserNotOut, bool overTemp);
 
     void updateDayCamera(bool connected, bool isActive, float fov, quint16 zoom,
                          quint16 focus, bool autofocus, bool error, quint8 errorCode);
@@ -308,6 +310,7 @@ signals:
     void lrfDistanceTextChanged();
     void lrfTempTextChanged();
     void lrfLaserCountTextChanged();
+    void lrfRawStatusByteTextChanged();
     void lrfFaultChanged();
     void lrfFaultTextChanged();
 
@@ -423,6 +426,7 @@ private:
     QString m_lrfDistanceText;
     QString m_lrfTempText;
     QString m_lrfLaserCountText;
+    QString m_lrfRawStatusByteText;
     bool m_lrfFault;
     QString m_lrfFaultText;
 

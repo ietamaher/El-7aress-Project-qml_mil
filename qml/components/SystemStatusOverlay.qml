@@ -271,6 +271,7 @@ Rectangle {
                             StatusRow { label: "Distance:"; value: viewModel ? viewModel.lrfDistanceText : "N/A" }
                             StatusRow { label: "Temp:"; value: viewModel ? viewModel.lrfTempText : "N/A" }
                             StatusRow { label: "Shots:"; value: viewModel ? viewModel.lrfLaserCountText : "N/A" }
+                            StatusRow { label: "Status:"; value: viewModel ? viewModel.lrfRawStatusByteText : "N/A" }
 
                             Text {
                                 text: viewModel ? viewModel.lrfFaultText : "N/A"

@@ -26,6 +26,7 @@ SystemStatusViewModel::SystemStatusViewModel(QObject *parent)
     , m_lrfDistanceText("N/A")
     , m_lrfTempText("N/A")
     , m_lrfLaserCountText("N/A")
+    , m_lrfRawStatusByteText("N/A")
     , m_lrfFault(false)
     , m_lrfFaultText("No Faults")
     , m_dayCamConnected(false)
@@ -224,7 +225,7 @@ void SystemStatusViewModel::updateImu(bool connected, double roll, double pitch,
 // LRF
 // ============================================================================
 void SystemStatusViewModel::updateLrf(bool connected, float distance, float temp,
-                                      quint32 laserCount, bool fault, bool noEcho,
+                                      quint32 laserCount, quint8 rawStatusByte, bool fault, bool noEcho,
                                       bool laserNotOut, bool overTemp)
 {
     if (m_lrfConnected != connected) {
@@ -248,6 +249,12 @@ void SystemStatusViewModel::updateLrf(bool connected, float distance, float temp
     if (m_lrfLaserCountText != newCount) {
         m_lrfLaserCountText = newCount;
         emit lrfLaserCountTextChanged();
+    }
+
+    QString newRawStatusByte = QString::number(rawStatusByte);
+    if (m_lrfRawStatusByteText != newRawStatusByte) {
+        m_lrfRawStatusByteText = newRawStatusByte;
+        emit lrfRawStatusByteTextChanged();
     }
 
     if (m_lrfFault != fault) {
