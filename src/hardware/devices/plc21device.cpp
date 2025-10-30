@@ -77,15 +77,20 @@ void Plc21Device::shutdown() {
 }
 
 void Plc21Device::pollTimerTimeout() {
-    // Read digital inputs (discrete inputs)
+    // Don't send new requests if we're still waiting for a response
+    // This prevents "Cannot match response with open request" errors
+    if (m_waitingForResponse) {
+        return;
+    }
+
+    // Start the request sequence: first read digital inputs,
+    // then read holding registers after the first response arrives
+    m_needsHoldingRegistersRead = true;
+    m_waitingForResponse = true;
+
     sendReadRequest(Plc21Registers::DIGITAL_INPUTS_START_ADDR,
                     Plc21Registers::DIGITAL_INPUTS_COUNT,
                     true);
-
-    // Read analog inputs (holding registers)
-    sendReadRequest(Plc21Registers::ANALOG_INPUTS_START_ADDR,
-                    Plc21Registers::ANALOG_INPUTS_COUNT,
-                    false);
 }
 
 void Plc21Device::sendReadRequest(int startAddress, int count, bool isDiscreteInputs) {
@@ -118,6 +123,7 @@ void Plc21Device::sendReadRequest(int startAddress, int count, bool isDiscreteIn
 void Plc21Device::onModbusReplyReady(QModbusReply* reply) {
     if (!reply || !m_parser) {
         if (reply) reply->deleteLater();
+        m_waitingForResponse = false;  // Reset flag even on error
         return;
     }
 
@@ -125,6 +131,8 @@ void Plc21Device::onModbusReplyReady(QModbusReply* reply) {
         qWarning() << m_identifier << "Modbus error:" << reply->errorString();
         setConnectionState(false);
         reply->deleteLater();
+        m_waitingForResponse = false;  // Reset flag to allow next poll
+        m_needsHoldingRegistersRead = false;  // Cancel pending request
         return;
     }
 
@@ -138,6 +146,10 @@ void Plc21Device::onModbusReplyReady(QModbusReply* reply) {
             processMessage(*msg);
         }
     }
+
+    // Response received successfully - send next pending request if any
+    m_waitingForResponse = false;
+    sendNextPendingRequest();
 }
 
 void Plc21Device::processMessage(const Message& message) {
@@ -274,6 +286,17 @@ void Plc21Device::setConnectionState(bool connected) {
         } else {
             qWarning() << m_identifier << "disconnected";
         }
+    }
+}
+
+void Plc21Device::sendNextPendingRequest() {
+    // If we need to read holding registers, send that request now
+    if (m_needsHoldingRegistersRead) {
+        m_needsHoldingRegistersRead = false;
+        m_waitingForResponse = true;
+        sendReadRequest(Plc21Registers::ANALOG_INPUTS_START_ADDR,
+                        Plc21Registers::ANALOG_INPUTS_COUNT,
+                        false);
     }
 }
 

@@ -76,15 +76,20 @@ void Plc42Device::shutdown() {
 }
 
 void Plc42Device::pollTimerTimeout() {
-    // Read digital inputs (discrete inputs)
+    // Don't send new requests if we're still waiting for a response
+    // This prevents "Cannot match response with open request" errors
+    if (m_waitingForResponse) {
+        return;
+    }
+
+    // Start the request sequence: first read digital inputs,
+    // then read holding registers after the first response arrives
+    m_needsHoldingRegistersRead = true;
+    m_waitingForResponse = true;
+
     sendReadRequest(Plc42Registers::DIGITAL_INPUTS_START_ADDR,
                     7,  // Read 7 discrete inputs
                     true);
-
-    // Read holding registers
-    sendReadRequest(Plc42Registers::HOLDING_REGISTERS_START_ADDR,
-                    Plc42Registers::HOLDING_REGISTERS_COUNT,
-                    false);
 }
 
 void Plc42Device::sendReadRequest(int startAddress, int count, bool isDiscreteInputs) {
@@ -117,6 +122,7 @@ void Plc42Device::sendReadRequest(int startAddress, int count, bool isDiscreteIn
 void Plc42Device::onModbusReplyReady(QModbusReply* reply) {
     if (!reply || !m_parser) {
         if (reply) reply->deleteLater();
+        m_waitingForResponse = false;  // Reset flag even on error
         return;
     }
 
@@ -124,6 +130,8 @@ void Plc42Device::onModbusReplyReady(QModbusReply* reply) {
         qWarning() << m_identifier << "Modbus error:" << reply->errorString();
         setConnectionState(false);
         reply->deleteLater();
+        m_waitingForResponse = false;  // Reset flag to allow next poll
+        m_needsHoldingRegistersRead = false;  // Cancel pending request
         return;
     }
 
@@ -137,6 +145,10 @@ void Plc42Device::onModbusReplyReady(QModbusReply* reply) {
             processMessage(*msg);
         }
     }
+
+    // Response received successfully - send next pending request if any
+    m_waitingForResponse = false;
+    sendNextPendingRequest();
 }
 
 void Plc42Device::processMessage(const Message& message) {
@@ -341,6 +353,17 @@ void Plc42Device::setConnectionState(bool connected) {
         } else {
             qWarning() << m_identifier << "disconnected";
         }
+    }
+}
+
+void Plc42Device::sendNextPendingRequest() {
+    // If we need to read holding registers, send that request now
+    if (m_needsHoldingRegistersRead) {
+        m_needsHoldingRegistersRead = false;
+        m_waitingForResponse = true;
+        sendReadRequest(Plc42Registers::HOLDING_REGISTERS_START_ADDR,
+                        Plc42Registers::HOLDING_REGISTERS_COUNT,
+                        false);
     }
 }
 
