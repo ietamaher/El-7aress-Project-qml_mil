@@ -47,7 +47,6 @@ public:
         MainMenu,
         ReticleMenu,
         ColorMenu,
-        BrightnessAdjust,
         ZeroingProcedure,
         WindageProcedure,
         ZoneDefinition,
@@ -67,13 +66,13 @@ private slots:
     // Main menu action handlers
     void handlePersonalizeReticle();
     void handlePersonalizeColors();
-    void handleAdjustBrightness();
     void handleZeroing();
     void handleClearZero();
     void handleWindage();
     void handleClearWindage();
     void handleZoneDefinitions();
     void handleSystemStatus();
+    void handleShutdown();
     void handleRadarTargetList();
     void handleHelpAbout();
 
