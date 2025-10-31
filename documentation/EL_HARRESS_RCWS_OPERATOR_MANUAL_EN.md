@@ -77,10 +77,11 @@ This document is RESTRICTED and shall only be distributed to:
 - [LESSON 8 - Advanced Joystick Operations](#lesson-8---advanced-joystick-operations)
 - [LESSON 9 - Lead Angle Compensation (LAC)](#lesson-9---lead-angle-compensation-lac)
 - [LESSON 10 - Boresight / Zeroing Procedures](#lesson-10---boresight--zeroing-procedures)
-- [LESSON 11 - System Status & Monitoring](#lesson-11---system-status--monitoring)
-- [LESSON 12 - Emergency Procedures](#lesson-12---emergency-procedures)
-- [LESSON 13 - Operator Maintenance & Care](#lesson-13---operator-maintenance--care)
-- [LESSON 14 - Troubleshooting Guide](#lesson-14---troubleshooting-guide)
+- [LESSON 11 - Windage Compensation](#lesson-11---windage-compensation)
+- [LESSON 12 - System Status & Monitoring](#lesson-12---system-status--monitoring)
+- [LESSON 13 - Emergency Procedures](#lesson-13---emergency-procedures)
+- [LESSON 14 - Operator Maintenance & Care](#lesson-14---operator-maintenance--care)
+- [LESSON 14-bis - Troubleshooting](#lesson-14-bis---troubleshooting)
 - [LESSON 15 - Hands-On Training](#lesson-15---hands-on-training)
 - [LESSON 16 - Hands-On Performance Evaluation](#lesson-16---hands-on-performance-evaluation)
 - [LESSON 17 - Written Examination](#lesson-17---written-examination)
@@ -107,7 +108,7 @@ This document is RESTRICTED and shall only be distributed to:
 
 **Course Code**: RCWS-OQC-001
 
-**Course Length**: 60 hours (theory) + 8 hours (live fire)
+**Course Length**: 68 hours (includes theory, practical, and live fire)
 
 **Class Size**: Maximum 8 students per instructor
 
@@ -134,15 +135,16 @@ This course qualifies military operators to safely and effectively operate the E
 | 8 | Advanced Joystick Operations | 3 | Classroom + Practical |
 | 9 | Lead Angle Compensation (LAC) | 3 | Classroom + Simulator |
 | 10 | Boresight / Zeroing Procedures | 4 | Classroom + Practical |
-| 11 | System Status & Monitoring | 2 | Classroom + Practical |
-| 12 | Emergency Procedures | 2 | Classroom + Practical |
-| 13 | Operator Maintenance & Care | 2 | Classroom + Practical |
-| 14 | Troubleshooting Guide | 2 | Classroom |
+| 11 | Windage Compensation | 2 | Classroom + Practical |
+| 12 | System Status & Monitoring | 2 | Classroom + Practical |
+| 13 | Emergency Procedures | 2 | Classroom + Practical |
+| 14 | Operator Maintenance & Care | 2 | Classroom + Practical |
+| 14-bis | Troubleshooting | 3 | Classroom + Practical |
 | 15 | Hands-On Training | 8 | Practical |
-| 16 | Hands-On Performance Evaluation | 2 | Practical Exam |
-| 17 | Written Examination | 1 | Written Exam |
+| 16 | Hands-On Performance Evaluation | 4 | Practical Exam |
+| 17 | Written Examination | 2 | Written Exam |
 | 18 | Live Fire Range Operations | 8 | Live Fire Range |
-| **TOTAL** | | **62** | |
+| **TOTAL** | | **68** | |
 
 ## GRADUATION REQUIREMENTS
 
@@ -259,12 +261,19 @@ Safely and effectively operate the El 7arress RCWS system to acquire, track, and
 - **ELO 13.4**: Backup system configurations
 - **ELO 13.5**: Complete maintenance log entries
 
-### **Lesson 14 - Troubleshooting**
-- **ELO 14.1**: Diagnose common joystick issues
-- **ELO 14.2**: Troubleshoot camera problems
-- **ELO 14.3**: Resolve tracking failures
-- **ELO 14.4**: Address gimbal movement issues
-- **ELO 14.5**: Identify when to escalate to maintenance personnel
+### **Lesson 11 - Windage Compensation**
+- **ELO 11.1**: Explain wind effects on projectile trajectory
+- **ELO 11.2**: Perform windage direction capture procedure
+- **ELO 11.3**: Set windage speed value
+- **ELO 11.4**: Apply and verify windage corrections
+- **ELO 11.5**: Clear active windage when no longer needed
+
+### **Lesson 14-bis - Troubleshooting**
+- **ELO 14B.1**: Diagnose common joystick issues
+- **ELO 14B.2**: Troubleshoot camera problems
+- **ELO 14B.3**: Resolve tracking failures
+- **ELO 14B.4**: Address gimbal movement issues
+- **ELO 14B.5**: Identify when to escalate to maintenance personnel
 
 ### **Lesson 15 - Hands-On Training**
 - **ELO 15.1**: Perform all operator tasks under supervision
