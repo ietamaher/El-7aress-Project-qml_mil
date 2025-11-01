@@ -257,7 +257,7 @@ struct Plc21PanelData {
     bool menuValSw = false;
 
     // Analog inputs
-    int speedSW = 2;
+    int speedSW = 50;
     int fireMode = 0;
     int panelTemperature = 0;
 

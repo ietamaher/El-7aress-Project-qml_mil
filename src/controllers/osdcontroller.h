@@ -36,7 +36,7 @@ public slots:
     void onSystemStateChanged(const SystemStateData& data);
 
     // PHASE 2: From CameraVideoStreamDevice (Uncomment when ready)
-    void onFrameDataReady(const FrameData& data);
+    void onFrameDataReady(const FrameData& frmdata);
 
 private slots:
     void onColorStyleChanged(const QColor& color);

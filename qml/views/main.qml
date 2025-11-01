@@ -139,7 +139,7 @@ Window {
     // ========================================================================
     // DEBUG INFO (Remove in production)
     // ========================================================================
-    Rectangle {
+    /*Rectangle {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 10
@@ -171,7 +171,7 @@ Window {
                 font.pixelSize: 12
             }
         }
-    }
+    }*/
 
     // Physical Button Handlers - ONLY 3 BUTTONS
     Row {

@@ -131,7 +131,7 @@ Item {
                 text: modelData.label
                 font.pixelSize: 12
                 font.bold: true
-                font.family: "Archivo Narrow"
+                font.family: "Segoe UI"
                 color: root.color
                 style: Text.Outline
                 styleColor: root.outlineColor
@@ -175,7 +175,7 @@ Item {
             text: "V"
             font.pixelSize: 10
             font.bold: true
-            font.family: "Archivo Narrow"
+            font.family: "Segoe UI"
             color: root.relativeColor
             style: Text.Outline
             styleColor: root.outlineColor
@@ -228,7 +228,7 @@ Item {
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.bottom
-        anchors.topMargin: 5
+        anchors.topMargin: 15
         spacing: 3
 
         // === TRUE BEARING (Primary - Bold) ===
@@ -240,7 +240,7 @@ Item {
                 text: root.trueBearing.toFixed(1) + "°"
                 font.pixelSize: 16
                 font.bold: true
-                font.family: "Archivo Narrow"
+                font.family: "Segoe UI"
                 color: root.color
                 style: Text.Outline
                 styleColor: root.outlineColor
@@ -252,7 +252,7 @@ Item {
                 text: "T"
                 font.pixelSize: 10
                 font.bold: true
-                font.family: "Archivo Narrow"
+                font.family: "Segoe UI"
                 color: root.color
                 style: Text.Outline
                 styleColor: root.outlineColor
@@ -270,7 +270,7 @@ Item {
             Text {
                 text: root.relativeAngle.toFixed(1) + "°"
                 font.pixelSize: 11
-                font.family: "Archivo Narrow"
+                font.family: "Segoe UI"
                 color: root.relativeColor
                 style: Text.Outline
                 styleColor: root.outlineColor
@@ -279,7 +279,7 @@ Item {
             Text {
                 text: "REL"
                 font.pixelSize: 8
-                font.family: "Archivo Narrow"
+                font.family: "Segoe UI"
                 color: root.relativeColor
                 style: Text.Outline
                 styleColor: root.outlineColor
@@ -294,7 +294,7 @@ Item {
             text: "NO IMU"
             font.pixelSize: 9
             font.bold: true
-            font.family: "Archivo Narrow"
+            font.family: "Segoe UI"
             color: "#C81428"  // Red
             style: Text.Outline
             styleColor: root.outlineColor
@@ -309,7 +309,7 @@ Item {
         visible: root.imuConnected
         text: "VEH: " + root.vehicleHeading.toFixed(1) + "°"
         font.pixelSize: 9
-        font.family: "Archivo Narrow"
+        font.family: "Segoe UI"
         color: root.relativeColor
         style: Text.Outline
         styleColor: root.outlineColor

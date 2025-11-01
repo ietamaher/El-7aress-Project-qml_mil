@@ -176,9 +176,7 @@ void OsdViewModel::updateImuData(bool connected, double yaw, double pitch, doubl
         }
 
         if (changed) {
-            qDebug() << "OsdViewModel: IMU updated - Heading:" << yaw
-                     << "Pitch:" << pitch << "Roll:" << roll
-                     << "Connected:" << connected;
+ 
         }
     }
 

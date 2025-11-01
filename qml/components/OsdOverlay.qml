@@ -72,6 +72,15 @@ Item {
             styleColor: "black"
         }
 
+        // SPEED
+        Text {
+            text: viewModel ? viewModel.speedText : "SPD: 0.0%"
+            font.pixelSize: 16
+            font.family: "Segoe UI"
+            color: osdRoot.accentColor
+            style: Text.Outline
+            styleColor: "black"
+        }
         // Zeroing Status
         Text {
             visible: viewModel ? viewModel.zeroingVisible : false
@@ -121,18 +130,7 @@ Item {
     // ========================================================================
     // TOP-RIGHT CORNER (Speed)
     // ========================================================================
-    Text {
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.margins: 10
-        text: viewModel ? viewModel.speedText : "SPD: 0.0%"
-        font.pixelSize: 16
-        font.bold: true
-        font.family: "Segoe UI"
-        color: osdRoot.accentColor
-        style: Text.Outline
-        styleColor: "black"
-    }
+
 
     // ========================================================================
     // BOTTOM-LEFT CORNER (Stab, Camera, FOV)
@@ -203,7 +201,8 @@ Item {
     AzimuthIndicator {
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: 75
+        anchors.rightMargin: 30
+        anchors.topMargin: 50
         width: azIndicatorRadius * 2
         height: azIndicatorRadius * 2
 
@@ -221,8 +220,9 @@ Item {
     // ========================================================================
     ElevationScale {
         anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.rightMargin: 55
+        anchors.top: parent.top
+        anchors.rightMargin: 20
+        anchors.topMargin: 250
         height: elScaleHeight
 
         elevation: viewModel ? viewModel.elevation : 0
