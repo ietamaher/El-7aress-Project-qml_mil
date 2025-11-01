@@ -813,7 +813,7 @@ bool CameraVideoStreamDevice::processFrame(GstBuffer *buffer)
         data.speed = m_speed;
         data.lrfDistance = m_lrfDistance;
         data.sysCharged = m_sysCharged;
-        data.sysArmed = m_sysArmed;
+        data.gunArmed = m_sysArmed;
         data.sysReady = m_sysReady;
         data.fireMode = m_fireMode;
         data.reticleType = m_reticleType;
