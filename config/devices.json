@@ -3,11 +3,22 @@
   "system": {
     "name": "El 7arress RCWS",
     "version": "4.5",
-    "accentColor": "#46E2A5"
+    "accentColor": "#46E2A5",
+    "logLevel": "info",
+    "logPath": "./logs/rcws.log",
+    "enableDataLogger": true,
+    "databasePath": "./data/rcws_history.db"
   },
   "video": {
     "sourceWidth": 1280,
     "sourceHeight": 720,
+    "framerate": 30,
+    "enableTracking": true,
+    "enableDetection": false,
+    "trackingBackend": "VPI_BACKEND_CUDA",
+    "trackingConfidence": 0.25,
+    "detectionConfidence": 0.5,
+    "detectionModelPath": "./models/yolov8s.onnx",
     "dayCamera": {
       "devicePath": "/dev/video0",
       "controlPort": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if00"
@@ -17,14 +28,56 @@
       "controlPort": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if02"
     }
   },
+  "gimbal": {
+    "azimuthLimits": [-180.0, 180.0],
+    "elevationLimits": [-20.0, 60.0],
+    "maxSlewSpeed": 120.0,
+    "defaultSlewSpeed": 30.0,
+    "acceleration": 50.0,
+    "joystickDeadZone": 0.05
+  },
+  "ballistics": {
+    "maxZeroingOffset": 10.0,
+    "zeroingStepSize": 0.1,
+    "maxWindSpeed": 50.0,
+    "windStepSize": 1.0,
+    "defaultBulletSpeed": 850.0
+  },
+  "ui": {
+    "osdRefreshRate": 30,
+    "defaultReticle": "BoxCrosshair",
+    "fontSize": 14,
+    "enableStatusOverlay": true,
+    "showDebugInfo": false
+  },
+  "safety": {
+    "enableNoFireZones": true,
+    "enableNoTraverseZones": true,
+    "requireArmedState": true,
+    "requireStationEnabled": true,
+    "motorMaxTemp": 80.0,
+    "motorWarningTemp": 70.0,
+    "driverMaxTemp": 85.0,
+    "driverWarningTemp": 75.0
+  },
+  "performance": {
+    "gimbalMotionBufferSize": 60000,
+    "imuDataBufferSize": 120000,
+    "trackingDataBufferSize": 36000,
+    "videoFrameBufferSize": 10
+  },
   "imu": {
-    "port": "/dev/serial/by-id/usb-WCH2",      
+    "port": "/dev/serial/by-id/usb-WCH2",
     "baudRate": 115200,
-    "slaveId": 1
+    "slaveId": 1,
+    "sampleRate": 100,
+    "tiltWarningThreshold": 30.0
   },
   "lrf": {
     "port": "/dev/serial/by-id/usb-WCH1",
-    "baudRate": 115200
+    "baudRate": 115200,
+    "minRange": 50.0,
+    "maxRange": 4000.0
   },
   "plc": {
     "plc21": {
