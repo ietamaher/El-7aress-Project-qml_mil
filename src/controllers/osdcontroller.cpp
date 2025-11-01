@@ -110,14 +110,7 @@ void OsdController::onFrameDataReady(const FrameData& data)
         data.imuRollDeg,
         data.imuTemp
     );
-
-    // ⚠️ CRITICAL FIX: Only update PLC21-dependent values if PLC21 is connected
-    // This prevents flickering between actual values and default values (speed=2%, fireMode=SingleShot)
-    if (data.plc21Connected) {
-        m_viewModel->updateSpeed(data.speed);
-        m_viewModel->updateFiringMode(data.fireMode);
-    }
-
+    m_viewModel->updateSpeed(data.speed);
     m_viewModel->updateFov(data.cameraFOV);
 
     // Camera type
@@ -126,7 +119,7 @@ void OsdController::onFrameDataReady(const FrameData& data)
 
     // === SYSTEM STATUS ===
     m_viewModel->updateSystemStatus(data.sysCharged, data.gunArmed, data.sysReady);
-    // Note: updateFiringMode is now inside plc21Connected check above (lines 116-119)
+    m_viewModel->updateFiringMode(data.fireMode);
     m_viewModel->updateLrfDistance(data.lrfDistance);
 
     // ========================================================================

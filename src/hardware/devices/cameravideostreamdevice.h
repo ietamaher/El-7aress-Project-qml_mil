@@ -61,10 +61,7 @@ struct FrameData {
     double imuPitchDeg;             // Pitch angle in degrees
     double imuYawDeg;               // Yaw/Heading angle in degrees (0-360, 0=North)
     double imuTemp;                 // IMU temperature in Celsius
-
-    // PLC21 connection status (for speed/fireMode data validation)
-    bool plc21Connected = false;    // PLC21 panel connection status
-
+    
     // Gyro rates (optional for OSD, but available if needed)
     double gyroX;                   // deg/s
     double gyroY;                   // deg/s
@@ -251,9 +248,7 @@ private:
     double m_imuYawDeg;      // Vehicle heading (0-360°, 0=North)
     double m_imuTemp;
     double m_gyroX, m_gyroY, m_gyroZ;
-    double m_accelX, m_accelY, m_accelZ;
-
-    bool m_plc21Connected;   // PLC21 connection status
+    double m_accelX, m_accelY, m_accelZ;    
 
     float m_cameraFOV;
     float m_lrfDistance;
