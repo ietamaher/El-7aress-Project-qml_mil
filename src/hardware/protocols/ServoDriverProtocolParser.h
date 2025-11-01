@@ -1,5 +1,6 @@
 #pragma once
 #include "../interfaces/ProtocolParser.h"
+#include "../data/DataTypes.h"
 #include <QModbusReply>
 #include <QMap>
 
