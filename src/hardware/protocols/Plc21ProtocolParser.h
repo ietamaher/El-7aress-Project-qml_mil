@@ -1,5 +1,6 @@
 #pragma once
 #include "../interfaces/ProtocolParser.h"
+#include "../data/DataTypes.h"
 #include <QModbusReply>
 
 //================================================================================
@@ -23,6 +24,9 @@ namespace Plc21Registers {
  *
  * Converts QModbusReply objects into typed Message objects.
  * Handles digital inputs (discrete inputs) and analog inputs (holding registers).
+ *
+ * IMPORTANT: Maintains accumulated state in m_data since PLC21 data comes from
+ * multiple separate Modbus read operations (digital inputs + analog inputs).
  */
 class Plc21ProtocolParser : public ProtocolParser {
     Q_OBJECT
@@ -40,4 +44,7 @@ private:
     // Helper methods to create specific messages from a reply
     MessagePtr parseDigitalInputsReply(const QModbusDataUnit& unit);
     MessagePtr parseAnalogInputsReply(const QModbusDataUnit& unit);
+
+    // ⭐ Accumulated data state (persists between poll cycles)
+    Plc21PanelData m_data;
 };

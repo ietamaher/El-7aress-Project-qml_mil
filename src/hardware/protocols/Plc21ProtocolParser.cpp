@@ -6,6 +6,8 @@
 Plc21ProtocolParser::Plc21ProtocolParser(QObject* parent)
     : ProtocolParser(parent)
 {
+    // Initialize m_data with defaults (connection will be set when data arrives)
+    m_data.isConnected = false;
 }
 
 std::vector<MessagePtr> Plc21ProtocolParser::parse(QModbusReply* reply) {
@@ -31,58 +33,60 @@ std::vector<MessagePtr> Plc21ProtocolParser::parse(QModbusReply* reply) {
 }
 
 MessagePtr Plc21ProtocolParser::parseDigitalInputsReply(const QModbusDataUnit& unit) {
-    Plc21PanelData data;
-    data.isConnected = true;
+    // ⭐ Update ONLY digital input fields in the accumulated m_data
+    m_data.isConnected = true;
 
     // Map digital inputs based on their indices
     if (unit.valueCount() > 0) {
-        data.authorizeSw = (unit.value(0) != 0);
+        m_data.authorizeSw = (unit.value(0) != 0);
     }
     if (unit.valueCount() > 1) {
-        data.menuValSw = (unit.value(1) != 0);
+        m_data.menuValSw = (unit.value(1) != 0);
     }
     if (unit.valueCount() > 2) {
-        data.menuDownSW = (unit.value(2) != 0);
+        m_data.menuDownSW = (unit.value(2) != 0);
     }
     if (unit.valueCount() > 3) {
-        data.menuUpSW = (unit.value(3) != 0);
+        m_data.menuUpSW = (unit.value(3) != 0);
     }
     if (unit.valueCount() > 4) {
-        data.switchCameraSW = (unit.value(4) != 0);
+        m_data.switchCameraSW = (unit.value(4) != 0);
     }
     if (unit.valueCount() > 5) {
-        data.enableStabilizationSW = (unit.value(5) != 0);
+        m_data.enableStabilizationSW = (unit.value(5) != 0);
     }
     if (unit.valueCount() > 6) {
-        data.homePositionSW = (unit.value(6) != 0);
+        m_data.homePositionSW = (unit.value(6) != 0);
     }
     if (unit.valueCount() > 8) {
-        data.loadAmmunitionSW = (unit.value(8) != 0);
+        m_data.loadAmmunitionSW = (unit.value(8) != 0);
     }
     if (unit.valueCount() > 9) {
-        data.armGunSW = (unit.value(9) != 0);
+        m_data.armGunSW = (unit.value(9) != 0);
     }
     if (unit.valueCount() > 10) {
-        data.enableStationSW = (unit.value(10) != 0);
+        m_data.enableStationSW = (unit.value(10) != 0);
     }
 
-    return std::make_unique<Plc21DataMessage>(data);
+    // Return the accumulated data (analog inputs retain previous values)
+    return std::make_unique<Plc21DataMessage>(m_data);
 }
 
 MessagePtr Plc21ProtocolParser::parseAnalogInputsReply(const QModbusDataUnit& unit) {
-    Plc21PanelData data;
-    data.isConnected = true;
+    // ⭐ Update ONLY analog input fields in the accumulated m_data
+    m_data.isConnected = true;
 
     // Map analog inputs based on their indices
     if (unit.valueCount() > 0) {
-        data.fireMode = unit.value(0);
+        m_data.fireMode = unit.value(0);
     }
     if (unit.valueCount() > 1) {
-        data.speedSW = unit.value(1);
+        m_data.speedSW = unit.value(1);
     }
     if (unit.valueCount() > 2) {
-        data.panelTemperature = unit.value(2);
+        m_data.panelTemperature = unit.value(2);
     }
 
-    return std::make_unique<Plc21DataMessage>(data);
+    // Return the accumulated data (digital inputs retain previous values)
+    return std::make_unique<Plc21DataMessage>(m_data);
 }

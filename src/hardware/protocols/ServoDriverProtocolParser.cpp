@@ -4,8 +4,10 @@
 #include <QModbusDataUnit>
 #include <QDebug>
 
-ServoDriverProtocolParser::ServoDriverProtocolParser(QObject* parent) 
+ServoDriverProtocolParser::ServoDriverProtocolParser(QObject* parent)
     : ProtocolParser(parent) {
+    // Initialize m_data with defaults (connection will be set when data arrives)
+    m_data.isConnected = false;
     initializeAlarmMap();
 }
 
@@ -59,13 +61,15 @@ MessagePtr ServoDriverProtocolParser::parsePositionReply(const QModbusDataUnit& 
         return nullptr;
     }
 
-    ServoDriverData data;
-    
+    // ⭐ Update ONLY position field in the accumulated m_data
+    m_data.isConnected = true;
+
     // Combine two 16-bit registers into 32-bit position value
     int32_t positionRaw = (static_cast<int32_t>(unit.value(0)) << 16) | unit.value(1);
-    data.position = static_cast<float>(positionRaw);
+    m_data.position = static_cast<float>(positionRaw);
 
-    return std::make_unique<ServoDriverDataMessage>(data);
+    // Return the accumulated data (temperature fields retain previous values)
+    return std::make_unique<ServoDriverDataMessage>(m_data);
 }
 
 MessagePtr ServoDriverProtocolParser::parseTemperatureReply(const QModbusDataUnit& unit) {
@@ -74,17 +78,19 @@ MessagePtr ServoDriverProtocolParser::parseTemperatureReply(const QModbusDataUni
         return nullptr;
     }
 
-    ServoDriverData data;
-    
+    // ⭐ Update ONLY temperature fields in the accumulated m_data
+    m_data.isConnected = true;
+
     // Driver temperature (registers 0-1)
     int32_t driverTempRaw = (static_cast<int32_t>(unit.value(0)) << 16) | unit.value(1);
-    data.driverTemp = static_cast<float>(driverTempRaw) * 0.1f;
+    m_data.driverTemp = static_cast<float>(driverTempRaw) * 0.1f;
 
     // Motor temperature (registers 2-3)
     int32_t motorTempRaw = (static_cast<int32_t>(unit.value(2)) << 16) | unit.value(3);
-    data.motorTemp = static_cast<float>(motorTempRaw) * 0.1f;
+    m_data.motorTemp = static_cast<float>(motorTempRaw) * 0.1f;
 
-    return std::make_unique<ServoDriverDataMessage>(data);
+    // Return the accumulated data (position field retains previous value)
+    return std::make_unique<ServoDriverDataMessage>(m_data);
 }
 
 MessagePtr ServoDriverProtocolParser::parseAlarmReply(const QModbusDataUnit& unit) {
