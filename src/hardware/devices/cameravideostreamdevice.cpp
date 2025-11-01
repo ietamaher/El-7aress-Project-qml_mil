@@ -126,6 +126,7 @@ CameraVideoStreamDevice::CameraVideoStreamDevice(int cameraIndex,
     m_sysCharged = false;
     m_sysArmed = false;
     m_sysReady = false;
+    m_plc21Connected = false;  // Initialize PLC21 connection status
     m_speed = 0.0;
     m_fireMode = FireMode::SingleShot; // Assuming this is defined in osdrenderer.h
 
@@ -299,6 +300,7 @@ void CameraVideoStreamDevice::onSystemStateChanged(const SystemStateData &newSta
     m_sysCharged = newState.ammoLoaded; // Map SystemStateData fields to your OSD needs
     m_sysArmed = newState.gunArmed;
     m_sysReady = newState.isReady();      // Use the helper function? Or specific flags
+    m_plc21Connected = newState.plc21Connected;  // Update PLC21 connection status
     m_cameraFOV = newState.activeCameraIsDay ? newState.dayCurrentHFOV : newState.nightCurrentHFOV; // Example: Get FOV based on active cam
     m_speed = newState.gimbalSpeed; // Assuming gimbalSpeed is the speed value
     m_fireMode = newState.fireMode; // Assuming fireMode is the rate mode
@@ -809,6 +811,8 @@ bool CameraVideoStreamDevice::processFrame(GstBuffer *buffer)
         data.accelX = m_accelX;
         data.accelY = m_accelY;
         data.accelZ = m_accelZ;
+
+        data.plc21Connected = m_plc21Connected;  // Copy PLC21 connection status
 
         data.speed = m_speed;
         data.lrfDistance = m_lrfDistance;
