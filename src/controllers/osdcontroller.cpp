@@ -118,7 +118,7 @@ void OsdController::onFrameDataReady(const FrameData& data)
     m_viewModel->updateCameraType(cameraType);
 
     // === SYSTEM STATUS ===
-    m_viewModel->updateSystemStatus(data.sysCharged, data.sysArmed, data.sysReady);
+    m_viewModel->updateSystemStatus(data.sysCharged, data.gunArmed, data.sysReady);
     m_viewModel->updateFiringMode(data.fireMode);
     m_viewModel->updateLrfDistance(data.lrfDistance);
 

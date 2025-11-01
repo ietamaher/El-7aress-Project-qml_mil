@@ -75,7 +75,7 @@ struct FrameData {
     float speed = 0.0f;
     float lrfDistance = 0.0f;
     bool sysCharged = false;
-    bool sysArmed = false;
+    bool gunArmed = false;
     bool sysReady = false;
     FireMode fireMode = FireMode::SingleShot;
     ReticleType reticleType = ReticleType::BoxCrosshair;

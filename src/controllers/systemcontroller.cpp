@@ -249,8 +249,8 @@ void SystemController::createApiServer()
         const auto& data = m_systemStateModel->data();
 
         QJsonObject status;
-        status["armed"] = data.sysArmed;
-        status["ready"] = data.sysReady;
+        status["armed"] = data.gunArmed;
+        status["ready"] = data.isReady;
         status["azimuth"] = data.gimbalAz;
         status["elevation"] = data.gimbalEl;
         status["tracking"] = data.trackingActive;
