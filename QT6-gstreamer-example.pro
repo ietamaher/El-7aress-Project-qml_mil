@@ -53,6 +53,10 @@ SOURCES += \
     src/controllers/windagecontroller.cpp \
     src/controllers/zeroingcontroller.cpp \
     src/controllers/zonedefinitioncontroller.cpp \
+    src/managers/HardwareManager.cpp \
+    src/managers/ViewModelRegistry.cpp \
+    src/managers/ControllerRegistry.cpp \
+    src/config/ConfigurationValidator.cpp \
     src/hardware/devices/cameravideostreamdevice.cpp \
     src/hardware/devices/daycameracontroldevice.cpp \
     src/hardware/devices/imudevice.cpp \
@@ -143,6 +147,11 @@ HEADERS += \
     src/controllers/windagecontroller.h \
     src/controllers/zeroingcontroller.h \
     src/controllers/zonedefinitioncontroller.h \
+    src/managers/HardwareManager.h \
+    src/managers/ViewModelRegistry.h \
+    src/managers/ControllerRegistry.h \
+    src/config/AppConstants.h \
+    src/config/ConfigurationValidator.h \
     src/hardware/devices/cameravideostreamdevice.h \
     src/hardware/devices/daycameracontroldevice.h \
     src/hardware/devices/imudevice.h \

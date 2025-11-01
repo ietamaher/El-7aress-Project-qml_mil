@@ -14,6 +14,11 @@ DeviceConfiguration::ServoConfig DeviceConfiguration::m_servoAz;
 DeviceConfiguration::ServoConfig DeviceConfiguration::m_servoEl;
 DeviceConfiguration::ActuatorConfig DeviceConfiguration::m_actuator;
 DeviceConfiguration::SystemConfig DeviceConfiguration::m_system;
+DeviceConfiguration::GimbalConfig DeviceConfiguration::m_gimbal;
+DeviceConfiguration::BallisticsConfig DeviceConfiguration::m_ballistics;
+DeviceConfiguration::UiConfig DeviceConfiguration::m_ui;
+DeviceConfiguration::SafetyConfig DeviceConfiguration::m_safety;
+DeviceConfiguration::PerformanceConfig DeviceConfiguration::m_performance;
 
 bool DeviceConfiguration::load(const QString& externalPath)
 {
@@ -72,6 +77,10 @@ bool DeviceConfiguration::loadFromFile(const QString& filePath)
         m_system.name = sys["name"].toString(m_system.name);
         m_system.version = sys["version"].toString(m_system.version);
         m_system.accentColor = sys["accentColor"].toString(m_system.accentColor);
+        m_system.logLevel = sys["logLevel"].toString(m_system.logLevel);
+        m_system.logPath = sys["logPath"].toString(m_system.logPath);
+        m_system.enableDataLogger = sys["enableDataLogger"].toBool(m_system.enableDataLogger);
+        m_system.databasePath = sys["databasePath"].toString(m_system.databasePath);
     }
 
     // Parse Video
@@ -157,6 +166,67 @@ bool DeviceConfiguration::loadFromFile(const QString& filePath)
         QJsonObject act = root["actuator"].toObject();
         m_actuator.port = act["port"].toString();
         m_actuator.baudRate = act["baudRate"].toInt(m_actuator.baudRate);
+    }
+
+    // Parse Gimbal
+    if (root.contains("gimbal")) {
+        QJsonObject gimbal = root["gimbal"].toObject();
+        QJsonArray azLimits = gimbal["azimuthLimits"].toArray();
+        QJsonArray elLimits = gimbal["elevationLimits"].toArray();
+        if (azLimits.size() == 2) {
+            m_gimbal.azimuthMin = azLimits[0].toDouble(m_gimbal.azimuthMin);
+            m_gimbal.azimuthMax = azLimits[1].toDouble(m_gimbal.azimuthMax);
+        }
+        if (elLimits.size() == 2) {
+            m_gimbal.elevationMin = elLimits[0].toDouble(m_gimbal.elevationMin);
+            m_gimbal.elevationMax = elLimits[1].toDouble(m_gimbal.elevationMax);
+        }
+        m_gimbal.maxSlewSpeed = gimbal["maxSlewSpeed"].toDouble(m_gimbal.maxSlewSpeed);
+        m_gimbal.defaultSlewSpeed = gimbal["defaultSlewSpeed"].toDouble(m_gimbal.defaultSlewSpeed);
+        m_gimbal.acceleration = gimbal["acceleration"].toDouble(m_gimbal.acceleration);
+        m_gimbal.joystickDeadZone = gimbal["joystickDeadZone"].toDouble(m_gimbal.joystickDeadZone);
+    }
+
+    // Parse Ballistics
+    if (root.contains("ballistics")) {
+        QJsonObject ballistics = root["ballistics"].toObject();
+        m_ballistics.maxZeroingOffset = ballistics["maxZeroingOffset"].toDouble(m_ballistics.maxZeroingOffset);
+        m_ballistics.zeroingStepSize = ballistics["zeroingStepSize"].toDouble(m_ballistics.zeroingStepSize);
+        m_ballistics.maxWindSpeed = ballistics["maxWindSpeed"].toDouble(m_ballistics.maxWindSpeed);
+        m_ballistics.windStepSize = ballistics["windStepSize"].toDouble(m_ballistics.windStepSize);
+        m_ballistics.defaultBulletSpeed = ballistics["defaultBulletSpeed"].toDouble(m_ballistics.defaultBulletSpeed);
+    }
+
+    // Parse UI
+    if (root.contains("ui")) {
+        QJsonObject ui = root["ui"].toObject();
+        m_ui.osdRefreshRate = ui["osdRefreshRate"].toInt(m_ui.osdRefreshRate);
+        m_ui.defaultReticle = ui["defaultReticle"].toString(m_ui.defaultReticle);
+        m_ui.fontSize = ui["fontSize"].toInt(m_ui.fontSize);
+        m_ui.enableStatusOverlay = ui["enableStatusOverlay"].toBool(m_ui.enableStatusOverlay);
+        m_ui.showDebugInfo = ui["showDebugInfo"].toBool(m_ui.showDebugInfo);
+    }
+
+    // Parse Safety
+    if (root.contains("safety")) {
+        QJsonObject safety = root["safety"].toObject();
+        m_safety.enableNoFireZones = safety["enableNoFireZones"].toBool(m_safety.enableNoFireZones);
+        m_safety.enableNoTraverseZones = safety["enableNoTraverseZones"].toBool(m_safety.enableNoTraverseZones);
+        m_safety.requireArmedState = safety["requireArmedState"].toBool(m_safety.requireArmedState);
+        m_safety.requireStationEnabled = safety["requireStationEnabled"].toBool(m_safety.requireStationEnabled);
+        m_safety.motorMaxTemp = safety["motorMaxTemp"].toDouble(m_safety.motorMaxTemp);
+        m_safety.motorWarningTemp = safety["motorWarningTemp"].toDouble(m_safety.motorWarningTemp);
+        m_safety.driverMaxTemp = safety["driverMaxTemp"].toDouble(m_safety.driverMaxTemp);
+        m_safety.driverWarningTemp = safety["driverWarningTemp"].toDouble(m_safety.driverWarningTemp);
+    }
+
+    // Parse Performance
+    if (root.contains("performance")) {
+        QJsonObject perf = root["performance"].toObject();
+        m_performance.gimbalMotionBufferSize = perf["gimbalMotionBufferSize"].toInt(m_performance.gimbalMotionBufferSize);
+        m_performance.imuDataBufferSize = perf["imuDataBufferSize"].toInt(m_performance.imuDataBufferSize);
+        m_performance.trackingDataBufferSize = perf["trackingDataBufferSize"].toInt(m_performance.trackingDataBufferSize);
+        m_performance.videoFrameBufferSize = perf["videoFrameBufferSize"].toInt(m_performance.videoFrameBufferSize);
     }
 
     return true;
