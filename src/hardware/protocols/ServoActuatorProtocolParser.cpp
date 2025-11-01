@@ -6,6 +6,8 @@
 
 ServoActuatorProtocolParser::ServoActuatorProtocolParser(QObject* parent)
     : ProtocolParser(parent) {
+    // Initialize m_data with defaults
+    m_data = ServoActuatorData();
     initializeStatusBitMap();
 }
 
@@ -39,17 +41,16 @@ std::vector<MessagePtr> ServoActuatorProtocolParser::parse(const QByteArray& raw
             QStringList parts = mainResponse.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
             QString dataPart = (parts.size() > 1) ? parts[1] : "";
 
-            // Create data message based on pending command
+            // ⭐ Update ONLY the relevant field in accumulated m_data based on pending command
             if (m_pendingCommand == "SR") {
-                ServoActuatorData data;
-                data.status = parseStatusRegister(dataPart);
-                messages.push_back(std::make_unique<ServoActuatorDataMessage>(data));
-                
+                m_data.status = parseStatusRegister(dataPart);
+                messages.push_back(std::make_unique<ServoActuatorDataMessage>(m_data));
+
                 // Check for critical faults
-                if (data.status.isMotorOff) {
+                if (m_data.status.isMotorOff) {
                     QStringList criticalFaults;
-                    for (const auto& msg : data.status.activeStatusMessages) {
-                        if (msg.contains("(Latching)") && 
+                    for (const auto& msg : m_data.status.activeStatusMessages) {
+                        if (msg.contains("(Latching)") &&
                             (msg.contains("Emergency") || msg.contains("MOTOR OFF"))) {
                             criticalFaults.append(msg);
                         }
@@ -60,25 +61,20 @@ std::vector<MessagePtr> ServoActuatorProtocolParser::parse(const QByteArray& raw
                     }
                 }
             } else if (m_pendingCommand == "AP") {
-                ServoActuatorData data;
-                data.position_mm = sensorCountsToMillimeters(dataPart.toInt());
-                messages.push_back(std::make_unique<ServoActuatorDataMessage>(data));
+                m_data.position_mm = sensorCountsToMillimeters(dataPart.toInt());
+                messages.push_back(std::make_unique<ServoActuatorDataMessage>(m_data));
             } else if (m_pendingCommand == "VL") {
-                ServoActuatorData data;
-                data.velocity_mm_s = sensorCountsToSpeed(dataPart.toInt());
-                messages.push_back(std::make_unique<ServoActuatorDataMessage>(data));
+                m_data.velocity_mm_s = sensorCountsToSpeed(dataPart.toInt());
+                messages.push_back(std::make_unique<ServoActuatorDataMessage>(m_data));
             } else if (m_pendingCommand == "TQ") {
-                ServoActuatorData data;
-                data.torque_percent = sensorCountsToTorquePercent(dataPart.toInt());
-                messages.push_back(std::make_unique<ServoActuatorDataMessage>(data));
+                m_data.torque_percent = sensorCountsToTorquePercent(dataPart.toInt());
+                messages.push_back(std::make_unique<ServoActuatorDataMessage>(m_data));
             } else if (m_pendingCommand == "RT1") {
-                ServoActuatorData data;
-                data.temperature_c = dataPart.toDouble();
-                messages.push_back(std::make_unique<ServoActuatorDataMessage>(data));
+                m_data.temperature_c = dataPart.toDouble();
+                messages.push_back(std::make_unique<ServoActuatorDataMessage>(m_data));
             } else if (m_pendingCommand == "BV") {
-                ServoActuatorData data;
-                data.busVoltage_v = dataPart.toDouble() / 1000.0;
-                messages.push_back(std::make_unique<ServoActuatorDataMessage>(data));
+                m_data.busVoltage_v = dataPart.toDouble() / 1000.0;
+                messages.push_back(std::make_unique<ServoActuatorDataMessage>(m_data));
             }
             
             // Create ACK message

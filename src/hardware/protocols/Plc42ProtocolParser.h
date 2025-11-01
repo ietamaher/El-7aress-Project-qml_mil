@@ -21,6 +21,9 @@ namespace Plc42Registers {
  *
  * Converts QModbusReply objects into typed Message objects.
  * Handles digital inputs (discrete inputs) and holding registers.
+ *
+ * IMPORTANT: Maintains accumulated state in m_data since PLC42 data comes from
+ * multiple separate Modbus read operations (digital inputs + holding registers).
  */
 class Plc42ProtocolParser : public ProtocolParser {
     Q_OBJECT
@@ -38,4 +41,7 @@ private:
     // Helper methods to create specific messages from a reply
     MessagePtr parseDigitalInputsReply(const QModbusDataUnit& unit);
     MessagePtr parseHoldingRegistersReply(const QModbusDataUnit& unit);
+
+    // ⭐ Accumulated data state (persists between poll cycles)
+    Plc42Data m_data;
 };

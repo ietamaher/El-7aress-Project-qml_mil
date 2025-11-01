@@ -18,9 +18,12 @@ namespace ServoActuatorConstants {
 
 /**
  * @brief Parser for serial ASCII-based servo actuator protocol
- * 
+ *
  * Converts ASCII command responses into typed Message objects.
  * Handles checksumming, ACK/NACK responses, and data parsing.
+ *
+ * IMPORTANT: Maintains accumulated state in m_data since servo actuator data comes
+ * from multiple separate command responses (SR, AP, VL, TQ, RT1, BV).
  */
 class ServoActuatorProtocolParser : public ProtocolParser {
     Q_OBJECT
@@ -30,7 +33,7 @@ public:
 
     // Parse incoming raw data stream
     std::vector<MessagePtr> parse(const QByteArray& rawData) override;
-    
+
     // Build command with checksum
     QByteArray buildCommand(const QString& command) const;
 
@@ -49,20 +52,23 @@ public:
 private:
     // Parse status register into ActuatorStatus structure
     ActuatorStatus parseStatusRegister(const QString& hexStatus) const;
-    
+
     // Calculate checksum for command
     QString calculateChecksum(const QString& command) const;
-    
+
     // Validate received checksum
     bool validateChecksum(const QString& response) const;
-    
+
     // Status bit mapping
     void initializeStatusBitMap();
     QMap<int, QString> m_statusBitMap;
-    
+
     // Read buffer for accumulating incoming data
     QByteArray m_readBuffer;
-    
+
     // Track current pending command for response routing
     QString m_pendingCommand;
+
+    // ⭐ Accumulated data state (persists between command responses)
+    ServoActuatorData m_data;
 };

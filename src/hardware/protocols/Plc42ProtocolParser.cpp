@@ -6,6 +6,8 @@
 Plc42ProtocolParser::Plc42ProtocolParser(QObject* parent)
     : ProtocolParser(parent)
 {
+    // Initialize m_data with defaults (connection will be set when data arrives)
+    m_data.isConnected = false;
 }
 
 std::vector<MessagePtr> Plc42ProtocolParser::parse(QModbusReply* reply) {
@@ -31,51 +33,53 @@ std::vector<MessagePtr> Plc42ProtocolParser::parse(QModbusReply* reply) {
 }
 
 MessagePtr Plc42ProtocolParser::parseDigitalInputsReply(const QModbusDataUnit& unit) {
-    Plc42Data data;
-    data.isConnected = true;
+    // ⭐ Update ONLY digital input fields in the accumulated m_data
+    m_data.isConnected = true;
 
     // Map digital inputs based on their indices
     if (unit.valueCount() >= 8) {
-        data.stationUpperSensor  = (unit.value(0) != 0);
-        data.stationLowerSensor  = (unit.value(1) != 0);
-        data.emergencyStopActive = (unit.value(2) != 0);
-        data.ammunitionLevel     = (unit.value(3) != 0);
-        data.stationInput1       = (unit.value(4) != 0);
-        data.stationInput2       = (unit.value(5) != 0);
-        data.stationInput3       = (unit.value(6) != 0);
-        data.solenoidActive      = (unit.value(7) != 0);
+        m_data.stationUpperSensor  = (unit.value(0) != 0);
+        m_data.stationLowerSensor  = (unit.value(1) != 0);
+        m_data.emergencyStopActive = (unit.value(2) != 0);
+        m_data.ammunitionLevel     = (unit.value(3) != 0);
+        m_data.stationInput1       = (unit.value(4) != 0);
+        m_data.stationInput2       = (unit.value(5) != 0);
+        m_data.stationInput3       = (unit.value(6) != 0);
+        m_data.solenoidActive      = (unit.value(7) != 0);
     }
 
-    return std::make_unique<Plc42DataMessage>(data);
+    // Return the accumulated data (holding registers retain previous values)
+    return std::make_unique<Plc42DataMessage>(m_data);
 }
 
 MessagePtr Plc42ProtocolParser::parseHoldingRegistersReply(const QModbusDataUnit& unit) {
-    Plc42Data data;
-    data.isConnected = true;
+    // ⭐ Update ONLY holding register fields in the accumulated m_data
+    m_data.isConnected = true;
 
     if (unit.valueCount() >= 7) {
-        data.solenoidMode = unit.value(0);
-        data.gimbalOpMode = unit.value(1);
+        m_data.solenoidMode = unit.value(0);
+        m_data.gimbalOpMode = unit.value(1);
 
         // Combine two 16-bit registers into a 32-bit value for azimuth speed
         uint16_t azLow  = unit.value(2);
         uint16_t azHigh = unit.value(3);
-        data.azimuthSpeed = (static_cast<uint32_t>(azHigh) << 16) | azLow;
+        m_data.azimuthSpeed = (static_cast<uint32_t>(azHigh) << 16) | azLow;
 
         // Combine two 16-bit registers into a 32-bit value for elevation speed
         uint16_t elLow  = unit.value(4);
         uint16_t elHigh = unit.value(5);
-        data.elevationSpeed = (static_cast<uint32_t>(elHigh) << 16) | elLow;
+        m_data.elevationSpeed = (static_cast<uint32_t>(elHigh) << 16) | elLow;
 
-        data.azimuthDirection = unit.value(6);
+        m_data.azimuthDirection = unit.value(6);
 
         // Additional registers if available
         if (unit.valueCount() >= 10) {
-            data.elevationDirection = unit.value(7);
-            data.solenoidState      = unit.value(8);
-            data.resetAlarm         = unit.value(9);
+            m_data.elevationDirection = unit.value(7);
+            m_data.solenoidState      = unit.value(8);
+            m_data.resetAlarm         = unit.value(9);
         }
     }
 
-    return std::make_unique<Plc42DataMessage>(data);
+    // Return the accumulated data (digital inputs retain previous values)
+    return std::make_unique<Plc42DataMessage>(m_data);
 }

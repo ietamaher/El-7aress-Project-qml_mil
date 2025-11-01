@@ -25,9 +25,12 @@ namespace ServoDriverRegisters {
 
 /**
  * @brief Parser for Modbus RTU servo driver protocol
- * 
+ *
  * Converts QModbusReply objects into typed Message objects.
  * Handles position, temperature, and alarm data parsing.
+ *
+ * IMPORTANT: Maintains accumulated state in m_data since servo driver data comes
+ * from multiple separate Modbus read operations (position + temperature).
  */
 class ServoDriverProtocolParser : public ProtocolParser {
     Q_OBJECT
@@ -51,6 +54,9 @@ private:
     // Alarm description lookup
     void initializeAlarmMap();
     QString getAlarmDescription(uint16_t alarmCode);
-    
+
     QMap<uint16_t, QString> m_alarmMap;
+
+    // ⭐ Accumulated data state (persists between poll cycles)
+    ServoDriverData m_data;
 };
