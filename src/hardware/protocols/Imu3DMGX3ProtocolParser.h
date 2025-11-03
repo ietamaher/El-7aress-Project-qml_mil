@@ -10,16 +10,16 @@
  * @brief Command bytes for 3DM-GX3-25 AHRS
  */
 namespace GX3Commands {
-    constexpr quint8 EULER_ANGLES_AND_RATES = 0xCF;  // Primary command for gimbal control
-    constexpr quint8 CAPTURE_GYRO_BIAS = 0xCD;       // Gyro bias calibration
-    constexpr quint8 SET_CONTINUOUS_MODE = 0xC4;     // Enable continuous streaming
-    constexpr quint8 STOP_CONTINUOUS_MODE = 0xFA;    // Stop streaming (no reply)
-    constexpr quint8 SAMPLING_SETTINGS = 0xDB;       // Configure sampling rate
-    constexpr quint8 TEMPERATURES = 0xD1;            // Read sensor temperatures (status)
-    constexpr quint8 MODE_COMMAND = 0xD4;            // Set device mode
-    constexpr quint8 DEVICE_RESET = 0xFE;            // Reset device (no reply)
-    constexpr quint8 READ_FIRMWARE_VERSION = 0xE9;   // Get firmware version
-    constexpr quint8 GYRO_STABILIZED_DATA = 0xD2;    // Alternative: gyro-stabilized outputs
+constexpr quint8 EULER_ANGLES_AND_RATES = 0xCF;  // Primary command for gimbal control
+constexpr quint8 CAPTURE_GYRO_BIAS = 0xCD;       // Gyro bias calibration
+constexpr quint8 SET_CONTINUOUS_MODE = 0xC4;     // Enable continuous streaming
+constexpr quint8 STOP_CONTINUOUS_MODE = 0xFA;    // Stop streaming (no reply)
+constexpr quint8 SAMPLING_SETTINGS = 0xDB;       // Configure sampling rate
+constexpr quint8 TEMPERATURES = 0xD1;            // Read sensor temperatures (status)
+constexpr quint8 MODE_COMMAND = 0xD4;            // Set device mode
+constexpr quint8 DEVICE_RESET = 0xFE;            // Reset device (no reply)
+constexpr quint8 READ_FIRMWARE_VERSION = 0xE9;   // Get firmware version
+constexpr quint8 GYRO_STABILIZED_DATA = 0xD2;    // Alternative: gyro-stabilized outputs
 }
 
 /**
@@ -28,7 +28,7 @@ namespace GX3Commands {
  * This parser handles the single-byte command protocol used by the 3DM-GX3-25.
  * Primary command: 0xCF (Euler Angles and Angular Rates)
  *
- * Packet format for 0xCF:
+ * Packet format for 0xCF (31 bytes):
  * - Echo (1 byte): 0xCF
  * - Roll (4 bytes): IEEE 754 float, degrees
  * - Pitch (4 bytes): IEEE 754 float, degrees
@@ -38,7 +38,6 @@ namespace GX3Commands {
  * - Yaw Rate (4 bytes): IEEE 754 float, deg/s
  * - Timer (4 bytes): 32-bit unsigned, ticks (62.5 µs each)
  * - Checksum (2 bytes): Big-endian sum of all bytes
- * Total: 31 bytes
  */
 class Imu3DMGX3ProtocolParser : public ProtocolParser {
     Q_OBJECT
@@ -72,20 +71,21 @@ public:
 
     /**
      * @brief Creates command to capture gyro bias (device must be stationary)
-     * @return 1-byte command: {0xCD}
+     * @param samplingTimeMs Sampling duration in milliseconds (recommended: 10000-30000)
+     * @return 5-byte command: {0xCD, 0xC1, 0x29, TimeH, TimeL}
      */
-    static QByteArray createCaptureGyroBiasCommand();
+    static QByteArray createCaptureGyroBiasCommand(quint16 samplingTimeMs = 10000);
 
     /**
-     * @brief Creates command to set sampling rate
-     * @param decimation Decimation value (0 = 1000Hz, 1 = 500Hz, 4 = 200Hz, 9 = 100Hz)
-     * @param flags Sampling flags (0x0000 for default)
-     * @param reserved Reserved bytes (0x0000)
-     * @return 7-byte command with checksum
+     * @brief Creates command to set sampling rate and filters
+     * @param function 0=Read only, 1=Write, 2=Write+Save to EEPROM, 3=Write no reply
+     * @param decimation Data rate decimation (1000/decimation = Hz, e.g., 10 = 100Hz)
+     * @param flags Data conditioning flags (default: 0x0003 = Orient+ConingAndSculling)
+     * @return 21-byte command with all parameters
      */
-    static QByteArray createSamplingSettingsCommand(quint16 decimation = 9,
-                                                     quint16 flags = 0x0000,
-                                                     quint16 reserved = 0x0000);
+    static QByteArray createSamplingSettingsCommand(quint8 function = 1,
+                                                    quint16 decimation = 10,
+                                                    quint16 flags = 0x0003);
 
     /**
      * @brief Creates command to read sensor temperatures
@@ -109,33 +109,35 @@ private:
     MessagePtr parse0xCFPacket(const QByteArray& packet);
 
     /**
+     * @brief Parses a complete 0xCD gyro bias response (19 bytes)
+     * @param packet Complete packet data
+     */
+    void parse0xCDPacket(const QByteArray& packet);
+
+    /**
+     * @brief Parses a complete 0xDB sampling settings response (19 bytes)
+     * @param packet Complete packet data
+     */
+    void parse0xDBPacket(const QByteArray& packet);
+
+    /**
      * @brief Parses a complete 0xD1 temperature packet (27 bytes)
      * @param packet Complete packet data
-     * @return Temperature data (stored in m_lastTemperature)
      */
     void parse0xD1Packet(const QByteArray& packet);
 
     /**
      * @brief Extracts IEEE 754 float from byte array (big-endian)
-     * @param data Byte array
-     * @param offset Starting offset
-     * @return Extracted float value
      */
     float extractFloat(const QByteArray& data, int offset) const;
 
     /**
      * @brief Extracts 32-bit unsigned integer (big-endian)
-     * @param data Byte array
-     * @param offset Starting offset
-     * @return Extracted uint32 value
      */
     quint32 extractUInt32(const QByteArray& data, int offset) const;
 
     /**
      * @brief Extracts 16-bit unsigned integer (big-endian)
-     * @param data Byte array
-     * @param offset Starting offset
-     * @return Extracted uint16 value
      */
     quint16 extractUInt16(const QByteArray& data, int offset) const;
 
@@ -143,12 +145,12 @@ private:
     QByteArray m_buffer;
 
     // Temperature cache (updated periodically from 0xD1 queries)
-    double m_lastTemperature = 0.0;  // Average of all sensor temps
+    double m_lastTemperature = 25.0;  // Average of all sensor temps
 
-    // Expected packet sizes for different commands
+    // Expected packet sizes for different response packets
     static constexpr int PACKET_SIZE_0xCF = 31;  // Euler Angles + Rates
-    static constexpr int PACKET_SIZE_0xCD = 79;  // Gyro Bias Capture response
-    static constexpr int PACKET_SIZE_0xDB = 7;   // Sampling Settings response
+    static constexpr int PACKET_SIZE_0xCD = 19;  // Gyro Bias response (3 floats + timer)
+    static constexpr int PACKET_SIZE_0xDB = 19;  // Sampling Settings response
     static constexpr int PACKET_SIZE_0xD1 = 27;  // Temperatures (5 floats + timer)
 
 public:

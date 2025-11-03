@@ -73,17 +73,15 @@ std::vector<MessagePtr> Imu3DMGX3ProtocolParser::parse(const QByteArray& rawData
                 msg = parse0xCFPacket(packet);
                 break;
             case GX3Commands::CAPTURE_GYRO_BIAS:
-                qDebug() << "Imu3DMGX3Parser: Gyro bias capture completed successfully";
-                // No data message generated, just log
+                parse0xCDPacket(packet);  // Now properly parses the response
                 break;
             case GX3Commands::SAMPLING_SETTINGS:
-                qDebug() << "Imu3DMGX3Parser: Sampling settings configured successfully";
+                parse0xDBPacket(packet);  // Now properly parses the response
                 break;
             case GX3Commands::TEMPERATURES:
                 parse0xD1Packet(packet);
-                // Temperature stored internally, will be added to next 0xCF data
                 break;
-        }
+            }
 
         if (msg) {
             messages.push_back(std::move(msg));
@@ -253,39 +251,75 @@ QByteArray Imu3DMGX3ProtocolParser::createStopContinuousModeCommand() {
     return cmd;
 }
 
-QByteArray Imu3DMGX3ProtocolParser::createCaptureGyroBiasCommand() {
-    // 0xCD - Device must be stationary for ~10 seconds
+QByteArray Imu3DMGX3ProtocolParser::createCaptureGyroBiasCommand(quint16 samplingTimeMs) {
+    // 0xCD - Full command is 5 bytes (device must be stationary):
+    // [0xCD, 0xC1, 0x29, SamplingTime_MSB, SamplingTime_LSB]
     QByteArray cmd;
-    cmd.append(static_cast<char>(GX3Commands::CAPTURE_GYRO_BIAS));
+    cmd.append(static_cast<char>(GX3Commands::CAPTURE_GYRO_BIAS));  // 0xCD
+    cmd.append(static_cast<char>(0xC1));  // Confirmation byte 1
+    cmd.append(static_cast<char>(0x29));  // Confirmation byte 2
+
+    // Sampling time in milliseconds (big-endian, recommended: 10000-30000 ms)
+    cmd.append(static_cast<char>((samplingTimeMs >> 8) & 0xFF));  // MSB
+    cmd.append(static_cast<char>(samplingTimeMs & 0xFF));         // LSB
+
     return cmd;
 }
 
-QByteArray Imu3DMGX3ProtocolParser::createSamplingSettingsCommand(quint16 decimation,
-                                                                   quint16 flags,
-                                                                   quint16 reserved) {
-    // Command format for 0xDB (7 bytes total):
-    // Byte 0: 0xDB (command)
-    // Bytes 1-2: Decimation (big-endian)
-    // Bytes 3-4: Flags (big-endian)
-    // Bytes 5-6: Reserved (big-endian)
+QByteArray Imu3DMGX3ProtocolParser::createSamplingSettingsCommand(quint8 function,
+                                                                  quint16 decimation,
+                                                                  quint16 flags) {
+    // 0xDB - Full command is 21 bytes:
+    // [0xDB, 0xA8, 0xB9, Function, Decimation(2), Flags(2),
+    //  GyroAccelFilter(1), MagFilter(1), UpComp(2), NorthComp(2),
+    //  MagPower(1), Reserved(5)]
 
     QByteArray cmd;
-    cmd.append(static_cast<char>(GX3Commands::SAMPLING_SETTINGS));
+    cmd.append(static_cast<char>(GX3Commands::SAMPLING_SETTINGS));  // 0xDB
+    cmd.append(static_cast<char>(0xA8));  // Confirmation byte 1
+    cmd.append(static_cast<char>(0xB9));  // Confirmation byte 2
 
-    // Decimation (big-endian)
+    // Function selector (0=Read, 1=Write, 2=Write+Save, 3=Write no reply)
+    cmd.append(static_cast<char>(function));
+
+    // Data Rate Decimation (big-endian): 1000/decimation = output rate Hz
+    // Examples: 1=1000Hz, 2=500Hz, 4=250Hz, 10=100Hz, 20=50Hz
     cmd.append(static_cast<char>((decimation >> 8) & 0xFF));
     cmd.append(static_cast<char>(decimation & 0xFF));
 
-    // Flags (big-endian)
+    // Data Conditioning Flags (big-endian)
+    // Bit 0: Calculate orientation (1)
+    // Bit 1: Enable Coning&Sculling (1)
+    // Default: 0x0003 (both enabled)
     cmd.append(static_cast<char>((flags >> 8) & 0xFF));
     cmd.append(static_cast<char>(flags & 0xFF));
 
-    // Reserved (big-endian)
-    cmd.append(static_cast<char>((reserved >> 8) & 0xFF));
-    cmd.append(static_cast<char>(reserved & 0xFF));
+    // Gyro/Accel digital filter window size (default: 15)
+    // First null at 1000/size Hz
+    cmd.append(static_cast<char>(15));
 
-    // Note: The device will send back a 7-byte response with checksum
-    // This command doesn't need a checksum when sending
+    // Mag digital filter window size (default: 17)
+    cmd.append(static_cast<char>(17));
+
+    // Up compensation in seconds (default: 10)
+    // Controls gravity vector correction rate
+    quint16 upComp = 10;
+    cmd.append(static_cast<char>((upComp >> 8) & 0xFF));
+    cmd.append(static_cast<char>(upComp & 0xFF));
+
+    // North compensation in seconds (default: 10)
+    // Controls magnetometer correction rate for yaw
+    quint16 northComp = 10;
+    cmd.append(static_cast<char>((northComp >> 8) & 0xFF));
+    cmd.append(static_cast<char>(northComp & 0xFF));
+
+    // Mag power/bandwidth setting (0=highest power/bandwidth, 1=lower power)
+    cmd.append(static_cast<char>(0x00));
+
+    // Reserved (5 bytes) - must be 0x00
+    for (int i = 0; i < 5; ++i) {
+        cmd.append(static_cast<char>(0x00));
+    }
 
     return cmd;
 }
@@ -295,4 +329,57 @@ QByteArray Imu3DMGX3ProtocolParser::createReadTemperaturesCommand() {
     QByteArray cmd;
     cmd.append(static_cast<char>(GX3Commands::TEMPERATURES));
     return cmd;
+}
+
+void Imu3DMGX3ProtocolParser::parse0xCDPacket(const QByteArray& packet) {
+    if (packet.size() != PACKET_SIZE_0xCD) {
+        qWarning() << "Imu3DMGX3Parser: Invalid 0xCD packet size:" << packet.size();
+        return;
+    }
+
+    // Verify echo byte
+    if (static_cast<quint8>(packet.at(0)) != GX3Commands::CAPTURE_GYRO_BIAS) {
+        qWarning() << "Imu3DMGX3Parser: Invalid echo byte in 0xCD packet";
+        return;
+    }
+
+    // Parse gyro bias values (all big-endian IEEE 754 floats)
+    float gyroBiasX = extractFloat(packet, 1);   // Offset 1
+    float gyroBiasY = extractFloat(packet, 5);   // Offset 5
+    float gyroBiasZ = extractFloat(packet, 9);   // Offset 9
+    // quint32 timer = extractUInt32(packet, 13);  // Offset 13
+
+    qDebug() << "Imu3DMGX3Parser: Gyro bias captured successfully -"
+             << "X:" << QString::number(gyroBiasX, 'f', 4) << "deg/s"
+             << "Y:" << QString::number(gyroBiasY, 'f', 4) << "deg/s"
+             << "Z:" << QString::number(gyroBiasZ, 'f', 4) << "deg/s";
+}
+
+void Imu3DMGX3ProtocolParser::parse0xDBPacket(const QByteArray& packet) {
+    if (packet.size() != PACKET_SIZE_0xDB) {
+        qWarning() << "Imu3DMGX3Parser: Invalid 0xDB packet size:" << packet.size();
+        return;
+    }
+
+    // Verify echo byte
+    if (static_cast<quint8>(packet.at(0)) != GX3Commands::SAMPLING_SETTINGS) {
+        qWarning() << "Imu3DMGX3Parser: Invalid echo byte in 0xDB packet";
+        return;
+    }
+
+    // Parse sampling settings response
+    quint16 decimation = extractUInt16(packet, 1);
+    quint16 flags = extractUInt16(packet, 3);
+    quint8 gyroAccelFilter = static_cast<quint8>(packet.at(5));
+    quint8 magFilter = static_cast<quint8>(packet.at(6));
+    quint16 upComp = extractUInt16(packet, 7);
+    quint16 northComp = extractUInt16(packet, 9);
+
+    float dataRateHz = 1000.0f / decimation;
+
+    qDebug() << "Imu3DMGX3Parser: Sampling settings confirmed -"
+             << "Rate:" << QString::number(dataRateHz, 'f', 1) << "Hz"
+             << "Flags: 0x" + QString::number(flags, 16).toUpper()
+             << "Filters: Gyro/Accel=" << gyroAccelFilter << "Mag=" << magFilter
+             << "Comp: Up=" << upComp << "s, North=" << northComp << "s";
 }
