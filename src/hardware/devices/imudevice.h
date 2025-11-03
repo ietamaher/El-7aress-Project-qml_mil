@@ -81,12 +81,14 @@ private slots:
     void processMessage(const Message& message);
     void onCommunicationWatchdogTimeout();
     void onInitializationTimeout();
+    void onTemperatureQueryTimeout();
 
 private:
     void startInitializationSequence();
     void sendCaptureGyroBiasCommand();
     void sendSamplingSettingsCommand();
     void startContinuousMode();
+    void sendReadTemperaturesCommand();
     void resetCommunicationWatchdog();
     void setConnectionState(bool connected);
 
@@ -96,6 +98,7 @@ private:
 
     QTimer* m_communicationWatchdog = nullptr;
     QTimer* m_initializationTimer = nullptr;
+    QTimer* m_temperatureQueryTimer = nullptr;
 
     enum class InitState {
         NotStarted,
@@ -110,6 +113,7 @@ private:
 
     static constexpr int COMMUNICATION_TIMEOUT_MS = 3000;  // 3 seconds without data = disconnected
     static constexpr int GYRO_BIAS_TIMEOUT_MS = 15000;     // 15 seconds for gyro bias capture
+    static constexpr int TEMPERATURE_QUERY_INTERVAL_MS = 5000;  // Query temperature every 5 seconds
 };
 
 #endif // IMUDEVICE_H

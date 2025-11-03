@@ -23,6 +23,7 @@ This document describes the migration from the **Vigor SST810 Inclinometer** (Mo
 ✅ **Built-in Kalman Filter** - Optimized orientation estimation
 ✅ **Gyro-Stabilized Outputs** - Hardware-compensated measurements
 ✅ **Automatic Bias Correction** - Built-in 0xCD command
+✅ **Temperature Monitoring** - Periodic sensor temperature queries (0xD1)
 
 ---
 
@@ -58,6 +59,7 @@ Heading: Real magnetic heading from 3-axis magnetometer
 | **0xC4** | Set Continuous Mode          | Enable continuous streaming          | ⭐⭐⭐ Essential |
 | **0xCD** | Capture Gyro Bias            | Calibrate gyro bias (stationary)    | ⭐⭐ Important  |
 | **0xDB** | Sampling Settings            | Configure data rate (50-1000Hz)      | ⭐⭐ Important  |
+| **0xD1** | Temperatures                 | Query sensor temps (status/health)   | ⭐ Optional    |
 | **0xFA** | Stop Continuous Mode         | Stop streaming (on shutdown)         | ⭐ Optional    |
 
 ---
@@ -156,14 +158,13 @@ ImuData {
     accelY_g = 0.0;
     accelZ_g = 0.0;
 
-    temperature = 0.0;                 // ⚠️ Not in 0xCF (use 0xD1 if needed)
+    temperature = avg_sensor_temp;     // ✅ From 0xD1 query (updated every 5 seconds)
 }
 ```
 
-**Note:** If accelerations or temperature are needed, consider using:
-- **0xCC** (Full data): Accel + Gyro + Mag + Orientation (longer packet)
-- **0xD1** (Temperatures): Mag, Accel, GyroX, GyroY, GyroZ temps
-- **0xD2** (Gyro-stabilized): Includes stabilized accelerations
+**Note:**
+- **Temperature monitoring**: Automatically queried via 0xD1 every 5 seconds and averaged across all sensors (Mag, Accel, GyroX, GyroY, GyroZ)
+- **Accelerations**: Not in 0xCF. Use 0xCC (Full data) or 0xD2 (Gyro-stabilized) if needed
 
 ---
 

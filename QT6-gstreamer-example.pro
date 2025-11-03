@@ -95,7 +95,6 @@ SOURCES += \
     src/hardware/communication/modbustransport.cpp \
     src/hardware/communication/serialporttransport.cpp \
     src/hardware/protocols/DayCameraProtocolParser.cpp \
-    src/hardware/protocols/ImuProtocolParser.cpp \
     src/hardware/protocols/Imu3DMGX3ProtocolParser.cpp \
     src/hardware/protocols/JoystickProtocolParser.cpp \
     src/hardware/protocols/LrfProtocolParser.cpp \
@@ -210,7 +209,6 @@ HEADERS += \
     src/hardware/communication/modbustransport.h \
     src/hardware/communication/serialporttransport.h \
     src/hardware/protocols/DayCameraProtocolParser.h \
-    src/hardware/protocols/ImuProtocolParser.h \
     src/hardware/protocols/Imu3DMGX3ProtocolParser.h \
     src/hardware/protocols/JoystickProtocolParser.h \
     src/hardware/protocols/LrfProtocolParser.h \

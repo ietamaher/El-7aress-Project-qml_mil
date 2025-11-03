@@ -16,7 +16,7 @@
 // Transport & Protocol Parsers
 #include "hardware/communication/modbustransport.h"
 #include "hardware/communication/serialporttransport.h"
-#include "hardware/protocols/ImuProtocolParser.h"
+#include "hardware/protocols/Imu3DMGX3ProtocolParser.h"
 #include "hardware/protocols/DayCameraProtocolParser.h"
 #include "hardware/protocols/NightCameraProtocolParser.h"
 #include "hardware/protocols/JoystickProtocolParser.h"
@@ -274,7 +274,7 @@ void HardwareManager::createProtocolParsers()
 {
     qInfo() << "  Creating protocol parsers...";
 
-    m_imuParser = new ImuProtocolParser(this);
+    m_imuParser = new Imu3DMGX3ProtocolParser(this);
     m_dayCameraParser = new DayCameraProtocolParser(this);
     m_nightCameraParser = new NightCameraProtocolParser(this);
     m_joystickParser = new JoystickProtocolParser(this);
