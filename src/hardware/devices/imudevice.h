@@ -34,7 +34,7 @@ signals:
 
 private slots:
     void pollTimerTimeout();
-    void onFrameReceived(const QByteArray& frame);
+    void processFrame(const QByteArray& frame);
     void processMessage(const Message& message);
     void onCommunicationWatchdogTimeout();
     void onGyroBiasTimeout();

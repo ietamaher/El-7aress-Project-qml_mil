@@ -53,9 +53,9 @@ class GimbalMotionModeBase : public QObject
 public:
     explicit GimbalMotionModeBase(QObject* parent = nullptr)
         : QObject(parent)
-        , m_gyroXFilter(5.0, 20.0)  // 5Hz cutoff, 20Hz sample rate
-        , m_gyroYFilter(5.0, 20.0)
-        , m_gyroZFilter(5.0, 20.0)
+        , m_gyroXFilter(5.0, 100.0)  // 5Hz cutoff, 100Hz sample rate (matches IMU 3DM-GX3-25)
+        , m_gyroYFilter(5.0, 100.0)
+        , m_gyroZFilter(5.0, 100.0)
     {}
 
     virtual ~GimbalMotionModeBase() = default;

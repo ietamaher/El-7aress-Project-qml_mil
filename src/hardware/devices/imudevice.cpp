@@ -38,9 +38,9 @@ void ImuDevice::setDependencies(Transport* transport,
     m_transport->setParent(this);
     m_parser->setParent(this);
 
-    // Connect to transport's data received signal
+    // Connect to transport's frameReceived signal
     connect(m_transport, &Transport::frameReceived,
-            this, &ImuDevice::onFrameReceived);
+            this, &ImuDevice::processFrame);
 }
 
 bool ImuDevice::initialize() {
@@ -125,7 +125,7 @@ void ImuDevice::sendReadRequest() {
     m_transport->sendFrame(cmd);
 }
 
-void ImuDevice::onFrameReceived(const QByteArray& frame) {
+void ImuDevice::processFrame(const QByteArray& frame) {
     if (!m_parser) return;
 
     // Parse the response
