@@ -8,7 +8,8 @@ ImuDevice::ImuDevice(const QString& identifier, QObject* parent)
     : TemplatedDevice<ImuData>(parent),
       m_identifier(identifier),
       m_communicationWatchdog(new QTimer(this)),
-      m_initializationTimer(new QTimer(this))
+      m_initializationTimer(new QTimer(this)),
+      m_temperatureQueryTimer(new QTimer(this))
 {
     // Communication watchdog - detects loss of data stream
     m_communicationWatchdog->setSingleShot(false);
@@ -20,6 +21,12 @@ ImuDevice::ImuDevice(const QString& identifier, QObject* parent)
     m_initializationTimer->setSingleShot(true);
     connect(m_initializationTimer, &QTimer::timeout,
             this, &ImuDevice::onInitializationTimeout);
+
+    // Temperature query timer - periodic status monitoring
+    m_temperatureQueryTimer->setSingleShot(false);
+    m_temperatureQueryTimer->setInterval(TEMPERATURE_QUERY_INTERVAL_MS);
+    connect(m_temperatureQueryTimer, &QTimer::timeout,
+            this, &ImuDevice::onTemperatureQueryTimeout);
 }
 
 ImuDevice::~ImuDevice() {
@@ -28,6 +35,9 @@ ImuDevice::~ImuDevice() {
     }
     if (m_initializationTimer) {
         m_initializationTimer->stop();
+    }
+    if (m_temperatureQueryTimer) {
+        m_temperatureQueryTimer->stop();
     }
 }
 
@@ -73,6 +83,9 @@ void ImuDevice::shutdown() {
     }
     if (m_initializationTimer) {
         m_initializationTimer->stop();
+    }
+    if (m_temperatureQueryTimer) {
+        m_temperatureQueryTimer->stop();
     }
 
     // Stop continuous mode
@@ -152,6 +165,9 @@ void ImuDevice::startContinuousMode() {
 
     // Start communication watchdog
     m_communicationWatchdog->start();
+
+    // Start periodic temperature monitoring
+    m_temperatureQueryTimer->start();
 
     qDebug() << m_identifier << "Initialization complete! Streaming orientation data...";
 }
@@ -239,4 +255,20 @@ void ImuDevice::onCommunicationWatchdogTimeout() {
     qWarning() << m_identifier << "Communication timeout - no data received for"
                << COMMUNICATION_TIMEOUT_MS << "ms";
     setConnectionState(false);
+}
+
+void ImuDevice::sendReadTemperaturesCommand() {
+    if (!m_transport || !m_parser) return;
+
+    QByteArray cmd = Imu3DMGX3ProtocolParser::createReadTemperaturesCommand();
+    QMetaObject::invokeMethod(m_transport, "sendData",
+                              Qt::DirectConnection,
+                              Q_ARG(QByteArray, cmd));
+}
+
+void ImuDevice::onTemperatureQueryTimeout() {
+    // Only query temperature if device is running normally
+    if (m_initState == InitState::Running && state() == DeviceState::Online) {
+        sendReadTemperaturesCommand();
+    }
 }

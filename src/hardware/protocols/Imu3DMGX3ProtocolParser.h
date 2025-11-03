@@ -15,6 +15,7 @@ namespace GX3Commands {
     constexpr quint8 SET_CONTINUOUS_MODE = 0xC4;     // Enable continuous streaming
     constexpr quint8 STOP_CONTINUOUS_MODE = 0xFA;    // Stop streaming (no reply)
     constexpr quint8 SAMPLING_SETTINGS = 0xDB;       // Configure sampling rate
+    constexpr quint8 TEMPERATURES = 0xD1;            // Read sensor temperatures (status)
     constexpr quint8 MODE_COMMAND = 0xD4;            // Set device mode
     constexpr quint8 DEVICE_RESET = 0xFE;            // Reset device (no reply)
     constexpr quint8 READ_FIRMWARE_VERSION = 0xE9;   // Get firmware version
@@ -87,6 +88,12 @@ public:
                                                      quint16 reserved = 0x0000);
 
     /**
+     * @brief Creates command to read sensor temperatures
+     * @return 1-byte command: {0xD1}
+     */
+    static QByteArray createReadTemperaturesCommand();
+
+    /**
      * @brief Calculates 16-bit checksum for packet validation
      * @param data Packet data (excluding checksum bytes)
      * @return 16-bit checksum (sum of all bytes)
@@ -100,6 +107,13 @@ private:
      * @return ImuDataMessage or nullptr if invalid
      */
     MessagePtr parse0xCFPacket(const QByteArray& packet);
+
+    /**
+     * @brief Parses a complete 0xD1 temperature packet (27 bytes)
+     * @param packet Complete packet data
+     * @return Temperature data (stored in m_lastTemperature)
+     */
+    void parse0xD1Packet(const QByteArray& packet);
 
     /**
      * @brief Extracts IEEE 754 float from byte array (big-endian)
@@ -128,8 +142,19 @@ private:
     // Buffer for accumulating partial packets
     QByteArray m_buffer;
 
+    // Temperature cache (updated periodically from 0xD1 queries)
+    double m_lastTemperature = 0.0;  // Average of all sensor temps
+
     // Expected packet sizes for different commands
     static constexpr int PACKET_SIZE_0xCF = 31;  // Euler Angles + Rates
     static constexpr int PACKET_SIZE_0xCD = 79;  // Gyro Bias Capture response
     static constexpr int PACKET_SIZE_0xDB = 7;   // Sampling Settings response
+    static constexpr int PACKET_SIZE_0xD1 = 27;  // Temperatures (5 floats + timer)
+
+public:
+    /**
+     * @brief Gets the last read temperature (averaged across sensors)
+     * @return Temperature in degrees Celsius
+     */
+    double lastTemperature() const { return m_lastTemperature; }
 };

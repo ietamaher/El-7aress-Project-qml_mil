@@ -36,6 +36,9 @@ std::vector<MessagePtr> Imu3DMGX3ProtocolParser::parse(const QByteArray& rawData
             case GX3Commands::SAMPLING_SETTINGS:
                 expectedSize = PACKET_SIZE_0xDB;
                 break;
+            case GX3Commands::TEMPERATURES:
+                expectedSize = PACKET_SIZE_0xD1;
+                break;
             default:
                 // Unknown command - try to find next valid command byte
                 qWarning() << "Imu3DMGX3Parser: Unknown command byte" << Qt::hex << command;
@@ -75,6 +78,10 @@ std::vector<MessagePtr> Imu3DMGX3ProtocolParser::parse(const QByteArray& rawData
                 break;
             case GX3Commands::SAMPLING_SETTINGS:
                 qDebug() << "Imu3DMGX3Parser: Sampling settings configured successfully";
+                break;
+            case GX3Commands::TEMPERATURES:
+                parse0xD1Packet(packet);
+                // Temperature stored internally, will be added to next 0xCF data
                 break;
         }
 
@@ -130,8 +137,8 @@ MessagePtr Imu3DMGX3ProtocolParser::parse0xCFPacket(const QByteArray& packet) {
     data.accelY_g = 0.0;
     data.accelZ_g = 0.0;
 
-    // Temperature not provided by 0xCF
-    data.temperature = 0.0;
+    // Temperature from last 0xD1 query (updated periodically by ImuDevice)
+    data.temperature = m_lastTemperature;
 
     // Validate data ranges (sanity checks)
     if (std::isnan(data.rollDeg) || std::isnan(data.pitchDeg) || std::isnan(data.yawDeg) ||
@@ -141,6 +148,49 @@ MessagePtr Imu3DMGX3ProtocolParser::parse0xCFPacket(const QByteArray& packet) {
     }
 
     return std::make_unique<ImuDataMessage>(data);
+}
+
+void Imu3DMGX3ProtocolParser::parse0xD1Packet(const QByteArray& packet) {
+    if (packet.size() != PACKET_SIZE_0xD1) {
+        qWarning() << "Imu3DMGX3Parser: Invalid 0xD1 packet size:" << packet.size();
+        return;
+    }
+
+    // Verify echo byte
+    if (static_cast<quint8>(packet.at(0)) != GX3Commands::TEMPERATURES) {
+        qWarning() << "Imu3DMGX3Parser: Invalid echo byte in 0xD1 packet";
+        return;
+    }
+
+    // Parse temperature fields (all big-endian IEEE 754 floats)
+    // Offset 1: Magnetometer temperature (°C)
+    float magTemp = extractFloat(packet, 1);
+
+    // Offset 5: Accelerometer temperature (°C)
+    float accelTemp = extractFloat(packet, 5);
+
+    // Offset 9: Gyro X temperature (°C)
+    float gyroXTemp = extractFloat(packet, 9);
+
+    // Offset 13: Gyro Y temperature (°C)
+    float gyroYTemp = extractFloat(packet, 13);
+
+    // Offset 17: Gyro Z temperature (°C)
+    float gyroZTemp = extractFloat(packet, 17);
+
+    // Offset 21: Timer (32-bit unsigned, ticks at 62.5µs)
+    // quint32 timerTicks = extractUInt32(packet, 21);
+
+    // Calculate average temperature across all sensors
+    m_lastTemperature = (magTemp + accelTemp + gyroXTemp + gyroYTemp + gyroZTemp) / 5.0;
+
+    qDebug() << "Imu3DMGX3Parser: Temperatures -"
+             << "Mag:" << QString::number(magTemp, 'f', 1) << "°C"
+             << "Accel:" << QString::number(accelTemp, 'f', 1) << "°C"
+             << "GyroX:" << QString::number(gyroXTemp, 'f', 1) << "°C"
+             << "GyroY:" << QString::number(gyroYTemp, 'f', 1) << "°C"
+             << "GyroZ:" << QString::number(gyroZTemp, 'f', 1) << "°C"
+             << "Avg:" << QString::number(m_lastTemperature, 'f', 1) << "°C";
 }
 
 float Imu3DMGX3ProtocolParser::extractFloat(const QByteArray& data, int offset) const {
@@ -237,5 +287,12 @@ QByteArray Imu3DMGX3ProtocolParser::createSamplingSettingsCommand(quint16 decima
     // Note: The device will send back a 7-byte response with checksum
     // This command doesn't need a checksum when sending
 
+    return cmd;
+}
+
+QByteArray Imu3DMGX3ProtocolParser::createReadTemperaturesCommand() {
+    // 0xD1 - Single byte command to query sensor temperatures
+    QByteArray cmd;
+    cmd.append(static_cast<char>(GX3Commands::TEMPERATURES));
     return cmd;
 }
