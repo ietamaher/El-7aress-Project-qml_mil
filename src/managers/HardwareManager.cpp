@@ -256,7 +256,7 @@ void HardwareManager::createTransportLayer()
 {
     qInfo() << "  Creating transport layer...";
 
-    m_imuTransport = new ModbusTransport(this);
+    m_imuTransport = new SerialPortTransport(this);  // 3DM-GX3-25 uses serial binary, not Modbus
     m_dayCameraTransport = new SerialPortTransport(this);
     m_nightCameraTransport = new SerialPortTransport(this);
     m_lrfTransport = new SerialPortTransport(this);
@@ -386,12 +386,12 @@ void HardwareManager::openTransports()
     const auto& servoAzConf = DeviceConfiguration::servoAz();
     const auto& servoElConf = DeviceConfiguration::servoEl();
 
-    // IMU Transport (Modbus RTU)
+    // IMU Transport (Serial Binary - 3DM-GX3-25)
     QJsonObject imuTransportConfig;
     imuTransportConfig["port"] = imuConf.port;
     imuTransportConfig["baudRate"] = imuConf.baudRate;
     imuTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
-    imuTransportConfig["slaveId"] = imuConf.slaveId;
+    // Note: No slaveId for serial binary protocol (not Modbus)
     m_imuTransport->open(imuTransportConfig);
 
     // Day Camera Transport (Serial)

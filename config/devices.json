@@ -67,10 +67,10 @@
     "videoFrameBufferSize": 10
   },
   "imu": {
+    "comment": "3DM-GX3-25 MicroStrain AHRS - Serial Binary Protocol",
     "port": "/dev/serial/by-id/usb-WCH2",
     "baudRate": 115200,
-    "slaveId": 1,
-    "sampleRate": 100,
+    "samplingRateHz": 100,
     "tiltWarningThreshold": 30.0
   },
   "lrf": {
