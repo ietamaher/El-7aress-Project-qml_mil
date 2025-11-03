@@ -1,33 +1,38 @@
 #include "imudevice.h"
 #include "../interfaces/Transport.h"
-#include "../protocols/ImuProtocolParser.h"
+#include "../protocols/Imu3DMGX3ProtocolParser.h"
 #include "../messages/ImuMessage.h"
-#include <QModbusRtuSerialClient>
-#include <QModbusDataUnit>
-#include <QModbusReply>
 #include <QDebug>
 
 ImuDevice::ImuDevice(const QString& identifier, QObject* parent)
     : TemplatedDevice<ImuData>(parent),
       m_identifier(identifier),
-      m_pollTimer(new QTimer(this)),
-      m_communicationWatchdog(new QTimer(this))
+      m_communicationWatchdog(new QTimer(this)),
+      m_initializationTimer(new QTimer(this))
 {
-    connect(m_pollTimer, &QTimer::timeout, this, &ImuDevice::pollTimerTimeout);
-
+    // Communication watchdog - detects loss of data stream
     m_communicationWatchdog->setSingleShot(false);
     m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
     connect(m_communicationWatchdog, &QTimer::timeout,
             this, &ImuDevice::onCommunicationWatchdogTimeout);
+
+    // Initialization timeout - handles long operations like gyro bias capture
+    m_initializationTimer->setSingleShot(true);
+    connect(m_initializationTimer, &QTimer::timeout,
+            this, &ImuDevice::onInitializationTimeout);
 }
 
 ImuDevice::~ImuDevice() {
-    m_pollTimer->stop();
-    m_communicationWatchdog->stop();
+    if (m_communicationWatchdog) {
+        m_communicationWatchdog->stop();
+    }
+    if (m_initializationTimer) {
+        m_initializationTimer->stop();
+    }
 }
 
 void ImuDevice::setDependencies(Transport* transport,
-                                 ImuProtocolParser* parser) {
+                                 Imu3DMGX3ProtocolParser* parser) {
     m_transport = transport;
     m_parser = parser;
 
@@ -35,7 +40,9 @@ void ImuDevice::setDependencies(Transport* transport,
     m_transport->setParent(this);
     m_parser->setParent(this);
 
-    // Don't listen to transport connectionStateChanged - we manage connection via watchdog
+    // Connect to transport's dataReceived signal
+    connect(m_transport, SIGNAL(dataReceived(QByteArray)),
+            this, SLOT(onSerialDataReceived(QByteArray)));
 }
 
 bool ImuDevice::initialize() {
@@ -48,25 +55,33 @@ bool ImuDevice::initialize() {
     }
 
     // Transport should already be opened by SystemController
-    qDebug() << m_identifier << "initializing...";
+    qDebug() << m_identifier << "initializing 3DM-GX3-25...";
 
-    // Get poll interval from config (default 50ms)
+    // Get sampling rate from config (default 100Hz)
     QJsonObject config = property("config").toJsonObject();
-    int pollInterval = config["pollIntervalMs"].toInt(50);
+    m_samplingRateHz = config["samplingRateHz"].toInt(100);
 
-    setState(DeviceState::Online);
+    // Start initialization sequence
+    startInitializationSequence();
 
-    // Start polling and watchdog
-    m_pollTimer->start(pollInterval);
-    m_communicationWatchdog->start();
-
-    qDebug() << m_identifier << "initialized successfully with poll interval:" << pollInterval << "ms";
     return true;
 }
 
 void ImuDevice::shutdown() {
-    m_pollTimer->stop();
-    m_communicationWatchdog->stop();
+    if (m_communicationWatchdog) {
+        m_communicationWatchdog->stop();
+    }
+    if (m_initializationTimer) {
+        m_initializationTimer->stop();
+    }
+
+    // Stop continuous mode
+    if (m_transport && m_parser) {
+        QByteArray stopCmd = Imu3DMGX3ProtocolParser::createStopContinuousModeCommand();
+        QMetaObject::invokeMethod(m_transport, "sendData",
+                                  Qt::QueuedConnection,
+                                  Q_ARG(QByteArray, stopCmd));
+    }
 
     if (m_transport) {
         QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
@@ -75,59 +90,95 @@ void ImuDevice::shutdown() {
     setState(DeviceState::Offline);
 }
 
-void ImuDevice::pollTimerTimeout() {
-    // Read all 18 Input Registers in a single request
-    sendReadRequest();
+void ImuDevice::startInitializationSequence() {
+    m_initState = InitState::WaitingForGyroBias;
+
+    qDebug() << m_identifier << "Step 1: Capturing gyro bias (device must be stationary)...";
+    sendCaptureGyroBiasCommand();
+
+    // Set timeout for gyro bias capture (takes ~10 seconds)
+    m_initializationTimer->setInterval(GYRO_BIAS_TIMEOUT_MS);
+    m_initializationTimer->start();
 }
 
-void ImuDevice::sendReadRequest() {
-    if (state() != DeviceState::Online || !m_transport) return;
+void ImuDevice::sendCaptureGyroBiasCommand() {
+    if (!m_transport || !m_parser) return;
 
-    // Cast to ModbusTransport to access Modbus-specific methods
-    auto modbusTransport = qobject_cast<QModbusRtuSerialClient*>(
-        m_transport->property("client").value<QObject*>());
-
-    if (!modbusTransport) return;
-
-    QModbusDataUnit readUnit(QModbusDataUnit::InputRegisters,
-                             ImuRegisters::ALL_DATA_START_ADDR,
-                             ImuRegisters::ALL_DATA_REG_COUNT);
-
-    QModbusReply* reply = nullptr;
-    QMetaObject::invokeMethod(m_transport, "sendReadRequest",
+    QByteArray cmd = Imu3DMGX3ProtocolParser::createCaptureGyroBiasCommand();
+    QMetaObject::invokeMethod(m_transport, "sendData",
                               Qt::DirectConnection,
-                              Q_RETURN_ARG(QModbusReply*, reply),
-                              Q_ARG(QModbusDataUnit, readUnit));
-
-    if (reply) {
-        connect(reply, &QModbusReply::finished, this, [this, reply]() {
-            onModbusReplyReady(reply);
-        });
-    }
+                              Q_ARG(QByteArray, cmd));
 }
 
-void ImuDevice::onModbusReplyReady(QModbusReply* reply) {
-    if (!reply || !m_parser) {
-        if (reply) reply->deleteLater();
-        return;
+void ImuDevice::sendSamplingSettingsCommand() {
+    if (!m_transport || !m_parser) return;
+
+    // Calculate decimation value from desired sampling rate
+    // 0 = 1000Hz, 1 = 500Hz, 4 = 200Hz, 9 = 100Hz, 19 = 50Hz
+    quint16 decimation;
+    if (m_samplingRateHz >= 1000) {
+        decimation = 0;
+    } else if (m_samplingRateHz >= 500) {
+        decimation = 1;
+    } else if (m_samplingRateHz >= 200) {
+        decimation = 4;
+    } else if (m_samplingRateHz >= 100) {
+        decimation = 9;
+    } else {
+        decimation = 19; // 50Hz
     }
 
-    if (reply->error() != QModbusDevice::NoError) {
-        qWarning() << m_identifier << "Modbus error:" << reply->errorString();
-        setConnectionState(false);
-        reply->deleteLater();
-        return;
-    }
+    qDebug() << m_identifier << "Step 2: Setting sampling rate to"
+             << (1000 / (decimation + 1)) << "Hz (decimation =" << decimation << ")";
 
-    // Parse the reply into messages
-    auto messages = m_parser->parse(reply);
-    reply->deleteLater();
+    QByteArray cmd = Imu3DMGX3ProtocolParser::createSamplingSettingsCommand(decimation);
+    QMetaObject::invokeMethod(m_transport, "sendData",
+                              Qt::DirectConnection,
+                              Q_ARG(QByteArray, cmd));
+}
+
+void ImuDevice::startContinuousMode() {
+    if (!m_transport || !m_parser) return;
+
+    qDebug() << m_identifier << "Step 3: Starting continuous mode (0xCF: Euler + Rates)...";
+
+    QByteArray cmd = Imu3DMGX3ProtocolParser::createContinuousModeCommand();
+    QMetaObject::invokeMethod(m_transport, "sendData",
+                              Qt::DirectConnection,
+                              Q_ARG(QByteArray, cmd));
+
+    m_initState = InitState::Running;
+    setState(DeviceState::Online);
+
+    // Start communication watchdog
+    m_communicationWatchdog->start();
+
+    qDebug() << m_identifier << "Initialization complete! Streaming orientation data...";
+}
+
+void ImuDevice::onSerialDataReceived(const QByteArray& data) {
+    if (!m_parser) return;
+
+    // Parse incoming data stream
+    auto messages = m_parser->parse(data);
 
     // Process each message
     for (const auto& msg : messages) {
         if (msg) {
             processMessage(*msg);
         }
+    }
+
+    // Handle initialization state machine
+    if (m_initState == InitState::WaitingForGyroBias) {
+        // Gyro bias capture completed (parser detected 0xCD response)
+        m_initializationTimer->stop();
+        m_initState = InitState::WaitingForSamplingRate;
+        sendSamplingSettingsCommand();
+    } else if (m_initState == InitState::WaitingForSamplingRate) {
+        // Sampling rate configured (parser detected 0xDB response)
+        m_initState = InitState::StartingContinuousMode;
+        startContinuousMode();
     }
 }
 
@@ -146,8 +197,22 @@ void ImuDevice::processMessage(const Message& message) {
     }
 }
 
-void ImuDevice::setPollInterval(int intervalMs) {
-    m_pollTimer->setInterval(intervalMs);
+void ImuDevice::setSamplingRate(int rateHz) {
+    m_samplingRateHz = qBound(50, rateHz, 1000);
+    qDebug() << m_identifier << "Sampling rate set to" << m_samplingRateHz << "Hz";
+}
+
+void ImuDevice::onInitializationTimeout() {
+    qWarning() << m_identifier << "Initialization timeout in state" << static_cast<int>(m_initState);
+
+    if (m_initState == InitState::WaitingForGyroBias) {
+        qWarning() << m_identifier << "Gyro bias capture timed out - proceeding anyway";
+        m_initState = InitState::WaitingForSamplingRate;
+        sendSamplingSettingsCommand();
+    } else {
+        qCritical() << m_identifier << "Initialization failed!";
+        setState(DeviceState::Error);
+    }
 }
 
 void ImuDevice::resetCommunicationWatchdog() {
