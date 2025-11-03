@@ -91,13 +91,11 @@ void ImuDevice::shutdown() {
     // Stop continuous mode
     if (m_transport && m_parser) {
         QByteArray stopCmd = Imu3DMGX3ProtocolParser::createStopContinuousModeCommand();
-        QMetaObject::invokeMethod(m_transport, "sendFrame",
-                                  Qt::QueuedConnection,
-                                  Q_ARG(QByteArray, stopCmd));
+        m_transport->sendFrame(stopCmd);
     }
 
     if (m_transport) {
-        QMetaObject::invokeMethod(m_transport, "close", Qt::QueuedConnection);
+        m_transport->close();
     }
 
     setState(DeviceState::Offline);
@@ -118,9 +116,7 @@ void ImuDevice::sendCaptureGyroBiasCommand() {
     if (!m_transport || !m_parser) return;
 
     QByteArray cmd = Imu3DMGX3ProtocolParser::createCaptureGyroBiasCommand();
-    QMetaObject::invokeMethod(m_transport, "sendFrame",
-                              Qt::DirectConnection,
-                              Q_ARG(QByteArray, cmd));
+    m_transport->sendFrame(cmd);
 }
 
 void ImuDevice::sendSamplingSettingsCommand() {
@@ -145,9 +141,7 @@ void ImuDevice::sendSamplingSettingsCommand() {
              << (1000 / (decimation + 1)) << "Hz (decimation =" << decimation << ")";
 
     QByteArray cmd = Imu3DMGX3ProtocolParser::createSamplingSettingsCommand(decimation);
-    QMetaObject::invokeMethod(m_transport, "sendFrame",
-                              Qt::DirectConnection,
-                              Q_ARG(QByteArray, cmd));
+    m_transport->sendFrame(cmd);
 }
 
 void ImuDevice::startContinuousMode() {
@@ -156,9 +150,7 @@ void ImuDevice::startContinuousMode() {
     qDebug() << m_identifier << "Step 3: Starting continuous mode (0xCF: Euler + Rates)...";
 
     QByteArray cmd = Imu3DMGX3ProtocolParser::createContinuousModeCommand();
-    QMetaObject::invokeMethod(m_transport, "sendFrame",
-                              Qt::DirectConnection,
-                              Q_ARG(QByteArray, cmd));
+    m_transport->sendFrame(cmd);
 
     m_initState = InitState::Running;
     setState(DeviceState::Online);
@@ -261,9 +253,7 @@ void ImuDevice::sendReadTemperaturesCommand() {
     if (!m_transport || !m_parser) return;
 
     QByteArray cmd = Imu3DMGX3ProtocolParser::createReadTemperaturesCommand();
-    QMetaObject::invokeMethod(m_transport, "sendFrame",
-                              Qt::DirectConnection,
-                              Q_ARG(QByteArray, cmd));
+    m_transport->sendFrame(cmd);
 }
 
 void ImuDevice::onTemperatureQueryTimeout() {
