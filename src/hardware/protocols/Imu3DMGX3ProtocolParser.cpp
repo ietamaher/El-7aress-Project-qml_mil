@@ -115,9 +115,13 @@ MessagePtr Imu3DMGX3ProtocolParser::parse0xCFPacket(const QByteArray& packet) {
     float pitchRad = extractFloat(packet, 5);
     data.pitchDeg = pitchRad * (180.0 / M_PI);
 
-    // Offset 9: Yaw (radians) - CONVERT TO DEGREES
+    // Offset 9: Yaw (radians, range: -π to π) - CONVERT TO DEGREES (0° to 360°)
     float yawRad = extractFloat(packet, 9);
     data.yawDeg = yawRad * (180.0 / M_PI);
+    // Normalize to [0, 360) range for display and gimbal control
+    if (data.yawDeg < 0.0) {
+        data.yawDeg += 360.0;
+    }
 
     // Offset 13: Roll Rate (rad/s) - CONVERT TO DEG/S
     float rollRateRad = extractFloat(packet, 13);
