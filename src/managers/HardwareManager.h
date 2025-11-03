@@ -141,7 +141,7 @@ private:
     // ========================================================================
     // TRANSPORT LAYER
     // ========================================================================
-    ModbusTransport* m_imuTransport = nullptr;
+    SerialPortTransport* m_imuTransport = nullptr;  // 3DM-GX3-25 uses serial binary
     SerialPortTransport* m_dayCameraTransport = nullptr;
     SerialPortTransport* m_nightCameraTransport = nullptr;
     SerialPortTransport* m_lrfTransport = nullptr;
