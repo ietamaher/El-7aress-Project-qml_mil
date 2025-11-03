@@ -50,9 +50,9 @@ void ImuDevice::setDependencies(Transport* transport,
     m_transport->setParent(this);
     m_parser->setParent(this);
 
-    // Connect to transport's dataReceived signal
-    connect(m_transport, SIGNAL(dataReceived(QByteArray)),
-            this, SLOT(onSerialDataReceived(QByteArray)));
+    // Connect to transport's frameReceived signal
+    connect(m_transport, SIGNAL(frameReceived(QByteArray)),
+            this, SLOT(onFrameReceived(QByteArray)));
 }
 
 bool ImuDevice::initialize() {
@@ -91,7 +91,7 @@ void ImuDevice::shutdown() {
     // Stop continuous mode
     if (m_transport && m_parser) {
         QByteArray stopCmd = Imu3DMGX3ProtocolParser::createStopContinuousModeCommand();
-        QMetaObject::invokeMethod(m_transport, "sendData",
+        QMetaObject::invokeMethod(m_transport, "sendFrame",
                                   Qt::QueuedConnection,
                                   Q_ARG(QByteArray, stopCmd));
     }
@@ -118,7 +118,7 @@ void ImuDevice::sendCaptureGyroBiasCommand() {
     if (!m_transport || !m_parser) return;
 
     QByteArray cmd = Imu3DMGX3ProtocolParser::createCaptureGyroBiasCommand();
-    QMetaObject::invokeMethod(m_transport, "sendData",
+    QMetaObject::invokeMethod(m_transport, "sendFrame",
                               Qt::DirectConnection,
                               Q_ARG(QByteArray, cmd));
 }
@@ -145,7 +145,7 @@ void ImuDevice::sendSamplingSettingsCommand() {
              << (1000 / (decimation + 1)) << "Hz (decimation =" << decimation << ")";
 
     QByteArray cmd = Imu3DMGX3ProtocolParser::createSamplingSettingsCommand(decimation);
-    QMetaObject::invokeMethod(m_transport, "sendData",
+    QMetaObject::invokeMethod(m_transport, "sendFrame",
                               Qt::DirectConnection,
                               Q_ARG(QByteArray, cmd));
 }
@@ -156,7 +156,7 @@ void ImuDevice::startContinuousMode() {
     qDebug() << m_identifier << "Step 3: Starting continuous mode (0xCF: Euler + Rates)...";
 
     QByteArray cmd = Imu3DMGX3ProtocolParser::createContinuousModeCommand();
-    QMetaObject::invokeMethod(m_transport, "sendData",
+    QMetaObject::invokeMethod(m_transport, "sendFrame",
                               Qt::DirectConnection,
                               Q_ARG(QByteArray, cmd));
 
@@ -172,11 +172,11 @@ void ImuDevice::startContinuousMode() {
     qDebug() << m_identifier << "Initialization complete! Streaming orientation data...";
 }
 
-void ImuDevice::onSerialDataReceived(const QByteArray& data) {
+void ImuDevice::onFrameReceived(const QByteArray& frame) {
     if (!m_parser) return;
 
     // Parse incoming data stream
-    auto messages = m_parser->parse(data);
+    auto messages = m_parser->parse(frame);
 
     // Process each message
     for (const auto& msg : messages) {
@@ -261,7 +261,7 @@ void ImuDevice::sendReadTemperaturesCommand() {
     if (!m_transport || !m_parser) return;
 
     QByteArray cmd = Imu3DMGX3ProtocolParser::createReadTemperaturesCommand();
-    QMetaObject::invokeMethod(m_transport, "sendData",
+    QMetaObject::invokeMethod(m_transport, "sendFrame",
                               Qt::DirectConnection,
                               Q_ARG(QByteArray, cmd));
 }
