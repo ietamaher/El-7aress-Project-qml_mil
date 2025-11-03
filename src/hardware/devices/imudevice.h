@@ -77,7 +77,7 @@ signals:
     void imuDataChanged(const ImuData& data);
 
 private slots:
-    void onSerialDataReceived(const QByteArray& data);
+    void onFrameReceived(const QByteArray& frame);
     void processMessage(const Message& message);
     void onCommunicationWatchdogTimeout();
     void onInitializationTimeout();

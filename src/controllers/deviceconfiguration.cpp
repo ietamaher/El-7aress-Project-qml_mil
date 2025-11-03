@@ -108,7 +108,7 @@ bool DeviceConfiguration::loadFromFile(const QString& filePath)
         QJsonObject imu = root["imu"].toObject();
         m_imu.port = imu["port"].toString();
         m_imu.baudRate = imu["baudRate"].toInt(m_imu.baudRate);
-        m_imu.slaveId = imu["slaveId"].toInt(m_imu.slaveId);
+        m_imu.samplingRateHz = imu["samplingRateHz"].toInt(m_imu.samplingRateHz);
     }
 
     // Parse LRF

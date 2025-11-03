@@ -20,7 +20,8 @@ public:
     struct ImuConfig {
         QString port;
         int baudRate = 115200;
-        int slaveId = 1;
+        int samplingRateHz = 100;  // 3DM-GX3-25 sampling rate (50-1000Hz)
+        // Note: No slaveId - serial binary protocol, not Modbus
     };
 
     struct LrfConfig {
