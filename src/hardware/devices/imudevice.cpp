@@ -51,8 +51,8 @@ void ImuDevice::setDependencies(Transport* transport,
     m_parser->setParent(this);
 
     // Connect to transport's frameReceived signal
-    connect(m_transport, SIGNAL(frameReceived(QByteArray)),
-            this, SLOT(onFrameReceived(QByteArray)));
+    connect(m_transport, &Transport::frameReceived,
+            this, &ImuDevice::onFrameReceived);
 }
 
 bool ImuDevice::initialize() {
