@@ -244,7 +244,7 @@ bool ConfigurationValidator::validateHardware()
         valid = false;
     }
     valid &= validateRange(imu.baudRate, 9600, 921600, "IMU baud rate");
-    valid &= validateRange(imu.slaveId, 1, 247, "IMU slave ID");
+    valid &= validateRange(imu.samplingRateHz, 50, 1000, "IMU sampling rate (Hz)");
 
     // Validate LRF config
     const auto& lrf = DeviceConfiguration::lrf();
