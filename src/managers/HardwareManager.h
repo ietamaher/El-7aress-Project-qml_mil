@@ -8,7 +8,7 @@
 class Transport;
 class ModbusTransport;
 class SerialPortTransport;
-class ImuProtocolParser;
+class Imu3DMGX3ProtocolParser;
 class DayCameraProtocolParser;
 class NightCameraProtocolParser;
 class JoystickProtocolParser;
@@ -155,7 +155,7 @@ private:
     // ========================================================================
     // PROTOCOL PARSERS
     // ========================================================================
-    ImuProtocolParser* m_imuParser = nullptr;
+    Imu3DMGX3ProtocolParser* m_imuParser = nullptr;
     DayCameraProtocolParser* m_dayCameraParser = nullptr;
     NightCameraProtocolParser* m_nightCameraParser = nullptr;
     JoystickProtocolParser* m_joystickParser = nullptr;
