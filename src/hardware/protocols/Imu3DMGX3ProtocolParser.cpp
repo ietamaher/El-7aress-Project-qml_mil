@@ -107,35 +107,39 @@ MessagePtr Imu3DMGX3ProtocolParser::parse0xCFPacket(const QByteArray& packet) {
     ImuData data;
     data.isConnected = true;
 
-    // Offset 1: Roll (degrees)
-    data.rollDeg = extractFloat(packet, 1);
+    // Offset 1: Roll (radians) - CONVERT TO DEGREES
+    float rollRad = extractFloat(packet, 1);
+    data.rollDeg = rollRad * (180.0 / M_PI);
 
-    // Offset 5: Pitch (degrees)
-    data.pitchDeg = extractFloat(packet, 5);
+    // Offset 5: Pitch (radians) - CONVERT TO DEGREES
+    float pitchRad = extractFloat(packet, 5);
+    data.pitchDeg = pitchRad * (180.0 / M_PI);
 
-    // Offset 9: Yaw (degrees) - FINALLY A REAL HEADING!
-    data.yawDeg = extractFloat(packet, 9);
+    // Offset 9: Yaw (radians) - CONVERT TO DEGREES
+    float yawRad = extractFloat(packet, 9);
+    data.yawDeg = yawRad * (180.0 / M_PI);
 
-    // Offset 13: Roll Rate (deg/s)
-    data.angRateX_dps = extractFloat(packet, 13);
+    // Offset 13: Roll Rate (rad/s) - CONVERT TO DEG/S
+    float rollRateRad = extractFloat(packet, 13);
+    data.angRateX_dps = rollRateRad * (180.0 / M_PI);
 
-    // Offset 17: Pitch Rate (deg/s)
-    data.angRateY_dps = extractFloat(packet, 17);
+    // Offset 17: Pitch Rate (rad/s) - CONVERT TO DEG/S
+    float pitchRateRad = extractFloat(packet, 17);
+    data.angRateY_dps = pitchRateRad * (180.0 / M_PI);
 
-    // Offset 21: Yaw Rate (deg/s)
-    data.angRateZ_dps = extractFloat(packet, 21);
+    // Offset 21: Yaw Rate (rad/s) - CONVERT TO DEG/S
+    float yawRateRad = extractFloat(packet, 21);
+    data.angRateZ_dps = yawRateRad * (180.0 / M_PI);
 
     // Offset 25: Timer (32-bit unsigned, ticks at 62.5µs)
     // quint32 timerTicks = extractUInt32(packet, 25);
-    // double timeSeconds = timerTicks * 62.5e-6; // Optional: convert to seconds
 
     // Acceleration data not provided by 0xCF command
-    // If needed, use 0xCC or 0xD2 commands instead
     data.accelX_g = 0.0;
     data.accelY_g = 0.0;
     data.accelZ_g = 0.0;
 
-    // Temperature from last 0xD1 query (updated periodically by ImuDevice)
+    // Temperature from last 0xD1 query
     data.temperature = m_lastTemperature;
 
     // Validate data ranges (sanity checks)
@@ -383,3 +387,4 @@ void Imu3DMGX3ProtocolParser::parse0xDBPacket(const QByteArray& packet) {
              << "Filters: Gyro/Accel=" << gyroAccelFilter << "Mag=" << magFilter
              << "Comp: Up=" << upComp << "s, North=" << northComp << "s";
 }
+

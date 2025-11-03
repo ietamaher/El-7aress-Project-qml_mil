@@ -100,6 +100,28 @@ public:
      */
     static quint16 calculateChecksum(const QByteArray& data);
 
+signals:
+    /**
+     * @brief Emitted when gyro bias capture completes
+     * @param biasX X-axis gyro bias (deg/s)
+     * @param biasY Y-axis gyro bias (deg/s)
+     * @param biasZ Z-axis gyro bias (deg/s)
+     */
+    void gyroBiasCaptured(float biasX, float biasY, float biasZ);
+
+    /**
+     * @brief Emitted when sampling settings are confirmed
+     * @param decimation Current decimation value
+     * @param dataRateHz Actual data rate in Hz
+     */
+    void samplingSettingsConfirmed(quint16 decimation, float dataRateHz);
+
+    /**
+     * @brief Emitted when temperature data is received
+     * @param avgTemperature Average temperature across all sensors (°C)
+     */
+    void temperatureReceived(double avgTemperature);
+        
 private:
     /**
      * @brief Parses a complete 0xCF packet (31 bytes)
