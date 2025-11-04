@@ -119,7 +119,7 @@ void ManualMotionMode::update(GimbalController* controller)
             updatedState.targetAzimuth_world = worldAz;
             updatedState.targetElevation_world = worldEl;
             updatedState.useWorldFrameTarget = false; // Disable hold while moving
-            stateModel->setData(updatedState);
+            stateModel->updateData(updatedState);
         }
     } else {
         // Joystick centered - enable world-frame hold
@@ -127,7 +127,7 @@ void ManualMotionMode::update(GimbalController* controller)
             auto stateModel = controller->systemStateModel();
             SystemStateData updatedState = stateModel->data();
             updatedState.useWorldFrameTarget = true; // Enable world-frame stabilization
-            stateModel->setData(updatedState);
+            stateModel->updateData(updatedState);
         }
     }
 

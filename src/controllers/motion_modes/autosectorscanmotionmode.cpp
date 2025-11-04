@@ -128,6 +128,22 @@ void AutoSectorScanMotionMode::update(GimbalController* controller) {
     }
 
     SystemStateData data = controller->systemStateModel()->data();
+
+    // Convert current target to world-frame for AHRS stabilization
+    if (data.imuConnected) {
+        double worldAz, worldEl;
+        convertGimbalToWorldFrame(m_targetAz, m_targetEl,
+                                  data.imuRollDeg, data.imuPitchDeg, data.imuYawDeg,
+                                  worldAz, worldEl);
+
+        auto stateModel = controller->systemStateModel();
+        SystemStateData updatedState = stateModel->data();
+        updatedState.targetAzimuth_world = worldAz;
+        updatedState.targetElevation_world = worldEl;
+        updatedState.useWorldFrameTarget = true; // Enable stabilized sector scanning
+        stateModel->updateData(updatedState);
+    }
+
     double errAz = m_targetAz - data.gimbalAz; // Azimuth still uses encoder
     double errEl = m_targetEl - data.imuPitchDeg; // Elevation now uses IMU Pitch
 

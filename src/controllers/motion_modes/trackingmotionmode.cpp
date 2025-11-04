@@ -176,16 +176,34 @@ void TrackingMotionMode::update(GimbalController* controller)
     m_previousDesiredAzVel = desiredAzVelocity;
     m_previousDesiredElVel = desiredElVelocity;
 
+    // 10. Convert target to world-frame for AHRS-based stabilization
+    if (data.imuConnected) {
+        // Convert current target position from platform frame to world frame
+        double worldAz, worldEl;
+        convertGimbalToWorldFrame(m_smoothedTargetAz, m_smoothedTargetEl,
+                                  data.imuRollDeg, data.imuPitchDeg, data.imuYawDeg,
+                                  worldAz, worldEl);
+
+        // Update system state with world-frame target
+        auto stateModel = controller->systemStateModel();
+        SystemStateData updatedState = stateModel->data();
+        updatedState.targetAzimuth_world = worldAz;
+        updatedState.targetElevation_world = worldEl;
+        updatedState.useWorldFrameTarget = true; // Enable world-frame tracking
+        stateModel->updateData(updatedState);
+    }
+
     // Debug output (reduced frequency to avoid spam)
     /*static int debugCounter = 0;
     if (++debugCounter % 10 == 0) { // Print every 10 updates
-        qDebug() << "Tracking - Error(Az,El):" << errAz << "," << errEl 
+        qDebug() << "Tracking - Error(Az,El):" << errAz << "," << errEl
                  << "| Vel(Az,El):" << desiredAzVelocity << "," << desiredElVelocity
                  << "| FF(Az,El):" << m_smoothedAzVel_dps << "," << m_smoothedElVel_dps
                  << "| elapsed(s):" << dt_s;
     }*/
 
-    // 10. Send final commands
-     sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity, false);
+    // 11. Send final commands with stabilization enabled
+    // Hybrid stabilization adds platform motion compensation to tracking velocity
+    sendStabilizedServoCommands(controller, desiredAzVelocity, desiredElVelocity, true);
 }
 
