@@ -94,6 +94,21 @@ void RadarSlewMotionMode::update(GimbalController* controller)
         return;
     }
 
+    // Convert radar target to world-frame for AHRS stabilization
+    if (data.imuConnected) {
+        double worldAz, worldEl;
+        convertGimbalToWorldFrame(m_targetAz, m_targetEl,
+                                  data.imuRollDeg, data.imuPitchDeg, data.imuYawDeg,
+                                  worldAz, worldEl);
+
+        auto stateModel = controller->systemStateModel();
+        SystemStateData updatedState = stateModel->data();
+        updatedState.targetAzimuth_world = worldAz;
+        updatedState.targetElevation_world = worldEl;
+        updatedState.useWorldFrameTarget = true; // Enable stabilized radar slewing
+        stateModel->updateData(updatedState);
+    }
+
     // Calculate error to the target
     double errAz = m_targetAz - data.gimbalAz; // Azimuth still uses encoder
     double errEl = m_targetEl - data.imuPitchDeg; // Elevation now uses IMU Pitch

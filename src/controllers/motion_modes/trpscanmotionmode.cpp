@@ -109,6 +109,21 @@ void TRPScanMotionMode::update(GimbalController* controller)
             const auto& targetTrp = m_trpPage[m_currentTrpIndex];
             SystemStateData data = controller->systemStateModel()->data();
 
+            // Convert TRP target to world-frame for AHRS stabilization
+            if (data.imuConnected) {
+                double worldAz, worldEl;
+                convertGimbalToWorldFrame(targetTrp.azimuth, targetTrp.elevation,
+                                          data.imuRollDeg, data.imuPitchDeg, data.imuYawDeg,
+                                          worldAz, worldEl);
+
+                auto stateModel = controller->systemStateModel();
+                SystemStateData updatedState = stateModel->data();
+                updatedState.targetAzimuth_world = worldAz;
+                updatedState.targetElevation_world = worldEl;
+                updatedState.useWorldFrameTarget = true; // Enable stabilized scanning
+                stateModel->updateData(updatedState);
+            }
+
             double errAz = targetTrp.azimuth - data.gimbalAz; // Azimuth still uses encoder
             double errEl = targetTrp.elevation - data.imuPitchDeg; // Elevation now uses IMU Pitch
 
