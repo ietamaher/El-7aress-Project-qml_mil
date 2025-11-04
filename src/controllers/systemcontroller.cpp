@@ -156,19 +156,25 @@ void SystemController::startSystem()
 {
     qInfo() << "=== PHASE 3: System Startup ===";
 
-    // 1. Start hardware (open transports, initialize devices)
+    // 1. Start the OSD startup sequence (shows professional startup messages)
+    if (m_controllerRegistry->osdController()) {
+        m_controllerRegistry->osdController()->startStartupSequence();
+        qInfo() << "  ✓ OSD startup sequence started";
+    }
+
+    // 2. Start hardware (open transports, initialize devices)
     if (!m_hardwareManager->startHardware()) {
         qCritical() << "Failed to start hardware!";
         return;
     }
 
-    // 2. Clear gimbal alarms (via gimbal controller)
+    // 3. Clear gimbal alarms (via gimbal controller)
     if (m_controllerRegistry->gimbalController()) {
         m_controllerRegistry->gimbalController()->clearAlarms();
         qInfo() << "  ✓ Gimbal alarms cleared";
     }
 
-    // 3. Create API server
+    // 4. Create API server
     createApiServer();
 
     qInfo() << "=== PHASE 3 COMPLETE - SYSTEM RUNNING ===\n";

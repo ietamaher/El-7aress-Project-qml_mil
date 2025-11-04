@@ -196,6 +196,117 @@ Item {
     }
 
     // ========================================================================
+    // STARTUP SEQUENCE MESSAGE (Center, Above Mid-Height)
+    // ========================================================================
+    Item {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: -80  // Above center
+        visible: viewModel ? viewModel.startupMessageVisible : false
+        width: startupMessageText.width + 40
+        height: startupMessageText.height + 20
+
+        // Military-grade dark background panel
+        Rectangle {
+            anchors.fill: parent
+            color: "#000000"
+            opacity: 0.85
+            radius: 2
+            border.color: osdRoot.accentColor
+            border.width: 2
+        }
+
+        // Message text
+        Text {
+            id: startupMessageText
+            anchors.centerIn: parent
+            text: viewModel ? viewModel.startupMessageText : ""
+            font.pixelSize: 20
+            font.bold: true
+            font.family: "Segoe UI"
+            font.letterSpacing: 1.5
+            color: osdRoot.accentColor
+            style: Text.Normal
+
+            // Blinking animation for professional appearance
+            SequentialAnimation on opacity {
+                running: parent.parent.visible
+                loops: Animation.Infinite
+
+                NumberAnimation {
+                    from: 1.0
+                    to: 0.7
+                    duration: 800
+                    easing.type: Easing.InOutQuad
+                }
+                NumberAnimation {
+                    from: 0.7
+                    to: 1.0
+                    duration: 800
+                    easing.type: Easing.InOutQuad
+                }
+            }
+        }
+
+        // Corner decorations for military style
+        Rectangle {
+            x: 0
+            y: 0
+            width: 10
+            height: 2
+            color: osdRoot.accentColor
+        }
+        Rectangle {
+            x: 0
+            y: 0
+            width: 2
+            height: 10
+            color: osdRoot.accentColor
+        }
+        Rectangle {
+            x: parent.width - 10
+            y: 0
+            width: 10
+            height: 2
+            color: osdRoot.accentColor
+        }
+        Rectangle {
+            x: parent.width - 2
+            y: 0
+            width: 2
+            height: 10
+            color: osdRoot.accentColor
+        }
+        Rectangle {
+            x: 0
+            y: parent.height - 2
+            width: 10
+            height: 2
+            color: osdRoot.accentColor
+        }
+        Rectangle {
+            x: 0
+            y: parent.height - 10
+            width: 2
+            height: 10
+            color: osdRoot.accentColor
+        }
+        Rectangle {
+            x: parent.width - 10
+            y: parent.height - 2
+            width: 10
+            height: 2
+            color: osdRoot.accentColor
+        }
+        Rectangle {
+            x: parent.width - 2
+            y: parent.height - 10
+            width: 2
+            height: 10
+            color: osdRoot.accentColor
+        }
+    }
+
+    // ========================================================================
     // AZIMUTH INDICATOR (Top-Right)
     // ========================================================================
     AzimuthIndicator {
@@ -311,6 +422,108 @@ Item {
             height: 10
             anchors.centerIn: parent
             color: osdRoot.accentColor
+        }
+    }
+
+    // ========================================================================
+    // ERROR MESSAGE DISPLAY (Bottom-Right Corner)
+    // ========================================================================
+    Rectangle {
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: 10
+        anchors.bottomMargin: 10
+        visible: viewModel ? viewModel.errorMessageVisible : false
+
+        width: errorMessageColumn.width + 24
+        height: errorMessageColumn.height + 16
+
+        color: "#000000"
+        opacity: 0.9
+        radius: 3
+        border.color: "#C81428"  // Red border for errors
+        border.width: 2
+
+        Column {
+            id: errorMessageColumn
+            anchors.centerIn: parent
+            spacing: 8
+
+            // Error icon and title
+            Row {
+                spacing: 8
+
+                // Warning icon
+                Text {
+                    text: "⚠"
+                    font.pixelSize: 18
+                    font.bold: true
+                    color: "#C81428"  // Red
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Text {
+                    text: "SYSTEM ERROR"
+                    font.pixelSize: 14
+                    font.bold: true
+                    font.family: "Segoe UI"
+                    font.letterSpacing: 1.2
+                    color: "#C81428"  // Red for error header
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+
+            // Error message text
+            Text {
+                text: viewModel ? viewModel.errorMessageText : ""
+                font.pixelSize: 12
+                font.family: "Segoe UI"
+                color: "#FFFFFF"
+                wrapMode: Text.WordWrap
+                width: 280
+                horizontalAlignment: Text.AlignLeft
+            }
+
+            // Action message
+            Text {
+                text: "► CONTACT MANUFACTURER"
+                font.pixelSize: 11
+                font.bold: true
+                font.family: "Segoe UI"
+                color: "#FFA500"  // Orange for action
+
+                // Blinking animation
+                SequentialAnimation on opacity {
+                    running: parent.parent.parent.visible
+                    loops: Animation.Infinite
+
+                    NumberAnimation {
+                        from: 1.0
+                        to: 0.4
+                        duration: 600
+                        easing.type: Easing.InOutQuad
+                    }
+                    NumberAnimation {
+                        from: 0.4
+                        to: 1.0
+                        duration: 600
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+            }
+        }
+
+        // Diagonal stripes for warning appearance
+        Repeater {
+            model: 3
+            Rectangle {
+                x: index * 15 + 5
+                y: 0
+                width: 1
+                height: parent.height
+                color: "#C81428"
+                opacity: 0.2
+            }
         }
     }
 }
