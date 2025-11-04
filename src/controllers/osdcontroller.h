@@ -47,19 +47,25 @@ public slots:
 private slots:
     void onColorStyleChanged(const QColor& color);
     void advanceStartupSequence();
+    void onStartupSystemStateChanged(const SystemStateData& data);
+    void onStaticDetectionTimerExpired();
 
 private:
     // Startup sequence states
     enum class StartupState {
         Idle,
         SystemInit,
+        WaitingForIMU,
         DetectingStatic,
         CalibratingAHRS,
+        WaitingForCriticalDevices,
         SystemReady,
         Complete
     };
 
     void updateStartupMessage(StartupState state);
+    void checkDevicesAndAdvance(const SystemStateData& data);
+    bool areCriticalDevicesConnected(const SystemStateData& data) const;
 
     // Shared update logic
     //void updateViewModelFromSystemState(const SystemStateData& data);
@@ -72,7 +78,13 @@ private:
 
     // Startup sequence state machine
     QTimer* m_startupTimer;
+    QTimer* m_staticDetectionTimer;
     StartupState m_startupState;
+    bool m_startupSequenceActive;
+
+    // Device connection tracking
+    bool m_imuConnected;
+    bool m_staticDetectionComplete;
 };
 
 #endif // OSDCONTROLLER_H
