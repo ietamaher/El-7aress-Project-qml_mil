@@ -88,6 +88,15 @@ class OsdViewModel : public QObject
     Q_PROPERTY(float rangeMeters READ rangeMeters NOTIFY rangeMetersChanged)
     Q_PROPERTY(float confidenceLevel READ confidenceLevel NOTIFY confidenceLevelChanged)
 
+    // ========================================================================
+    // STARTUP SEQUENCE & ERROR MESSAGES
+    // ========================================================================
+    Q_PROPERTY(QString startupMessageText READ startupMessageText NOTIFY startupMessageTextChanged)
+    Q_PROPERTY(bool startupMessageVisible READ startupMessageVisible NOTIFY startupMessageVisibleChanged)
+
+    Q_PROPERTY(QString errorMessageText READ errorMessageText NOTIFY errorMessageTextChanged)
+    Q_PROPERTY(bool errorMessageVisible READ errorMessageVisible NOTIFY errorMessageVisibleChanged)
+
 
 public:
     explicit OsdViewModel(QObject *parent = nullptr);
@@ -146,6 +155,12 @@ public:
     float rangeMeters() const { return m_rangeMeters; }
     float confidenceLevel() const { return m_confidenceLevel; }
 
+    QString startupMessageText() const { return m_startupMessageText; }
+    bool startupMessageVisible() const { return m_startupMessageVisible; }
+
+    QString errorMessageText() const { return m_errorMessageText; }
+    bool errorMessageVisible() const { return m_errorMessageVisible; }
+
 public slots:
     // Setters
     void setAccentColor(const QColor& color);
@@ -183,6 +198,9 @@ public slots:
     void updateLacActive(bool active);
     void updateRangeMeters(float range);
     void updateConfidenceLevel(float confidence);
+
+    void updateStartupMessage(const QString& message, bool visible);
+    void updateErrorMessage(const QString& message, bool visible);
 
 
 
@@ -239,6 +257,12 @@ signals:
     void lacActiveChanged();
     void rangeMetersChanged();
     void confidenceLevelChanged();
+
+    void startupMessageTextChanged();
+    void startupMessageVisibleChanged();
+
+    void errorMessageTextChanged();
+    void errorMessageVisibleChanged();
 
 
 
@@ -307,6 +331,12 @@ private:
     bool m_lacActive;
     float m_rangeMeters;
     float m_confidenceLevel;
+
+    QString m_startupMessageText;
+    bool m_startupMessageVisible;
+
+    QString m_errorMessageText;
+    bool m_errorMessageVisible;
 
 
 };

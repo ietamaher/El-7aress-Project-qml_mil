@@ -8,7 +8,12 @@ OsdController::OsdController(QObject *parent)
     : QObject(parent)
     , m_viewModel(nullptr)
     , m_stateModel(nullptr)
+    , m_startupTimer(new QTimer(this))
+    , m_startupState(StartupState::Idle)
 {
+    // Connect startup timer
+    connect(m_startupTimer, &QTimer::timeout, this, &OsdController::advanceStartupSequence);
+    m_startupTimer->setSingleShot(true);
 }
 
 void OsdController::setViewModel(OsdViewModel* viewModel)
@@ -314,4 +319,109 @@ void OsdController::onColorStyleChanged(const QColor& color)
     if (m_viewModel) {
         m_viewModel->setAccentColor(color);
     }
+}
+
+// ============================================================================
+// STARTUP SEQUENCE CONTROL
+// ============================================================================
+
+void OsdController::startStartupSequence()
+{
+    if (!m_viewModel) {
+        qWarning() << "[OsdController] Cannot start startup sequence - ViewModel is null";
+        return;
+    }
+
+    qDebug() << "[OsdController] Starting startup sequence";
+    m_startupState = StartupState::SystemInit;
+    updateStartupMessage(m_startupState);
+    m_startupTimer->start(1800);  // 1.8 seconds for first message
+}
+
+void OsdController::advanceStartupSequence()
+{
+    if (!m_viewModel) return;
+
+    // Advance to next state
+    switch (m_startupState) {
+        case StartupState::SystemInit:
+            m_startupState = StartupState::DetectingStatic;
+            updateStartupMessage(m_startupState);
+            m_startupTimer->start(1800);  // 1.8 seconds
+            break;
+
+        case StartupState::DetectingStatic:
+            m_startupState = StartupState::CalibratingAHRS;
+            updateStartupMessage(m_startupState);
+            m_startupTimer->start(2000);  // 2 seconds for calibration
+            break;
+
+        case StartupState::CalibratingAHRS:
+            m_startupState = StartupState::SystemReady;
+            updateStartupMessage(m_startupState);
+            m_startupTimer->start(1200);  // 1.2 seconds for "READY" message
+            break;
+
+        case StartupState::SystemReady:
+            m_startupState = StartupState::Complete;
+            m_viewModel->updateStartupMessage("", false);  // Hide message
+            qDebug() << "[OsdController] Startup sequence complete";
+            break;
+
+        default:
+            break;
+    }
+}
+
+void OsdController::updateStartupMessage(StartupState state)
+{
+    if (!m_viewModel) return;
+
+    QString message;
+    bool visible = true;
+
+    switch (state) {
+        case StartupState::SystemInit:
+            message = "SYSTEM INITIALIZATION...";
+            break;
+
+        case StartupState::DetectingStatic:
+            message = "DETECTING STATIC CONDITION...";
+            break;
+
+        case StartupState::CalibratingAHRS:
+            message = "CALIBRATING AHRS...";
+            break;
+
+        case StartupState::SystemReady:
+            message = "SYSTEM READY";
+            break;
+
+        default:
+            message = "";
+            visible = false;
+            break;
+    }
+
+    qDebug() << "[OsdController] Startup message:" << message;
+    m_viewModel->updateStartupMessage(message, visible);
+}
+
+void OsdController::showErrorMessage(const QString& errorText)
+{
+    if (!m_viewModel) {
+        qWarning() << "[OsdController] Cannot show error - ViewModel is null";
+        return;
+    }
+
+    qDebug() << "[OsdController] Showing error message:" << errorText;
+    m_viewModel->updateErrorMessage(errorText, true);
+}
+
+void OsdController::hideErrorMessage()
+{
+    if (!m_viewModel) return;
+
+    qDebug() << "[OsdController] Hiding error message";
+    m_viewModel->updateErrorMessage("", false);
 }

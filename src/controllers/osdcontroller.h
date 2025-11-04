@@ -2,6 +2,7 @@
 #define OSDCONTROLLER_H
 
 #include <QObject>
+#include <QTimer>
 
 // Forward declarations
 class OsdViewModel;
@@ -31,6 +32,11 @@ public:
     // Initialize connections
     void initialize();
 
+    // Startup sequence control
+    void startStartupSequence();
+    void showErrorMessage(const QString& errorText);
+    void hideErrorMessage();
+
 public slots:
     // PHASE 1: Direct from SystemStateModel (Active NOW)
     void onSystemStateChanged(const SystemStateData& data);
@@ -40,8 +46,21 @@ public slots:
 
 private slots:
     void onColorStyleChanged(const QColor& color);
+    void advanceStartupSequence();
 
 private:
+    // Startup sequence states
+    enum class StartupState {
+        Idle,
+        SystemInit,
+        DetectingStatic,
+        CalibratingAHRS,
+        SystemReady,
+        Complete
+    };
+
+    void updateStartupMessage(StartupState state);
+
     // Shared update logic
     //void updateViewModelFromSystemState(const SystemStateData& data);
 
@@ -50,6 +69,10 @@ private:
     SystemStateModel* m_stateModel;
 
     int m_activeCameraIndex;
+
+    // Startup sequence state machine
+    QTimer* m_startupTimer;
+    StartupState m_startupState;
 };
 
 #endif // OSDCONTROLLER_H

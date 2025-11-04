@@ -45,6 +45,10 @@ OsdViewModel::OsdViewModel(QObject *parent)
     , m_lacActive(false)
     , m_rangeMeters(0.0f)
     , m_confidenceLevel(1.0f)
+    , m_startupMessageText("")
+    , m_startupMessageVisible(false)
+    , m_errorMessageText("")
+    , m_errorMessageVisible(false)
 
 {
 }
@@ -528,6 +532,56 @@ void OsdViewModel::updateConfidenceLevel(float confidence)
     if (m_confidenceLevel != confidence) {
         m_confidenceLevel = confidence;
         emit confidenceLevelChanged();
+    }
+}
+
+// ============================================================================
+// STARTUP SEQUENCE & ERROR MESSAGE UPDATES
+// ============================================================================
+
+void OsdViewModel::updateStartupMessage(const QString& message, bool visible)
+{
+    bool changed = false;
+
+    if (m_startupMessageText != message) {
+        m_startupMessageText = message;
+        emit startupMessageTextChanged();
+        changed = true;
+    }
+
+    if (m_startupMessageVisible != visible) {
+        m_startupMessageVisible = visible;
+        emit startupMessageVisibleChanged();
+        changed = true;
+    }
+
+    if (changed) {
+        qDebug() << "[OsdViewModel] Startup message updated:"
+                 << "Visible=" << visible
+                 << "Text=" << message;
+    }
+}
+
+void OsdViewModel::updateErrorMessage(const QString& message, bool visible)
+{
+    bool changed = false;
+
+    if (m_errorMessageText != message) {
+        m_errorMessageText = message;
+        emit errorMessageTextChanged();
+        changed = true;
+    }
+
+    if (m_errorMessageVisible != visible) {
+        m_errorMessageVisible = visible;
+        emit errorMessageVisibleChanged();
+        changed = true;
+    }
+
+    if (changed) {
+        qDebug() << "[OsdViewModel] Error message updated:"
+                 << "Visible=" << visible
+                 << "Text=" << message;
     }
 }
 
