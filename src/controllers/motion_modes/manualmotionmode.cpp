@@ -98,10 +98,41 @@ void ManualMotionMode::update(GimbalController* controller)
     double azVelocityDegS = m_currentAzSpeedCmd_Hz / azStepsPerDegree;
     double elVelocityDegS = m_currentElSpeedCmd_Hz / elStepsPerDegree;
 
-    // 5. Send final command
-    sendStabilizedServoCommands(controller, azVelocityDegS, elVelocityDegS, true);
- 
+    // 5. World-frame target management
+    constexpr double VELOCITY_THRESHOLD = 0.1; // deg/s
+    bool joystickActive = (std::abs(azVelocityDegS) > VELOCITY_THRESHOLD ||
+                           std::abs(elVelocityDegS) > VELOCITY_THRESHOLD);
 
+    if (joystickActive) {
+        // Joystick is moving - disable world-frame hold, update target continuously
+        if (data.imuConnected) {
+            // Update world-frame target to current pointing direction
+            // This way when joystick is released, gimbal holds current direction
+            double worldAz, worldEl;
+            convertGimbalToWorldFrame(data.gimbalAz, data.gimbalEl,
+                                      data.imuRollDeg, data.imuPitchDeg, data.imuYawDeg,
+                                      worldAz, worldEl);
+
+            // Update system state model with new world target
+            auto stateModel = controller->systemStateModel();
+            SystemStateData updatedState = stateModel->data();
+            updatedState.targetAzimuth_world = worldAz;
+            updatedState.targetElevation_world = worldEl;
+            updatedState.useWorldFrameTarget = false; // Disable hold while moving
+            stateModel->setData(updatedState);
+        }
+    } else {
+        // Joystick centered - enable world-frame hold
+        if (data.imuConnected) {
+            auto stateModel = controller->systemStateModel();
+            SystemStateData updatedState = stateModel->data();
+            updatedState.useWorldFrameTarget = true; // Enable world-frame stabilization
+            stateModel->setData(updatedState);
+        }
+    }
+
+    // 6. Send final command (stabilization handles world-frame hold)
+    sendStabilizedServoCommands(controller, azVelocityDegS, elVelocityDegS, true);
 }
 
 double ManualMotionMode::processJoystickInput(double rawInput, double& filteredValue) {

@@ -99,17 +99,6 @@ void GimbalMotionModeBase::sendStabilizedServoCommands(GimbalController* control
                                  double desiredElVelocity,
                                  bool enableStabilization)
 {
-
-   /*if (!controller) {
-        qWarning() << "sendStabilizedServoCommands: controller is null";
-        return;
-    }
-
-     if (!controller->systemStateModel()) {
-        qWarning() << "sendStabilizedServoCommands: systemStateModel is null";
-        return;
-    }*/
-
     // --- Step 1: Get current system state ---
     SystemStateData systemState = controller->systemStateModel()->data();
 
@@ -121,12 +110,10 @@ void GimbalMotionModeBase::sendStabilizedServoCommands(GimbalController* control
         double azCorrection = 0.0;
         double elCorrection = 0.0;
 
-        // Call the helper function with the necessary data from the system state.
-        calculateStabilizationCorrection(systemState.gimbalAz, systemState.gimbalEl,
-                                         systemState.GyroX, systemState.GyroY, systemState.GyroZ,
-                                         azCorrection, elCorrection);
+        // Use new hybrid stabilization: AHRS position control + gyro velocity feedforward
+        calculateHybridStabilizationCorrection(systemState, azCorrection, elCorrection);
 
-        // Add the calculated correction to the desired velocity.
+        // Add the calculated correction to the desired velocity
         finalAzVelocity += azCorrection;
         finalElVelocity += elCorrection;
     }
@@ -135,11 +122,11 @@ void GimbalMotionModeBase::sendStabilizedServoCommands(GimbalController* control
     finalAzVelocity = qBound(-MAX_VELOCITY, finalAzVelocity, MAX_VELOCITY);
     finalElVelocity = qBound(-MAX_VELOCITY, finalElVelocity, MAX_VELOCITY);
 
-    // --- Step 4: Convert to servo steps and send commands ---
+    // --- Step 4: Convert to servo steps and send commands (AZD-KD velocity mode) ---
     const double azStepsPerDegree = 222500.0 / 360.0;
     const double elStepsPerDegree = 200000.0 / 360.0;
 
-    // --- CRITICAL FIX from previous review: Send the FINAL calculated velocities ---
+    // Send velocity commands to AZD-KD drivers (Operation Type 16)
     if (auto azServo = controller->azimuthServo()) {
         writeVelocityCommand(azServo, finalAzVelocity, azStepsPerDegree);
     }
@@ -372,4 +359,227 @@ void GimbalMotionModeBase::calculateStabilizationCorrection(double currentAz_deg
     elCorrection_dps = qBound(-MAX_CORRECTION_DPS, elCorrection_dps, MAX_CORRECTION_DPS);
 }
 
+// =========================================================================
+// AHRS-BASED WORLD-FRAME STABILIZATION FUNCTIONS
+// =========================================================================
+
+void GimbalMotionModeBase::calculateRequiredGimbalAngles(
+    double platform_roll, double platform_pitch, double platform_yaw,
+    double target_az_world, double target_el_world,
+    double& required_gimbal_az, double& required_gimbal_el)
+{
+    // Convert angles to radians
+    double roll = degToRad(platform_roll);
+    double pitch = degToRad(platform_pitch);
+    double yaw = degToRad(platform_yaw);
+    double target_az = degToRad(target_az_world);
+    double target_el = degToRad(target_el_world);
+
+    // STEP A: Create unit vector pointing at target in world frame
+    double cos_el = cos(target_el);
+    double target_x_world = cos_el * cos(target_az);
+    double target_y_world = cos_el * sin(target_az);
+    double target_z_world = sin(target_el);
+
+    // STEP B: Rotate vector INTO platform frame (inverse rotation sequence: ZYX)
+    // The platform's orientation is defined by Yaw-Pitch-Roll Euler angles.
+    // To transform from world to platform, we apply the INVERSE rotations in REVERSE order.
+
+    // Undo yaw rotation (Z-axis rotation)
+    double cos_yaw = cos(-yaw);
+    double sin_yaw = sin(-yaw);
+    double x_temp = target_x_world * cos_yaw - target_y_world * sin_yaw;
+    double y_temp = target_x_world * sin_yaw + target_y_world * cos_yaw;
+    double z_temp = target_z_world;
+
+    // Undo pitch rotation (Y-axis rotation)
+    double cos_pitch = cos(-pitch);
+    double sin_pitch = sin(-pitch);
+    double x_platform = x_temp * cos_pitch + z_temp * sin_pitch;
+    double y_platform = y_temp;
+    double z_platform = -x_temp * sin_pitch + z_temp * cos_pitch;
+
+    // Undo roll rotation (X-axis rotation)
+    double cos_roll = cos(-roll);
+    double sin_roll = sin(-roll);
+    double y_final = y_platform * cos_roll - z_platform * sin_roll;
+    double z_final = y_platform * sin_roll + z_platform * cos_roll;
+    double x_final = x_platform;
+
+    // STEP C: Convert platform-frame vector back to azimuth/elevation angles
+    required_gimbal_az = radToDeg(atan2(y_final, x_final));
+    required_gimbal_el = radToDeg(atan2(z_final, sqrt(x_final * x_final + y_final * y_final)));
+}
+
+void GimbalMotionModeBase::convertGimbalToWorldFrame(
+    double gimbalAz_platform, double gimbalEl_platform,
+    double platform_roll, double platform_pitch, double platform_yaw,
+    double& worldAz, double& worldEl)
+{
+    // Convert angles to radians
+    double gAz = degToRad(gimbalAz_platform);
+    double gEl = degToRad(gimbalEl_platform);
+    double roll = degToRad(platform_roll);
+    double pitch = degToRad(platform_pitch);
+    double yaw = degToRad(platform_yaw);
+
+    // STEP A: Create unit vector from gimbal angles in platform frame
+    double cos_gEl = cos(gEl);
+    double x_platform = cos_gEl * cos(gAz);
+    double y_platform = cos_gEl * sin(gAz);
+    double z_platform = sin(gEl);
+
+    // STEP B: Rotate vector FROM platform frame TO world frame (forward rotation: XYZ)
+
+    // Apply roll rotation (X-axis)
+    double cos_roll = cos(roll);
+    double sin_roll = sin(roll);
+    double y_temp1 = y_platform * cos_roll - z_platform * sin_roll;
+    double z_temp1 = y_platform * sin_roll + z_platform * cos_roll;
+    double x_temp1 = x_platform;
+
+    // Apply pitch rotation (Y-axis)
+    double cos_pitch = cos(pitch);
+    double sin_pitch = sin(pitch);
+    double x_temp2 = x_temp1 * cos_pitch + z_temp1 * sin_pitch;
+    double y_temp2 = y_temp1;
+    double z_temp2 = -x_temp1 * sin_pitch + z_temp1 * cos_pitch;
+
+    // Apply yaw rotation (Z-axis)
+    double cos_yaw = cos(yaw);
+    double sin_yaw = sin(yaw);
+    double x_world = x_temp2 * cos_yaw - y_temp2 * sin_yaw;
+    double y_world = x_temp2 * sin_yaw + y_temp2 * cos_yaw;
+    double z_world = z_temp2;
+
+    // STEP C: Convert world-frame vector back to azimuth/elevation angles
+    worldAz = radToDeg(atan2(y_world, x_world));
+    worldEl = radToDeg(atan2(z_world, sqrt(x_world * x_world + y_world * y_world)));
+
+    // Normalize azimuth to [0, 360)
+    if (worldAz < 0.0) worldAz += 360.0;
+}
+
+void GimbalMotionModeBase::calculateHybridStabilizationCorrection(
+    const SystemStateData& state,
+    double& azCorrection_dps,
+    double& elCorrection_dps)
+{
+    // ========================================
+    // LAYER 1: POSITION CONTROL (AHRS-based)
+    // Outputs velocity to reduce position error
+    // ========================================
+    double positionCorrectionAz_dps = 0.0;
+    double positionCorrectionEl_dps = 0.0;
+
+    if (state.useWorldFrameTarget && state.imuConnected) {
+        // Calculate where gimbal SHOULD be (in platform frame) to point at world target
+        double required_az, required_el;
+        calculateRequiredGimbalAngles(
+            state.imuRollDeg,
+            state.imuPitchDeg,
+            state.imuYawDeg,
+            state.targetAzimuth_world,
+            state.targetElevation_world,
+            required_az,
+            required_el
+        );
+
+        // Calculate position error
+        double az_error = required_az - state.gimbalAz;
+        double el_error = required_el - state.gimbalEl;
+
+        // Normalize azimuth error to [-180, 180]
+        while (az_error > 180.0) az_error -= 360.0;
+        while (az_error < -180.0) az_error += 360.0;
+
+        // Proportional control: velocity = Kp × error
+        const double Kp_position = 2.0;  // Tuning parameter
+        positionCorrectionAz_dps = Kp_position * az_error;
+        positionCorrectionEl_dps = Kp_position * el_error;
+
+        // Limit position correction velocity
+        const double MAX_POSITION_VEL = 10.0;  // deg/s
+        positionCorrectionAz_dps = qBound(-MAX_POSITION_VEL, positionCorrectionAz_dps, MAX_POSITION_VEL);
+        positionCorrectionEl_dps = qBound(-MAX_POSITION_VEL, positionCorrectionEl_dps, MAX_POSITION_VEL);
+    }
+
+    // ========================================
+    // LAYER 2: VELOCITY FEEDFORWARD (Gyro-based)
+    // Compensates for platform rotation
+    // ========================================
+    double velocityCorrectionAz_dps = 0.0;
+    double velocityCorrectionEl_dps = 0.0;
+
+    if (state.imuConnected) {
+        // Validate gyro inputs
+        if (std::isnan(state.GyroX) || std::isnan(state.GyroY) || std::isnan(state.GyroZ)) {
+            velocityCorrectionAz_dps = 0.0;
+            velocityCorrectionEl_dps = 0.0;
+        } else {
+            // Apply bias correction
+            double gyroX_corrected = state.GyroX - m_gyroBiasX;
+            double gyroY_corrected = state.GyroY - m_gyroBiasY;
+            double gyroZ_corrected = state.GyroZ - m_gyroBiasZ;
+
+            // Filter gyro rates
+            double gyroX_filtered = m_gyroXFilter.update(gyroX_corrected);
+            double gyroY_filtered = m_gyroYFilter.update(gyroY_corrected);
+            double gyroZ_filtered = m_gyroZFilter.update(gyroZ_corrected);
+
+            // Map to platform axes
+            // TODO: VERIFY THIS MAPPING WITH PHYSICAL IMU ORIENTATION!
+            // Current assumption: IMU X=platform forward, Y=right, Z=up
+            const double p_imu = gyroX_filtered; // Roll rate (rotation around X)
+            const double q_imu = gyroY_filtered; // Pitch rate (rotation around Y)
+            const double r_imu = gyroZ_filtered; // Yaw rate (rotation around Z)
+
+            // Kinematic transformation
+            const double currentAzRad = degToRad(state.gimbalAz);
+            const double currentElRad = degToRad(state.gimbalEl);
+
+            double platformEffectOnEl = (q_imu * cos(currentAzRad)) - (p_imu * sin(currentAzRad));
+
+            double tanEl = tan(currentElRad);
+            double platformEffectOnAz;
+            if (qAbs(cos(currentElRad)) < 1e-6) {
+                platformEffectOnAz = r_imu;
+            } else {
+                platformEffectOnAz = r_imu + tanEl * (q_imu * sin(currentAzRad) + p_imu * cos(currentAzRad));
+            }
+
+            // Negate to get correction
+            velocityCorrectionAz_dps = -platformEffectOnAz;
+            velocityCorrectionEl_dps = -platformEffectOnEl;
+
+            // Limit velocity correction
+            const double MAX_VELOCITY_CORR = 5.0;  // deg/s
+            velocityCorrectionAz_dps = qBound(-MAX_VELOCITY_CORR, velocityCorrectionAz_dps, MAX_VELOCITY_CORR);
+            velocityCorrectionEl_dps = qBound(-MAX_VELOCITY_CORR, velocityCorrectionEl_dps, MAX_VELOCITY_CORR);
+        }
+    }
+
+    // ========================================
+    // COMBINE BOTH LAYERS
+    // ========================================
+    azCorrection_dps = positionCorrectionAz_dps + velocityCorrectionAz_dps;
+    elCorrection_dps = positionCorrectionEl_dps + velocityCorrectionEl_dps;
+
+    // Final safety limit
+    const double MAX_TOTAL_VEL = 12.0;  // deg/s
+    azCorrection_dps = qBound(-MAX_TOTAL_VEL, azCorrection_dps, MAX_TOTAL_VEL);
+    elCorrection_dps = qBound(-MAX_TOTAL_VEL, elCorrection_dps, MAX_TOTAL_VEL);
+
+    // Diagnostic logging (every 50th call)
+    static int logCounter = 0;
+    if ((logCounter++ % 50) == 0 && state.useWorldFrameTarget) {
+        qDebug().noquote().nospace()
+            << "[HybridStab] TargetWorld: Az=" << QString::number(state.targetAzimuth_world, 'f', 1)
+            << "° El=" << QString::number(state.targetElevation_world, 'f', 1)
+            << "° | PosCorr: Az=" << QString::number(positionCorrectionAz_dps, 'f', 2)
+            << " El=" << QString::number(positionCorrectionEl_dps, 'f', 2)
+            << " | VelCorr: Az=" << QString::number(velocityCorrectionAz_dps, 'f', 2)
+            << " El=" << QString::number(velocityCorrectionEl_dps, 'f', 2);
+    }
+}
 

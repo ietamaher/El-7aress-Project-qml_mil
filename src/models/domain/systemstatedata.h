@@ -417,6 +417,11 @@ struct SystemStateData {
     bool isStabilizationActive = false; ///< Stabilization system active status
     double temperature = 0.0;           ///< Current system temperature in Celsius
 
+    // World-frame stabilization target (AHRS-based absolute pointing)
+    double targetAzimuth_world = 0.0;   ///< Desired world azimuth in degrees (0° = North, 90° = East)
+    double targetElevation_world = 0.0; ///< Desired world elevation in degrees (0° = horizon, +90° = zenith)
+    bool useWorldFrameTarget = false;   ///< Enable world-frame stabilization (true = hold absolute direction)
+
     // Stationary detection variables
     bool isVehicleStationary = false;   ///< Flag indicating if the vehicle is stationary
     double previousAccelMagnitude = 0.0; ///< Previous accelerometer magnitude for delta calculation
@@ -708,7 +713,12 @@ struct SystemStateData {
                qFuzzyCompare(AccelZ, other.AccelZ) &&
                isStabilizationActive == other.isStabilizationActive &&
                qFuzzyCompare(temperature, other.temperature) &&
-               
+
+               // World-frame Stabilization Target
+               qFuzzyCompare(targetAzimuth_world, other.targetAzimuth_world) &&
+               qFuzzyCompare(targetElevation_world, other.targetElevation_world) &&
+               useWorldFrameTarget == other.useWorldFrameTarget &&
+
                // Stationary Detection
                isVehicleStationary == other.isVehicleStationary &&
                qFuzzyCompare(previousAccelMagnitude, other.previousAccelMagnitude) &&

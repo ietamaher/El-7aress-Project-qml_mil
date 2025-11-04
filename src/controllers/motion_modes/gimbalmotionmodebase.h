@@ -76,6 +76,21 @@ public:
      * @param systemState The current system state data.
      */
     void updateGyroBias(const SystemStateData& systemState);
+
+    /**
+     * @brief Converts gimbal angles from platform frame to world frame.
+     * @param gimbalAz_platform Current gimbal azimuth in platform frame (degrees)
+     * @param gimbalEl_platform Current gimbal elevation in platform frame (degrees)
+     * @param platform_roll Platform roll angle from AHRS (degrees)
+     * @param platform_pitch Platform pitch angle from AHRS (degrees)
+     * @param platform_yaw Platform yaw angle from AHRS (degrees)
+     * @param worldAz Output world-frame azimuth (degrees)
+     * @param worldEl Output world-frame elevation (degrees)
+     */
+    void convertGimbalToWorldFrame(double gimbalAz_platform, double gimbalEl_platform,
+                                    double platform_roll, double platform_pitch, double platform_yaw,
+                                    double& worldAz, double& worldEl);
+
 protected:
 
 
@@ -169,16 +184,40 @@ protected:
 private:
     // Helper for angle conversions
     static inline double degToRad(double deg) { return deg * (M_PI / 180.0); }
+    static inline double radToDeg(double rad) { return rad * (180.0 / M_PI); }
 
     // Gyro filters for stabilization
     GyroLowPassFilter m_gyroXFilter;
     GyroLowPassFilter m_gyroYFilter;
     GyroLowPassFilter m_gyroZFilter;
 
-    // Gyro bias  
+    // Gyro bias
     double m_gyroBiasX = 0.0;
     double m_gyroBiasY = 0.0;
     double m_gyroBiasZ = 0.0;
+
+    /**
+     * @brief Calculates required gimbal angles to point at a world-frame target.
+     * @param platform_roll Platform roll angle from AHRS (degrees)
+     * @param platform_pitch Platform pitch angle from AHRS (degrees)
+     * @param platform_yaw Platform yaw angle from AHRS (degrees)
+     * @param target_az_world Desired world azimuth (degrees, 0° = North)
+     * @param target_el_world Desired world elevation (degrees, 0° = horizon)
+     * @param required_gimbal_az Output required gimbal azimuth in platform frame (degrees)
+     * @param required_gimbal_el Output required gimbal elevation in platform frame (degrees)
+     */
+    void calculateRequiredGimbalAngles(double platform_roll, double platform_pitch, double platform_yaw,
+                                       double target_az_world, double target_el_world,
+                                       double& required_gimbal_az, double& required_gimbal_el);
+
+    /**
+     * @brief Hybrid stabilization: combines position control (AHRS) + velocity feedforward (gyros).
+     * @param state Current system state with IMU data and gimbal angles
+     * @param azCorrection_dps Output azimuth correction velocity (deg/s)
+     * @param elCorrection_dps Output elevation correction velocity (deg/s)
+     */
+    void calculateHybridStabilizationCorrection(const SystemStateData& state,
+                                                double& azCorrection_dps, double& elCorrection_dps);
 
     void calculateStabilizationCorrection(double currentAz_deg, double currentEl_deg,
                                                             double gyroX_dps_raw, double gyroY_dps_raw, double gyroZ_dps_raw,
