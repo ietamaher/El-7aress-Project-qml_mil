@@ -7,6 +7,7 @@
 
 // Controllers (needed for direct access)
 #include "gimbalcontroller.h"
+#include "osdcontroller.h"
 
 // Configuration & Validation
 #include "deviceconfiguration.h"

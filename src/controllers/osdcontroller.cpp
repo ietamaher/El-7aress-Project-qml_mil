@@ -9,11 +9,19 @@ OsdController::OsdController(QObject *parent)
     , m_viewModel(nullptr)
     , m_stateModel(nullptr)
     , m_startupTimer(new QTimer(this))
+    , m_staticDetectionTimer(new QTimer(this))
     , m_startupState(StartupState::Idle)
+    , m_startupSequenceActive(false)
+    , m_imuConnected(false)
+    , m_staticDetectionComplete(false)
 {
     // Connect startup timer
     connect(m_startupTimer, &QTimer::timeout, this, &OsdController::advanceStartupSequence);
     m_startupTimer->setSingleShot(true);
+
+    // Connect static detection timer (10 seconds minimum for IMU gyro bias capture)
+    connect(m_staticDetectionTimer, &QTimer::timeout, this, &OsdController::onStaticDetectionTimerExpired);
+    m_staticDetectionTimer->setSingleShot(true);
 }
 
 void OsdController::setViewModel(OsdViewModel* viewModel)
@@ -322,55 +330,135 @@ void OsdController::onColorStyleChanged(const QColor& color)
 }
 
 // ============================================================================
-// STARTUP SEQUENCE CONTROL
+// STARTUP SEQUENCE CONTROL (EVENT-DRIVEN, REALISTIC TIMING)
 // ============================================================================
 
 void OsdController::startStartupSequence()
 {
-    if (!m_viewModel) {
-        qWarning() << "[OsdController] Cannot start startup sequence - ViewModel is null";
+    if (!m_viewModel || !m_stateModel) {
+        qWarning() << "[OsdController] Cannot start startup sequence - ViewModel or StateModel is null";
         return;
     }
 
-    qDebug() << "[OsdController] Starting startup sequence";
+    qDebug() << "[OsdController] Starting event-driven startup sequence";
+
+    // Reset state
+    m_startupSequenceActive = true;
+    m_imuConnected = false;
+    m_staticDetectionComplete = false;
+
+    // Show initial message
     m_startupState = StartupState::SystemInit;
     updateStartupMessage(m_startupState);
-    m_startupTimer->start(1800);  // 1.8 seconds for first message
+
+    // Connect to SystemStateModel to monitor device connections
+    connect(m_stateModel, &SystemStateModel::dataChanged,
+            this, &OsdController::onStartupSystemStateChanged, Qt::UniqueConnection);
+
+    // After 2 seconds of initialization message, move to waiting for IMU
+    m_startupTimer->start(2000);
 }
 
 void OsdController::advanceStartupSequence()
 {
-    if (!m_viewModel) return;
+    if (!m_viewModel || !m_startupSequenceActive) return;
 
-    // Advance to next state
-    switch (m_startupState) {
-        case StartupState::SystemInit:
+    // Only advance from SystemInit to WaitingForIMU via timer
+    if (m_startupState == StartupState::SystemInit) {
+        m_startupState = StartupState::WaitingForIMU;
+        updateStartupMessage(m_startupState);
+
+        // Check current state immediately
+        if (m_stateModel) {
+            checkDevicesAndAdvance(m_stateModel->data());
+        }
+    }
+}
+
+void OsdController::onStartupSystemStateChanged(const SystemStateData& data)
+{
+    if (!m_startupSequenceActive) return;
+
+    checkDevicesAndAdvance(data);
+}
+
+void OsdController::checkDevicesAndAdvance(const SystemStateData& data)
+{
+    if (!m_viewModel || !m_startupSequenceActive) return;
+
+    // Track IMU connection
+    if (data.imuConnected && !m_imuConnected) {
+        m_imuConnected = true;
+        qDebug() << "[OsdController] IMU connected - starting static detection phase";
+
+        // Transition to DetectingStatic when IMU connects
+        if (m_startupState == StartupState::WaitingForIMU) {
             m_startupState = StartupState::DetectingStatic;
             updateStartupMessage(m_startupState);
-            m_startupTimer->start(1800);  // 1.8 seconds
-            break;
 
-        case StartupState::DetectingStatic:
-            m_startupState = StartupState::CalibratingAHRS;
-            updateStartupMessage(m_startupState);
-            m_startupTimer->start(2000);  // 2 seconds for calibration
-            break;
+            // Start 10-second minimum timer for gyro bias capture
+            m_staticDetectionTimer->start(10000);  // 10 seconds minimum
+        }
+    }
 
-        case StartupState::CalibratingAHRS:
+    // After static detection timer completes, move to AHRS calibration
+    if (m_staticDetectionComplete && m_startupState == StartupState::DetectingStatic) {
+        m_startupState = StartupState::CalibratingAHRS;
+        updateStartupMessage(m_startupState);
+        m_startupTimer->start(2000);  // 2 seconds for AHRS calibration message
+    }
+
+    // After AHRS calibration message, wait for critical devices
+    if (m_startupState == StartupState::CalibratingAHRS && !m_startupTimer->isActive()) {
+        m_startupState = StartupState::WaitingForCriticalDevices;
+        // No message shown during this state - we just check devices
+
+        // Check if critical devices are ready
+        if (areCriticalDevicesConnected(data)) {
             m_startupState = StartupState::SystemReady;
             updateStartupMessage(m_startupState);
-            m_startupTimer->start(1200);  // 1.2 seconds for "READY" message
-            break;
-
-        case StartupState::SystemReady:
-            m_startupState = StartupState::Complete;
-            m_viewModel->updateStartupMessage("", false);  // Hide message
-            qDebug() << "[OsdController] Startup sequence complete";
-            break;
-
-        default:
-            break;
+            m_startupTimer->start(1500);  // 1.5 seconds for "READY" message
+        }
     }
+
+    // Final transition to complete
+    if (m_startupState == StartupState::SystemReady && !m_startupTimer->isActive()) {
+        m_startupState = StartupState::Complete;
+        m_startupSequenceActive = false;
+        m_viewModel->updateStartupMessage("", false);  // Hide message
+
+        // Disconnect from state changes
+        disconnect(m_stateModel, &SystemStateModel::dataChanged,
+                   this, &OsdController::onStartupSystemStateChanged);
+
+        qDebug() << "[OsdController] Startup sequence complete";
+    }
+}
+
+void OsdController::onStaticDetectionTimerExpired()
+{
+    qDebug() << "[OsdController] Static detection timer expired (10 seconds minimum)";
+    m_staticDetectionComplete = true;
+
+    // Check if we should advance
+    if (m_stateModel) {
+        checkDevicesAndAdvance(m_stateModel->data());
+    }
+}
+
+bool OsdController::areCriticalDevicesConnected(const SystemStateData& data) const
+{
+    // Critical devices: IMU, Azimuth servo, Elevation servo
+    // Cameras are not critical for basic operation
+    bool critical = data.imuConnected &&
+                   data.azConnected &&
+                   data.elConnected;
+
+    if (critical) {
+        qDebug() << "[OsdController] All critical devices connected";
+    }
+
+    return critical;
 }
 
 void OsdController::updateStartupMessage(StartupState state)
@@ -385,12 +473,22 @@ void OsdController::updateStartupMessage(StartupState state)
             message = "SYSTEM INITIALIZATION...";
             break;
 
+        case StartupState::WaitingForIMU:
+            message = "WAITING FOR IMU CONNECTION...";
+            break;
+
         case StartupState::DetectingStatic:
             message = "DETECTING STATIC CONDITION...";
             break;
 
         case StartupState::CalibratingAHRS:
             message = "CALIBRATING AHRS...";
+            break;
+
+        case StartupState::WaitingForCriticalDevices:
+            // No message shown - waiting in background
+            message = "";
+            visible = false;
             break;
 
         case StartupState::SystemReady:
@@ -403,7 +501,9 @@ void OsdController::updateStartupMessage(StartupState state)
             break;
     }
 
-    qDebug() << "[OsdController] Startup message:" << message;
+    if (!message.isEmpty()) {
+        qDebug() << "[OsdController] Startup message:" << message;
+    }
     m_viewModel->updateStartupMessage(message, visible);
 }
 
