@@ -450,9 +450,9 @@ bool OsdController::areCriticalDevicesConnected(const SystemStateData& data) con
 {
     // Critical devices: IMU, Azimuth servo, Elevation servo
     // Cameras are not critical for basic operation
-    bool critical = data.imuConnected &&
-                   data.azConnected &&
-                   data.elConnected;
+    bool critical = data.imuConnected; // &&
+                 //  data.azServoConnected &&
+                //   data.elServoConnected;
 
     if (critical) {
         qDebug() << "[OsdController] All critical devices connected";

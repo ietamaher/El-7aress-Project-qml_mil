@@ -474,6 +474,7 @@ struct SystemStateData {
     FireMode fireMode = FireMode::Unknown; ///< Current weapon fire mode
     double gimbalSpeed = 2.0;               ///< Speed switch setting
     bool enableStabilization = true;   ///< Platform stabilization enable switch
+    bool emergencyStopActive = false;    ///< Emergency stop activation status
 
     // =================================
     // GIMBAL STATION HARDWARE (PLC42)
@@ -482,7 +483,6 @@ struct SystemStateData {
     bool plc42Connected = false;          ///< PLC42 connection status
     bool upperLimitSensorActive = false; ///< Upper travel limit sensor status
     bool lowerLimitSensorActive = false; ///< Lower travel limit sensor status
-    bool emergencyStopActive = false;    ///< Emergency stop activation status
     
     // Station Inputs
     bool stationAmmunitionLevel = false; ///< Station ammunition level sensor

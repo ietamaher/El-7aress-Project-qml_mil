@@ -237,6 +237,26 @@ void Plc21Device::setDigitalOutputs(const QVector<bool>& outputs) {
     sendWriteRequest(Plc21Registers::DIGITAL_OUTPUTS_START_ADDR, outputs);
 }
 
+void Plc21Device::setGunArmedLed(bool on)
+{
+    writeDigitalOutput(0, on);
+}
+
+void Plc21Device::setStationEnabledLed(bool on)
+{
+    writeDigitalOutput(1, on);
+}
+
+void Plc21Device::setStationInput1Led(bool on)
+{
+    writeDigitalOutput(2, on);
+}
+
+void Plc21Device::setPanelBacklight(bool on)
+{
+    writeDigitalOutput(3, on);
+}
+
 void Plc21Device::writeDigitalOutput(int index, bool value) {
     if (index < 0 || index >= Plc21Registers::DIGITAL_OUTPUTS_COUNT) {
         qWarning() << m_identifier << "Invalid output index:" << index;

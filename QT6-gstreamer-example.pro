@@ -38,6 +38,7 @@ SOURCES += \
     src/controllers/deviceconfiguration.cpp \
     src/controllers/gimbalcontroller.cpp \
     src/controllers/joystickcontroller.cpp \
+    src/controllers/ledcontroller.cpp \
     src/controllers/mainmenucontroller.cpp \
     src/controllers/motion_modes/autosectorscanmotionmode.cpp \
     src/controllers/motion_modes/gimbalmotionmodebase.cpp \
@@ -131,6 +132,7 @@ HEADERS += \
     src/controllers/deviceconfiguration.h \
     src/controllers/gimbalcontroller.h \
     src/controllers/joystickcontroller.h \
+    src/controllers/ledcontroller.h \
     src/controllers/mainmenucontroller.h \
     src/controllers/motion_modes/autosectorscanmotionmode.h \
     src/controllers/motion_modes/gimbalmotionmodebase.h \

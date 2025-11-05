@@ -8,6 +8,7 @@ class GimbalController;
 class WeaponController;
 class CameraController;
 class JoystickController;
+class LedController;
 
 // Forward declarations - QML Controllers
 class OsdController;
@@ -108,6 +109,7 @@ public:
     SystemStatusController* systemStatusController() const { return m_systemStatusController; }
     AboutController* aboutController() const { return m_aboutController; }
     ApplicationController* applicationController() const { return m_appController; }
+    LedController* ledController() const { return m_ledController; }
 
 signals:
     void hardwareControllersCreated();
@@ -136,6 +138,7 @@ private:
     SystemStatusController* m_systemStatusController = nullptr;
     AboutController* m_aboutController = nullptr;
     ApplicationController* m_appController = nullptr;
+    LedController* m_ledController = nullptr;
 
     // ========================================================================
     // DEPENDENCIES (not owned)

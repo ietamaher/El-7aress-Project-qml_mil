@@ -7,6 +7,7 @@
 #include "controllers/weaponcontroller.h"
 #include "controllers/cameracontroller.h"
 #include "controllers/joystickcontroller.h"
+#include "controllers/ledcontroller.h"
 
 // QML Controllers
 #include "controllers/applicationcontroller.h"
@@ -115,6 +116,12 @@ bool ControllerRegistry::createHardwareControllers()
             m_gimbalController,
             m_cameraController,
             m_weaponController,
+            this
+        );
+
+        m_ledController = new LedController(
+            m_systemStateModel,
+            m_hardwareManager->plc21Device(),
             this
         );
 

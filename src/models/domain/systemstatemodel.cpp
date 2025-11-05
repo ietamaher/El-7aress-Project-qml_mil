@@ -714,6 +714,7 @@ void SystemStateModel::onPlc21DataChanged(const Plc21PanelData &pData)
     newData.authorized = pData.authorizeSw;
     newData.enableStabilization = pData.enableStabilizationSW;
     newData.activeCameraIsDay = pData.switchCameraSW;
+    newData.emergencyStopActive = pData.authorizeSw;            
 
     switch (pData.fireMode) {
     case 0:
@@ -741,7 +742,6 @@ void SystemStateModel::onPlc42DataChanged(const Plc42Data &pData)
     SystemStateData newData = m_currentStateData;
     newData.upperLimitSensorActive = pData.stationUpperSensor;        // DataModel::m_stationUpperSensor
     newData.lowerLimitSensorActive = pData.stationLowerSensor;        // DataModel::m_stationLowerSensor
-    newData.emergencyStopActive = pData.emergencyStopActive;           // (Not directly in DataModel – you might map one of the station inputs)
 
     // Additional station inputs (if needed)
     newData.stationAmmunitionLevel = pData.ammunitionLevel;        // DataModel::m_stationAmmunitionLevel
