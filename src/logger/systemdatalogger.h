@@ -33,6 +33,8 @@
 #include <QVector>
 #include <QMutex>
 #include <QSqlDatabase>
+#include <QTimer>
+#include <QAtomicInt>
 #include "models/domain/systemstatedata.h"
 
 // ============================================================================
@@ -520,12 +522,25 @@ private:
     // Database support
     QSqlDatabase m_database;
     bool m_databaseEnabled;
-    QDateTime m_lastDbWrite;
+    QTimer* m_databaseWriteTimer;
+    QAtomicInt m_databaseWriteInProgress;
+
+    // Track last written timestamp for each category (for incremental writes)
+    qint64 m_lastWrittenTimestamp_deviceStatus;
+    qint64 m_lastWrittenTimestamp_gimbalMotion;
+    qint64 m_lastWrittenTimestamp_imuData;
+    qint64 m_lastWrittenTimestamp_trackingData;
+    qint64 m_lastWrittenTimestamp_weaponStatus;
+    qint64 m_lastWrittenTimestamp_cameraStatus;
+    qint64 m_lastWrittenTimestamp_sensorData;
+    qint64 m_lastWrittenTimestamp_ballisticData;
+    qint64 m_lastWrittenTimestamp_userInput;
 
     // Private helper methods
     void initializeBuffers();
     void initializeDatabase();
     void writePendingDataToDatabase();
+    void cleanupOldData();  // Delete data older than retention period
 
     // Data extraction from SystemStateData
     DeviceStatusData extractDeviceStatus(const SystemStateData& state);
@@ -537,6 +552,17 @@ private:
     SensorDataPoint extractSensorData(const SystemStateData& state);
     BallisticDataPoint extractBallisticData(const SystemStateData& state);
     UserInputData extractUserInput(const SystemStateData& state);
+
+private slots:
+    /**
+     * @brief Timer slot for periodic database writes (runs on background thread)
+     */
+    void onDatabaseWriteTimerTimeout();
+
+    /**
+     * @brief Called when background database write completes
+     */
+    void onBackgroundWriteFinished(int recordsWritten);
 };
 
 #endif // SYSTEMDATALOGGER_H
