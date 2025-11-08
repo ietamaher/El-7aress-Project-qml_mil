@@ -18,6 +18,11 @@
 #include "logger/systemdatalogger.h"
 #include "video/videoimageprovider.h"
 
+// Telemetry Services
+#include "services/telemetryauthservice.h"
+#include "services/telemetryapiservice.h"
+#include "services/telemetryconfig.h"
+
 // Hardware Devices (for video connection)
 #include "hardware/devices/cameravideostreamdevice.h"
 
@@ -26,6 +31,7 @@
 #include <QDebug>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QFile>
 
 SystemController::SystemController(QObject *parent)
     : QObject(parent)
@@ -175,8 +181,11 @@ void SystemController::startSystem()
         qInfo() << "  ✓ Gimbal alarms cleared";
     }
 
-    // 4. Create API server
+    // 4. Create API server (legacy)
     createApiServer();
+
+    // 5. Create and start telemetry services (NEW)
+    createTelemetryServices();
 
     qInfo() << "=== PHASE 3 COMPLETE - SYSTEM RUNNING ===\n";
 }
@@ -271,6 +280,74 @@ void SystemController::createApiServer()
 
     m_apiServer->listen(QHostAddress::Any, 8080);
     qInfo() << "    ✓ API Server listening on port 8080";
+}
+
+void SystemController::createTelemetryServices()
+{
+    qInfo() << "  Creating telemetry services...";
+
+    // 1. Create Telemetry Configuration
+    TelemetryConfig telemetryConfig;
+
+    // Load configuration from file or use defaults
+    const auto& sysConf = DeviceConfiguration::system();
+
+    // HTTP API configuration
+    telemetryConfig.httpApi.enabled = true;
+    telemetryConfig.httpApi.bindAddress = "0.0.0.0";
+    telemetryConfig.httpApi.port = 8443;  // Different port from legacy API
+    telemetryConfig.httpApi.enableCors = true;
+    telemetryConfig.httpApi.corsOrigins = {"*"};  // Change in production!
+    telemetryConfig.httpApi.rateLimitPerMinute = 120;
+
+    // WebSocket configuration (for Phase 2)
+    telemetryConfig.webSocket.enabled = false;  // Will be enabled in Phase 2
+    telemetryConfig.webSocket.port = 8444;
+    telemetryConfig.webSocket.updateRateHz = 10;
+
+    // TLS configuration
+    telemetryConfig.tls.enabled = false;  // Disabled by default (enable in production)
+    // telemetryConfig.tls.certificatePath = "/path/to/cert.pem";
+    // telemetryConfig.tls.privateKeyPath = "/path/to/key.pem";
+
+    // Export configuration
+    telemetryConfig.exportSettings.enableCsvExport = true;
+    telemetryConfig.exportSettings.exportDirectory = "./data/exports";
+    telemetryConfig.exportSettings.maxExportRangeDays = 30;
+
+    // 2. Create Authentication Service
+    TelemetryAuthService::Config authConfig;
+    authConfig.jwtSecret = "RCWS_SECURE_SECRET_KEY_CHANGE_IN_PRODUCTION_2025";  // MUST CHANGE!
+    authConfig.tokenExpirationMinutes = 60;
+    authConfig.enableIpWhitelist = false;  // Disabled by default
+    authConfig.enableAuditLogging = true;
+    authConfig.auditLogPath = "./logs/telemetry_audit.log";
+
+    m_telemetryAuthService = new TelemetryAuthService(authConfig, this);
+    qInfo() << "    ✓ TelemetryAuthService created";
+
+    // Load users from file if exists
+    if (QFile::exists("./config/telemetry_users.json")) {
+        m_telemetryAuthService->loadUsers("./config/telemetry_users.json");
+    }
+
+    // 3. Create API Service
+    m_telemetryApiService = new TelemetryApiService(
+        telemetryConfig,
+        m_dataLogger,
+        m_systemStateModel,
+        m_telemetryAuthService,
+        this
+    );
+    qInfo() << "    ✓ TelemetryApiService created";
+
+    // 4. Start API Service
+    if (m_telemetryApiService->start()) {
+        qInfo() << "    ✓ Telemetry API Server started:" << m_telemetryApiService->getServerUrl();
+        qInfo() << "    ℹ Default credentials: admin / admin123 (CHANGE IMMEDIATELY!)";
+    } else {
+        qWarning() << "    ✗ Failed to start Telemetry API Server";
+    }
 }
 
 void SystemController::connectVideoToProvider()

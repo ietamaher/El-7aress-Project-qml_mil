@@ -189,6 +189,17 @@ The device layer follows **MIL-STD** (Military Standard) architecture patterns w
 - Temperature monitoring (motors/drivers)
 - Connection status for all devices
 
+### 6. **Telemetry API System (NEW)**
+- **RESTful API**: Complete HTTP API for telemetry data access
+- **JWT Authentication**: Secure token-based authentication with role-based access control
+- **Real-time Data**: Access current system state via API endpoints
+- **Historical Queries**: Query time-series data for all system parameters
+- **Data Categories**: Device status, gimbal motion, IMU, tracking, weapon, camera, sensors, ballistics
+- **Export Functions**: CSV export for data analysis
+- **User Management**: Multi-user support with Admin/Operator/Viewer roles
+- **Audit Logging**: Complete audit trail of all API access
+- **Security**: Optional TLS/SSL encryption, IP whitelisting, rate limiting
+
 ---
 
 ## 🛠️ Build Instructions
@@ -454,6 +465,244 @@ rcws_app --log-level=debug
 4. **Adjust azimuth/elevation offsets** to compensate for impact point
 5. Repeat until point of aim = point of impact
 6. **Save zeroing** settings
+
+---
+
+## 📡 Telemetry API
+
+### Overview
+
+The RCWS system includes a comprehensive **Qt-native telemetry API** for remote monitoring, data analysis, and integration with external systems. The API provides secure access to real-time and historical telemetry data.
+
+### API Server Details
+
+- **Base URL**: `http://<device-ip>:8443/api`
+- **Authentication**: JWT (JSON Web Token)
+- **Data Format**: JSON
+- **TLS/SSL**: Optional (configure in production)
+- **Legacy API**: Port 8080 (deprecated, will be removed)
+
+### Quick Start
+
+1. **Start the system** - API server starts automatically
+2. **Get authentication token**:
+```bash
+curl -X POST http://localhost:8443/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+Response:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresAt": "2025-01-08T15:30:00Z",
+  "role": 2
+}
+```
+
+3. **Query current telemetry**:
+```bash
+curl -X GET http://localhost:8443/api/telemetry/current \
+  -H "Authorization: Bearer <your-token>"
+```
+
+### API Endpoints
+
+#### Authentication
+```
+POST   /api/auth/login      - Login and get JWT token
+POST   /api/auth/refresh    - Refresh token
+POST   /api/auth/logout     - Logout (revoke token)
+```
+
+#### Current State
+```
+GET    /api/telemetry/current  - All current telemetry data
+GET    /api/status             - System status summary (legacy)
+```
+
+#### Historical Data
+Query parameters: `?from=<ISO8601>&to=<ISO8601>`
+```
+GET    /api/telemetry/history/gimbal     - Gimbal position history
+GET    /api/telemetry/history/imu        - IMU sensor history
+GET    /api/telemetry/history/tracking   - Tracking system history
+GET    /api/telemetry/history/weapon     - Weapon status history
+GET    /api/telemetry/history/camera     - Camera system history
+GET    /api/telemetry/history/sensor     - LRF/radar history
+GET    /api/telemetry/history/ballistic  - Ballistics data history
+GET    /api/telemetry/history/device     - Device health history
+```
+
+Example:
+```bash
+curl "http://localhost:8443/api/telemetry/history/gimbal?from=2025-01-08T10:00:00Z&to=2025-01-08T11:00:00Z" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Statistics
+```
+GET    /api/telemetry/stats/memory      - Memory usage by category
+GET    /api/telemetry/stats/samples     - Sample counts per category
+GET    /api/telemetry/stats/timerange   - Available data time ranges
+```
+
+#### Export
+```
+GET    /api/telemetry/export/csv?category=gimbal&from=<ISO8601>&to=<ISO8601>
+```
+
+#### System
+```
+GET    /api/health     - Health check (no auth required)
+GET    /api/version    - API version information
+```
+
+#### User Management (Admin only)
+```
+GET    /api/users                      - List all users
+POST   /api/users                      - Create new user
+DELETE /api/users/:username            - Delete user
+PUT    /api/users/:username/password   - Change password
+```
+
+### User Roles and Permissions
+
+| Role | Permissions |
+|------|-------------|
+| **Viewer** | Read telemetry, read history, read system health |
+| **Operator** | All Viewer permissions + export data |
+| **Admin** | All Operator permissions + user management, config modification |
+
+### Security Configuration
+
+**Default Credentials** (CHANGE IMMEDIATELY):
+- Username: `admin`
+- Password: `admin123`
+
+**Change Password via API**:
+```bash
+curl -X PUT http://localhost:8443/api/users/admin/password \
+  -H "Authorization: Bearer <admin-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "oldPassword": "admin123",
+    "newPassword": "YourSecurePassword2025!"
+  }'
+```
+
+**Enable TLS/SSL** (Production):
+1. Generate SSL certificate and private key
+2. Edit `systemcontroller.cpp` → `createTelemetryServices()`:
+```cpp
+telemetryConfig.tls.enabled = true;
+telemetryConfig.tls.certificatePath = "/etc/rcws/ssl/cert.pem";
+telemetryConfig.tls.privateKeyPath = "/etc/rcws/ssl/key.pem";
+```
+3. Rebuild and restart
+4. API URL becomes: `https://localhost:8443/api`
+
+**IP Whitelisting**:
+```cpp
+authConfig.enableIpWhitelist = true;
+authConfig.allowedIpAddresses = {"192.168.1.0/24", "10.0.0.5"};
+```
+
+### Data Categories
+
+The telemetry system organizes data into **9 categories**:
+
+1. **Device Status** (1 Hz) - Temperatures, connections, health
+2. **Gimbal Motion** (60 Hz) - Position, speed, direction
+3. **IMU Data** (100 Hz) - Roll, pitch, yaw, gyro, accelerometer
+4. **Tracking Data** (30 Hz) - Tracking phase, target position, lock status
+5. **Weapon Status** (1 Hz) - Armed state, ammo, fire mode, zones
+6. **Camera Status** (1 Hz) - Zoom, FOV, active camera
+7. **Sensor Data** (10 Hz) - LRF distance, radar plots
+8. **Ballistic Data** (1 Hz) - Zeroing, windage, lead angle
+9. **User Input** (10 Hz) - Joystick, buttons
+
+### Integration Examples
+
+#### Python Client
+```python
+import requests
+import json
+
+# Login
+response = requests.post('http://localhost:8443/api/auth/login',
+    json={'username': 'admin', 'password': 'admin123'})
+token = response.json()['token']
+
+# Get current telemetry
+headers = {'Authorization': f'Bearer {token}'}
+telemetry = requests.get('http://localhost:8443/api/telemetry/current',
+    headers=headers).json()
+
+print(f"Gimbal Az: {telemetry['gimbalAz']}°")
+print(f"Gimbal El: {telemetry['gimbalEl']}°")
+print(f"Tracking: {telemetry['trackingActive']}")
+```
+
+#### JavaScript/Node.js
+```javascript
+const axios = require('axios');
+
+const API_URL = 'http://localhost:8443/api';
+
+async function getTelemetry() {
+  // Login
+  const loginResp = await axios.post(`${API_URL}/auth/login`, {
+    username: 'admin',
+    password: 'admin123'
+  });
+
+  const token = loginResp.data.token;
+
+  // Get current state
+  const telemetryResp = await axios.get(`${API_URL}/telemetry/current`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  console.log(telemetryResp.data);
+}
+```
+
+### Audit Logging
+
+All API access is logged to `./logs/telemetry_audit.log`:
+```
+2025-01-08T14:30:15Z | admin | LOGIN_SUCCESS | 192.168.1.100 | /api/auth/login | SUCCESS | Role: 2
+2025-01-08T14:30:20Z | admin | ACCESS | 192.168.1.100 | /api/telemetry/current | SUCCESS |
+2025-01-08T14:31:05Z | operator | ACCESS | 192.168.1.101 | /api/telemetry/history/gimbal | SUCCESS |
+```
+
+### Performance
+
+- **Ring Buffer Storage**: In-memory circular buffers per category
+- **Configurable Buffer Sizes**: Default 10 minutes of high-frequency data
+- **Low Overhead**: ~10-50 MB RAM typical usage
+- **Optional SQLite**: Long-term persistence to database
+- **Rate Limiting**: 120 requests/minute per IP (configurable)
+
+### Configuration Files
+
+**User Database**: `./config/telemetry_users.json`
+```json
+{
+  "users": [
+    {
+      "username": "operator",
+      "role": 1,
+      "enabled": true,
+      "description": "Operator account"
+    }
+  ]
+}
+```
+
+**Telemetry Config**: Edit `systemcontroller.cpp` or create JSON config (future)
 
 ---
 
