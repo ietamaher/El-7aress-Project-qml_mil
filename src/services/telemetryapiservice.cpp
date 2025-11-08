@@ -129,6 +129,19 @@ void TelemetryApiService::registerEndpoints()
 {
     qInfo() << "TelemetryApiService: Registering API endpoints...";
 
+    // Register OPTIONS handler for CORS preflight requests (must be first)
+    m_server->route("/<arg>", QHttpServerRequest::Method::Options,
+                   [this](const QString &path, const QHttpServerRequest &request) {
+        Q_UNUSED(path);
+        Q_UNUSED(request);
+        QHttpServerResponse response(QHttpServerResponse::StatusCode::NoContent);
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.addHeader("Access-Control-Max-Age", "86400");
+        return response;
+    });
+
     registerAuthEndpoints();
     registerTelemetryEndpoints();
     registerStatisticsEndpoints();
@@ -941,13 +954,7 @@ QHttpServerResponse TelemetryApiService::checkAuthentication(const QHttpServerRe
 
 void TelemetryApiService::addCorsHeaders(QHttpServerResponse& response) const
 {
-    if (!m_config.httpApi.enableCors) {
-        return;
-    }
-
-    QString allowedOrigins = m_config.httpApi.corsOrigins.join(",");
-    // Note: QHttpServerResponse doesn't support custom headers in current Qt version
-    // This is a placeholder for future implementation
+    // CORS headers are now added in response creation methods
 }
 
 QHttpServerResponse TelemetryApiService::createErrorResponse(const QString& error, int statusCode) const
@@ -956,17 +963,32 @@ QHttpServerResponse TelemetryApiService::createErrorResponse(const QString& erro
     obj["error"] = error;
     obj["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
 
-    return QHttpServerResponse(obj, static_cast<QHttpServerResponse::StatusCode>(statusCode));
+    QHttpServerResponse response(obj, static_cast<QHttpServerResponse::StatusCode>(statusCode));
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    response.addHeader("Content-Type", "application/json");
+    return response;
 }
 
 QHttpServerResponse TelemetryApiService::createJsonResponse(const QJsonObject& data, int statusCode) const
 {
-    return QHttpServerResponse(data, static_cast<QHttpServerResponse::StatusCode>(statusCode));
+    QHttpServerResponse response(data, static_cast<QHttpServerResponse::StatusCode>(statusCode));
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    response.addHeader("Content-Type", "application/json");
+    return response;
 }
 
 QHttpServerResponse TelemetryApiService::createJsonResponse(const QJsonArray& data, int statusCode) const
 {
-    return QHttpServerResponse(data, static_cast<QHttpServerResponse::StatusCode>(statusCode));
+    QHttpServerResponse response(data, static_cast<QHttpServerResponse::StatusCode>(statusCode));
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    response.addHeader("Content-Type", "application/json");
+    return response;
 }
 
 bool TelemetryApiService::parseTimeRange(const QHttpServerRequest &request,
