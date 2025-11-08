@@ -456,7 +456,19 @@ QHttpServerResponse TelemetryApiService::handleGetGimbalHistory(const QHttpServe
         return createErrorResponse(errorMsg);
     }
 
+    // Get max samples from query (default: 5000 for performance)
+    QUrlQuery query(request.url());
+    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    if (maxSamples <= 0 || maxSamples > 50000) {
+        maxSamples = 5000;  // Clamp to reasonable range
+    }
+
     auto history = m_dataLogger->getGimbalMotionHistory(startTime, endTime);
+
+    // Downsample if needed
+    if (history.size() > maxSamples) {
+        history = downsampleData(history, maxSamples);
+    }
 
     QJsonArray jsonArray;
     for (const auto& point : history) {
@@ -482,7 +494,19 @@ QHttpServerResponse TelemetryApiService::handleGetImuHistory(const QHttpServerRe
         return createErrorResponse(errorMsg);
     }
 
+    // Get max samples from query (default: 5000 for performance)
+    QUrlQuery query(request.url());
+    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    if (maxSamples <= 0 || maxSamples > 50000) {
+        maxSamples = 5000;
+    }
+
     auto history = m_dataLogger->getImuHistory(startTime, endTime);
+
+    // Downsample if needed
+    if (history.size() > maxSamples) {
+        history = downsampleData(history, maxSamples);
+    }
 
     QJsonArray jsonArray;
     for (const auto& point : history) {
@@ -508,7 +532,12 @@ QHttpServerResponse TelemetryApiService::handleGetTrackingHistory(const QHttpSer
         return createErrorResponse(errorMsg);
     }
 
+    QUrlQuery query(request.url());
+    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
+
     auto history = m_dataLogger->getTrackingHistory(startTime, endTime);
+    if (history.size() > maxSamples) history = downsampleData(history, maxSamples);
 
     QJsonArray jsonArray;
     for (const auto& point : history) {
@@ -534,7 +563,12 @@ QHttpServerResponse TelemetryApiService::handleGetWeaponHistory(const QHttpServe
         return createErrorResponse(errorMsg);
     }
 
+    QUrlQuery query(request.url());
+    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
+
     auto history = m_dataLogger->getWeaponStatusHistory(startTime, endTime);
+    if (history.size() > maxSamples) history = downsampleData(history, maxSamples);
 
     QJsonArray jsonArray;
     for (const auto& point : history) {
@@ -560,7 +594,12 @@ QHttpServerResponse TelemetryApiService::handleGetCameraHistory(const QHttpServe
         return createErrorResponse(errorMsg);
     }
 
+    QUrlQuery query(request.url());
+    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
+
     auto history = m_dataLogger->getCameraStatusHistory(startTime, endTime);
+    if (history.size() > maxSamples) history = downsampleData(history, maxSamples);
 
     QJsonArray jsonArray;
     for (const auto& point : history) {
@@ -586,7 +625,12 @@ QHttpServerResponse TelemetryApiService::handleGetSensorHistory(const QHttpServe
         return createErrorResponse(errorMsg);
     }
 
+    QUrlQuery query(request.url());
+    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
+
     auto history = m_dataLogger->getSensorHistory(startTime, endTime);
+    if (history.size() > maxSamples) history = downsampleData(history, maxSamples);
 
     QJsonArray jsonArray;
     for (const auto& point : history) {
@@ -612,7 +656,12 @@ QHttpServerResponse TelemetryApiService::handleGetBallisticHistory(const QHttpSe
         return createErrorResponse(errorMsg);
     }
 
+    QUrlQuery query(request.url());
+    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
+
     auto history = m_dataLogger->getBallisticHistory(startTime, endTime);
+    if (history.size() > maxSamples) history = downsampleData(history, maxSamples);
 
     QJsonArray jsonArray;
     for (const auto& point : history) {
@@ -638,7 +687,12 @@ QHttpServerResponse TelemetryApiService::handleGetDeviceHistory(const QHttpServe
         return createErrorResponse(errorMsg);
     }
 
+    QUrlQuery query(request.url());
+    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
+
     auto history = m_dataLogger->getDeviceStatusHistory(startTime, endTime);
+    if (history.size() > maxSamples) history = downsampleData(history, maxSamples);
 
     QJsonArray jsonArray;
     for (const auto& point : history) {
@@ -1100,6 +1154,38 @@ bool TelemetryApiService::parseTimeRange(const QHttpServerRequest &request,
     qDebug() << "parseTimeRange successful: from" << startTime << "to" << endTime;
     return true;
 }
+
+template<typename T>
+QVector<T> TelemetryApiService::downsampleData(const QVector<T>& data, int maxSamples) const
+{
+    if (data.size() <= maxSamples) {
+        return data;  // No downsampling needed
+    }
+
+    QVector<T> downsampled;
+    downsampled.reserve(maxSamples);
+
+    // Calculate step size for uniform sampling
+    double step = static_cast<double>(data.size()) / maxSamples;
+
+    for (int i = 0; i < maxSamples; ++i) {
+        int index = static_cast<int>(i * step);
+        downsampled.append(data[index]);
+    }
+
+    qDebug() << "Downsampled" << data.size() << "samples to" << downsampled.size();
+    return downsampled;
+}
+
+// Explicit template instantiations
+template QVector<GimbalMotionData> TelemetryApiService::downsampleData(const QVector<GimbalMotionData>&, int) const;
+template QVector<ImuDataPoint> TelemetryApiService::downsampleData(const QVector<ImuDataPoint>&, int) const;
+template QVector<TrackingDataPoint> TelemetryApiService::downsampleData(const QVector<TrackingDataPoint>&, int) const;
+template QVector<WeaponStatusData> TelemetryApiService::downsampleData(const QVector<WeaponStatusData>&, int) const;
+template QVector<CameraStatusData> TelemetryApiService::downsampleData(const QVector<CameraStatusData>&, int) const;
+template QVector<SensorDataPoint> TelemetryApiService::downsampleData(const QVector<SensorDataPoint>&, int) const;
+template QVector<BallisticDataPoint> TelemetryApiService::downsampleData(const QVector<BallisticDataPoint>&, int) const;
+template QVector<DeviceStatusData> TelemetryApiService::downsampleData(const QVector<DeviceStatusData>&, int) const;
 
 bool TelemetryApiService::checkRateLimit(const QString& clientIp)
 {
