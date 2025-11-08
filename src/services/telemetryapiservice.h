@@ -275,6 +275,12 @@ private:
                        QString& errorMsg) const;
 
     /**
+     * @brief Downsample vector to maxSamples using uniform sampling
+     */
+    template<typename T>
+    QVector<T> downsampleData(const QVector<T>& data, int maxSamples) const;
+
+    /**
      * @brief Check rate limit for client IP
      */
     bool checkRateLimit(const QString& clientIp);
