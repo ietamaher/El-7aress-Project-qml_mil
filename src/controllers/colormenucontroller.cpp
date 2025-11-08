@@ -76,8 +76,8 @@ ColorStyle ColorMenuController::stringToColorStyle(const QString& str) const
 QColor ColorMenuController::colorStyleToQColor(ColorStyle style) const
 {
     switch(style) {
-    case ColorStyle::Green: return QColor("#00FF99");
-    case ColorStyle::Red: return QColor("#FF0000");
+    case ColorStyle::Green: return QColor("#04db85"); //   #00FF99");
+    case ColorStyle::Red: return QColor("#800000");
     case ColorStyle::White: return QColor("#FFFFFF");
     //case ColorStyle::Yellow: return QColor("#FFFF00");
     //case ColorStyle::Cyan: return QColor("#00FFFF");
