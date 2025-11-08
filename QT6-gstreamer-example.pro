@@ -1,4 +1,4 @@
-QT += quick serialbus serialport dbus sql httpserver
+QT += quick serialbus serialport dbus sql httpserver websockets concurrent
 
 #LIBS += -L/usr/lib/x86_64-linux-gnu/gstreamer-1.0 -lgstxvimagesink
 INCLUDEPATH += "/usr/include/gstreamer-1.0"
@@ -87,6 +87,10 @@ SOURCES += \
     src/models/zonemapviewmodel.cpp \
     src/services/servicemanager.cpp \
     src/services/zonegeometryservice.cpp \
+    src/services/telemetryauthservice.cpp \
+    src/services/telemetryconfig.cpp \
+    src/services/telemetryapiservice.cpp \
+    src/services/telemetrywebsocketserver.cpp \
     src/utils/ballisticsprocessor.cpp \
     src/utils/colorutils.cpp \
     src/utils/inference.cpp \
@@ -193,6 +197,10 @@ HEADERS += \
     src/models/zonemapviewmodel.h \
     src/services/servicemanager.h \
     src/services/zonegeometryservice.h \
+    src/services/telemetryauthservice.h \
+    src/services/telemetryconfig.h \
+    src/services/telemetryapiservice.h \
+    src/services/telemetrywebsocketserver.h \
     src/utils/TimestampLogger.h \
     src/utils/ballisticsprocessor.h \
     src/utils/colorutils.h \
