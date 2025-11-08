@@ -15,6 +15,7 @@ class SystemDataLogger;
 class VideoImageProvider;
 class TelemetryAuthService;
 class TelemetryApiService;
+class TelemetryWebSocketServer;
 
 class QQmlApplicationEngine;
 
@@ -90,6 +91,7 @@ private:
     // Telemetry Services (NEW)
     TelemetryAuthService* m_telemetryAuthService = nullptr;
     TelemetryApiService* m_telemetryApiService = nullptr;
+    TelemetryWebSocketServer* m_telemetryWebSocketServer = nullptr;
 };
 
 #endif // SYSTEMCONTROLLER_H

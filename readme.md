@@ -476,11 +476,20 @@ The RCWS system includes a comprehensive **Qt-native telemetry API** for remote 
 
 ### API Server Details
 
+**REST API:**
 - **Base URL**: `http://<device-ip>:8443/api`
 - **Authentication**: JWT (JSON Web Token)
 - **Data Format**: JSON
 - **TLS/SSL**: Optional (configure in production)
-- **Legacy API**: Port 8080 (deprecated, will be removed)
+
+**WebSocket Server (Real-Time Streaming):**
+- **URL**: `ws://<device-ip>:8444/telemetry`
+- **Authentication**: JWT (JSON Web Token)
+- **Update Rate**: 10 Hz (configurable)
+- **Protocol**: JSON messages
+- **Max Connections**: 50
+
+**Legacy API:** Port 8080 (deprecated, will be removed)
 
 ### Quick Start
 
@@ -623,9 +632,193 @@ The telemetry system organizes data into **9 categories**:
 8. **Ballistic Data** (1 Hz) - Zeroing, windage, lead angle
 9. **User Input** (10 Hz) - Joystick, buttons
 
+### WebSocket Real-Time Streaming
+
+The WebSocket server provides real-time telemetry streaming at 10 Hz (configurable up to 100 Hz) for live dashboards and monitoring applications.
+
+#### WebSocket Connection Flow
+
+1. **Connect** to `ws://localhost:8444/telemetry`
+2. **Authenticate** with JWT token
+3. **Subscribe** to data categories
+4. **Receive** telemetry updates automatically
+
+#### WebSocket Client Example (JavaScript)
+
+```javascript
+const WebSocket = require('ws');
+
+// Get JWT token first (from REST API)
+const token = "YOUR_JWT_TOKEN_HERE";
+
+// Connect to WebSocket server
+const ws = new WebSocket('ws://localhost:8444/telemetry');
+
+ws.on('open', function() {
+  console.log('Connected to RCWS Telemetry Server');
+
+  // Step 1: Authenticate
+  ws.send(JSON.stringify({
+    type: 'auth',
+    token: token
+  }));
+});
+
+ws.on('message', function(data) {
+  const message = JSON.parse(data);
+
+  if (message.type === 'auth_success') {
+    console.log('Authenticated successfully');
+
+    // Step 2: Subscribe to categories
+    ws.send(JSON.stringify({
+      type: 'subscribe',
+      categories: ['gimbal', 'imu', 'tracking', 'weapon']
+      // Or use ['all'] for all categories
+    }));
+  }
+
+  if (message.type === 'subscribe_success') {
+    console.log('Subscribed to:', message.categories);
+  }
+
+  if (message.type === 'telemetry') {
+    // Step 3: Process telemetry data (received at 10 Hz)
+    console.log('Gimbal Az:', message.data.gimbal.azimuth);
+    console.log('Gimbal El:', message.data.gimbal.elevation);
+    console.log('IMU Roll:', message.data.imu.roll);
+    console.log('Tracking Active:', message.data.tracking.active);
+  }
+
+  if (message.type === 'error') {
+    console.error('Error:', message.message);
+  }
+});
+
+ws.on('close', function() {
+  console.log('Disconnected from server');
+});
+
+ws.on('error', function(error) {
+  console.error('WebSocket error:', error);
+});
+
+// Keep-alive ping (optional, recommended)
+setInterval(() => {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'ping' }));
+  }
+}, 15000);  // Ping every 15 seconds
+```
+
+#### WebSocket Message Types
+
+**Client → Server:**
+```json
+// Authentication
+{
+  "type": "auth",
+  "token": "JWT_TOKEN"
+}
+
+// Subscribe to categories
+{
+  "type": "subscribe",
+  "categories": ["gimbal", "imu", "tracking"]
+}
+
+// Unsubscribe
+{
+  "type": "unsubscribe",
+  "categories": ["tracking"]
+}
+
+// Keep-alive ping
+{
+  "type": "ping"
+}
+```
+
+**Server → Client:**
+```json
+// Welcome message
+{
+  "type": "welcome",
+  "message": "RCWS Telemetry Server",
+  "version": "1.0.0",
+  "requiresAuth": true
+}
+
+// Authentication success
+{
+  "type": "auth_success",
+  "username": "admin",
+  "role": 2
+}
+
+// Telemetry update (sent at 10 Hz)
+{
+  "type": "telemetry",
+  "timestamp": "2025-01-08T14:30:15Z",
+  "data": {
+    "gimbal": {
+      "azimuth": 45.3,
+      "elevation": -12.5,
+      "azimuthSpeed": 0.5,
+      "elevationSpeed": -0.2
+    },
+    "imu": {
+      "roll": 0.1,
+      "pitch": -0.3,
+      "yaw": 180.2
+    },
+    "tracking": {
+      "active": true,
+      "phase": 3,
+      "hasTarget": true
+    }
+  }
+}
+
+// Pong response
+{
+  "type": "pong",
+  "timestamp": "2025-01-08T14:30:15Z"
+}
+
+// Error
+{
+  "type": "error",
+  "message": "Authentication required"
+}
+```
+
+#### Available Data Categories
+
+Subscribe to specific categories or use `"all"` for everything:
+
+- **`all`** - All telemetry data (highest bandwidth)
+- **`gimbal`** - Gimbal position, speed, direction, modes
+- **`imu`** - Roll, pitch, yaw, gyro, accelerometer
+- **`tracking`** - Tracking phase, target position, lock status
+- **`weapon`** - Armed state, ready status, ammo, fire mode
+- **`camera`** - Active camera, zoom, field of view
+- **`sensor`** - LRF distance, radar plots
+- **`ballistic`** - Zeroing, windage, lead angle
+- **`device`** - Motor temperatures, driver temps, system health
+
+#### Performance Considerations
+
+- **Default update rate**: 10 Hz (one message every 100ms)
+- **Bandwidth**: ~500-2000 bytes per message (depends on subscriptions)
+- **Recommended**: Subscribe only to needed categories to reduce bandwidth
+- **Max update rate**: 100 Hz (for high-frequency monitoring)
+- **Heartbeat**: Send ping every 15-30 seconds to keep connection alive
+- **Auto-disconnect**: Clients inactive for 90 seconds are disconnected
+
 ### Integration Examples
 
-#### Python Client
+#### Python Client (REST API)
 ```python
 import requests
 import json
