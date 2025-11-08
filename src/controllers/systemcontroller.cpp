@@ -21,6 +21,7 @@
 // Telemetry Services
 #include "services/telemetryauthservice.h"
 #include "services/telemetryapiservice.h"
+#include "services/telemetrywebsocketserver.h"
 #include "services/telemetryconfig.h"
 
 // Hardware Devices (for video connection)
@@ -300,10 +301,12 @@ void SystemController::createTelemetryServices()
     telemetryConfig.httpApi.corsOrigins = {"*"};  // Change in production!
     telemetryConfig.httpApi.rateLimitPerMinute = 120;
 
-    // WebSocket configuration (for Phase 2)
-    telemetryConfig.webSocket.enabled = false;  // Will be enabled in Phase 2
+    // WebSocket configuration
+    telemetryConfig.webSocket.enabled = true;  // Phase 2: Real-time streaming
     telemetryConfig.webSocket.port = 8444;
     telemetryConfig.webSocket.updateRateHz = 10;
+    telemetryConfig.webSocket.maxConnections = 50;
+    telemetryConfig.webSocket.heartbeatIntervalSec = 30;
 
     // TLS configuration
     telemetryConfig.tls.enabled = false;  // Disabled by default (enable in production)
@@ -347,6 +350,22 @@ void SystemController::createTelemetryServices()
         qInfo() << "    ℹ Default credentials: admin / admin123 (CHANGE IMMEDIATELY!)";
     } else {
         qWarning() << "    ✗ Failed to start Telemetry API Server";
+    }
+
+    // 5. Create and start WebSocket Server
+    m_telemetryWebSocketServer = new TelemetryWebSocketServer(
+        telemetryConfig.webSocket,
+        m_telemetryAuthService,
+        m_systemStateModel,
+        this
+    );
+    qInfo() << "    ✓ TelemetryWebSocketServer created";
+
+    if (m_telemetryWebSocketServer->start()) {
+        qInfo() << "    ✓ WebSocket Server started:" << m_telemetryWebSocketServer->getServerUrl();
+        qInfo() << "    ℹ Update rate:" << telemetryConfig.webSocket.updateRateHz << "Hz";
+    } else {
+        qWarning() << "    ✗ Failed to start WebSocket Server";
     }
 }
 
