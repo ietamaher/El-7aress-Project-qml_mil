@@ -279,9 +279,9 @@ class TelemetryCharts {
             });
         });
 
-        const rollData = historyData.map(point => point.imuRollDeg);
-        const pitchData = historyData.map(point => point.imuPitchDeg);
-        const yawData = historyData.map(point => point.imuYawDeg);
+        const rollData = historyData.map(point => point.roll || point.imuRollDeg || 0);
+        const pitchData = historyData.map(point => point.pitch || point.imuPitchDeg || 0);
+        const yawData = historyData.map(point => point.yaw || point.imuYawDeg || 0);
 
         this.historicalChart.data.labels = labels;
         this.historicalChart.data.datasets = [
