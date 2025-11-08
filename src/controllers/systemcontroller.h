@@ -13,6 +13,8 @@ class ControllerRegistry;
 class SystemStateModel;
 class SystemDataLogger;
 class VideoImageProvider;
+class TelemetryAuthService;
+class TelemetryApiService;
 
 class QQmlApplicationEngine;
 
@@ -65,6 +67,7 @@ private:
     void createManagers();
     void createDataLogger();
     void createApiServer();
+    void createTelemetryServices();  // NEW: Create modern telemetry API services
     void connectVideoToProvider();
 
     // ========================================================================
@@ -81,8 +84,12 @@ private:
 
     // Services
     SystemDataLogger* m_dataLogger = nullptr;
-    QHttpServer* m_apiServer = nullptr;
+    QHttpServer* m_apiServer = nullptr;  // Legacy API (will be deprecated)
     VideoImageProvider* m_videoProvider = nullptr;
+
+    // Telemetry Services (NEW)
+    TelemetryAuthService* m_telemetryAuthService = nullptr;
+    TelemetryApiService* m_telemetryApiService = nullptr;
 };
 
 #endif // SYSTEMCONTROLLER_H
