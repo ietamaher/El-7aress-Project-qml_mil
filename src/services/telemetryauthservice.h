@@ -34,6 +34,7 @@
 #include <QHostAddress>
 #include <QCryptographicHash>
 #include <QMessageAuthenticationCode>
+#include <QMutex>
 
 // ============================================================================
 // ENUMERATIONS

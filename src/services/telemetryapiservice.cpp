@@ -367,7 +367,7 @@ QHttpServerResponse TelemetryApiService::handleLogout(const QHttpServerRequest &
 QHttpServerResponse TelemetryApiService::handleGetCurrent(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadTelemetry);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -384,7 +384,7 @@ QHttpServerResponse TelemetryApiService::handleGetStatus(const QHttpServerReques
 {
     // Legacy endpoint - reduced data set
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadTelemetry);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -408,7 +408,7 @@ QHttpServerResponse TelemetryApiService::handleGetStatus(const QHttpServerReques
 QHttpServerResponse TelemetryApiService::handleGetGimbalHistory(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadHistory);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -434,7 +434,7 @@ QHttpServerResponse TelemetryApiService::handleGetGimbalHistory(const QHttpServe
 QHttpServerResponse TelemetryApiService::handleGetImuHistory(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadHistory);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -460,7 +460,7 @@ QHttpServerResponse TelemetryApiService::handleGetImuHistory(const QHttpServerRe
 QHttpServerResponse TelemetryApiService::handleGetTrackingHistory(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadHistory);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -486,7 +486,7 @@ QHttpServerResponse TelemetryApiService::handleGetTrackingHistory(const QHttpSer
 QHttpServerResponse TelemetryApiService::handleGetWeaponHistory(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadHistory);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -512,7 +512,7 @@ QHttpServerResponse TelemetryApiService::handleGetWeaponHistory(const QHttpServe
 QHttpServerResponse TelemetryApiService::handleGetCameraHistory(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadHistory);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -538,7 +538,7 @@ QHttpServerResponse TelemetryApiService::handleGetCameraHistory(const QHttpServe
 QHttpServerResponse TelemetryApiService::handleGetSensorHistory(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadHistory);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -564,7 +564,7 @@ QHttpServerResponse TelemetryApiService::handleGetSensorHistory(const QHttpServe
 QHttpServerResponse TelemetryApiService::handleGetBallisticHistory(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadHistory);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -590,7 +590,7 @@ QHttpServerResponse TelemetryApiService::handleGetBallisticHistory(const QHttpSe
 QHttpServerResponse TelemetryApiService::handleGetDeviceHistory(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadHistory);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -620,7 +620,7 @@ QHttpServerResponse TelemetryApiService::handleGetDeviceHistory(const QHttpServe
 QHttpServerResponse TelemetryApiService::handleGetMemoryStats(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadSystemHealth);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -648,7 +648,7 @@ QHttpServerResponse TelemetryApiService::handleGetMemoryStats(const QHttpServerR
 QHttpServerResponse TelemetryApiService::handleGetSampleStats(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadSystemHealth);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -672,7 +672,7 @@ QHttpServerResponse TelemetryApiService::handleGetSampleStats(const QHttpServerR
 QHttpServerResponse TelemetryApiService::handleGetTimeRangeStats(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ReadSystemHealth);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -705,7 +705,7 @@ QHttpServerResponse TelemetryApiService::handleGetTimeRangeStats(const QHttpServ
 QHttpServerResponse TelemetryApiService::handleExportCsv(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ExportData);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -797,7 +797,7 @@ QHttpServerResponse TelemetryApiService::handleGetVersion(const QHttpServerReque
 QHttpServerResponse TelemetryApiService::handleListUsers(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ManageUsers);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -824,7 +824,7 @@ QHttpServerResponse TelemetryApiService::handleListUsers(const QHttpServerReques
 QHttpServerResponse TelemetryApiService::handleCreateUser(const QHttpServerRequest &request)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ManageUsers);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -856,7 +856,7 @@ QHttpServerResponse TelemetryApiService::handleCreateUser(const QHttpServerReque
 QHttpServerResponse TelemetryApiService::handleDeleteUser(const QHttpServerRequest &request, const QString& username)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ManageUsers);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 
@@ -877,7 +877,7 @@ QHttpServerResponse TelemetryApiService::handleDeleteUser(const QHttpServerReque
 QHttpServerResponse TelemetryApiService::handleChangePassword(const QHttpServerRequest &request, const QString& username)
 {
     QHttpServerResponse authResponse = checkAuthentication(request, Permission::ManageUsers);
-    if (authResponse.statusCode() != 200) {
+    if (authResponse.statusCode() != QHttpServerResponse::StatusCode::Ok) {
         return authResponse;
     }
 

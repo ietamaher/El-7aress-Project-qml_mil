@@ -86,6 +86,9 @@ SOURCES += \
     src/models/zonedefinitionviewmodel.cpp \
     src/models/zonemapviewmodel.cpp \
     src/services/servicemanager.cpp \
+    src/services/telemetryapiservice.cpp \
+    src/services/telemetryauthservice.cpp \
+    src/services/telemetryconfig.cpp \
     src/services/zonegeometryservice.cpp \
     src/utils/ballisticsprocessor.cpp \
     src/utils/colorutils.cpp \
@@ -192,6 +195,9 @@ HEADERS += \
     src/models/zonedefinitionviewmodel.h \
     src/models/zonemapviewmodel.h \
     src/services/servicemanager.h \
+    src/services/telemetryapiservice.h \
+    src/services/telemetryauthservice.h \
+    src/services/telemetryconfig.h \
     src/services/zonegeometryservice.h \
     src/utils/TimestampLogger.h \
     src/utils/ballisticsprocessor.h \
