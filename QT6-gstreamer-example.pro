@@ -91,10 +91,6 @@ SOURCES += \
     src/services/telemetryconfig.cpp \
     src/services/telemetrywebsocketserver.cpp \
     src/services/zonegeometryservice.cpp \
-    src/services/telemetryauthservice.cpp \
-    src/services/telemetryconfig.cpp \
-    src/services/telemetryapiservice.cpp \
-    src/services/telemetrywebsocketserver.cpp \
     src/utils/ballisticsprocessor.cpp \
     src/utils/colorutils.cpp \
     src/utils/inference.cpp \
@@ -205,10 +201,6 @@ HEADERS += \
     src/services/telemetryconfig.h \
     src/services/telemetrywebsocketserver.h \
     src/services/zonegeometryservice.h \
-    src/services/telemetryauthservice.h \
-    src/services/telemetryconfig.h \
-    src/services/telemetryapiservice.h \
-    src/services/telemetrywebsocketserver.h \
     src/utils/TimestampLogger.h \
     src/utils/ballisticsprocessor.h \
     src/utils/colorutils.h \

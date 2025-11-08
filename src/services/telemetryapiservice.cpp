@@ -125,21 +125,46 @@ QString TelemetryApiService::getServerUrl() const
 // ENDPOINT REGISTRATION
 // ============================================================================
 
+// helper to create CORS OPTIONS response
+QHttpServerResponse TelemetryApiService::createOptionsResponse() const
+{
+    QHttpServerResponse response(QHttpServerResponse::StatusCode::NoContent);
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    response.addHeader("Access-Control-Max-Age", "86400");
+    return response;
+}
+
+
 void TelemetryApiService::registerEndpoints()
 {
     qInfo() << "TelemetryApiService: Registering API endpoints...";
 
     // Register OPTIONS handler for CORS preflight requests (must be first)
-    m_server->route("/<arg>", QHttpServerRequest::Method::Options,
+    // Match all paths with wildcard patterns
+    m_server->route("/api/<arg>", QHttpServerRequest::Method::Options,
                    [this](const QString &path, const QHttpServerRequest &request) {
         Q_UNUSED(path);
         Q_UNUSED(request);
-        QHttpServerResponse response(QHttpServerResponse::StatusCode::NoContent);
-        response.addHeader("Access-Control-Allow-Origin", "*");
-        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-        response.addHeader("Access-Control-Max-Age", "86400");
-        return response;
+        return createOptionsResponse();
+    });
+
+    m_server->route("/api/<arg>/<arg>", QHttpServerRequest::Method::Options,
+                   [this](const QString &seg1, const QString &seg2, const QHttpServerRequest &request) {
+        Q_UNUSED(seg1);
+        Q_UNUSED(seg2);
+        Q_UNUSED(request);
+        return createOptionsResponse();
+    });
+
+    m_server->route("/api/<arg>/<arg>/<arg>", QHttpServerRequest::Method::Options,
+                   [this](const QString &seg1, const QString &seg2, const QString &seg3, const QHttpServerRequest &request) {
+        Q_UNUSED(seg1);
+        Q_UNUSED(seg2);
+        Q_UNUSED(seg3);
+        Q_UNUSED(request);
+        return createOptionsResponse();
     });
 
     registerAuthEndpoints();
@@ -997,8 +1022,11 @@ bool TelemetryApiService::parseTimeRange(const QHttpServerRequest &request,
 {
     QUrlQuery query(request.url());
 
-    QString fromStr = query.queryItemValue("from");
-    QString toStr = query.queryItemValue("to");
+    // Use QUrl::FullyDecoded to get decoded values
+    QString fromStr = query.queryItemValue("from", QUrl::FullyDecoded);
+    QString toStr = query.queryItemValue("to", QUrl::FullyDecoded);
+
+    qDebug() << "parseTimeRange: from =" << fromStr << ", to =" << toStr;
 
     // Default: last 60 seconds
     if (fromStr.isEmpty() && toStr.isEmpty()) {
@@ -1010,18 +1038,50 @@ bool TelemetryApiService::parseTimeRange(const QHttpServerRequest &request,
     // Parse timestamps
     if (!fromStr.isEmpty()) {
         startTime = QDateTime::fromString(fromStr, Qt::ISODate);
+        
+        // Try with milliseconds format if standard fails
         if (!startTime.isValid()) {
-            errorMsg = "Invalid 'from' timestamp format (use ISO 8601)";
+            startTime = QDateTime::fromString(fromStr, Qt::ISODateWithMs);
+        }
+        
+        if (!startTime.isValid()) {
+            errorMsg = QString("Invalid 'from' timestamp format (use ISO 8601). Received: %1").arg(fromStr);
+            qWarning() << "Failed to parse 'from' timestamp:" << fromStr;
             return false;
+        }
+        
+        // Ensure UTC if not specified
+        if (startTime.timeSpec() == Qt::LocalTime) {
+            startTime.setTimeSpec(Qt::UTC);
         }
     }
 
     if (!toStr.isEmpty()) {
         endTime = QDateTime::fromString(toStr, Qt::ISODate);
+        
+        // Try with milliseconds format if standard fails
         if (!endTime.isValid()) {
-            errorMsg = "Invalid 'to' timestamp format (use ISO 8601)";
+            endTime = QDateTime::fromString(toStr, Qt::ISODateWithMs);
+        }
+        
+        if (!endTime.isValid()) {
+            errorMsg = QString("Invalid 'to' timestamp format (use ISO 8601). Received: %1").arg(toStr);
+            qWarning() << "Failed to parse 'to' timestamp:" << toStr;
             return false;
         }
+        
+        // Ensure UTC if not specified
+        if (endTime.timeSpec() == Qt::LocalTime) {
+            endTime.setTimeSpec(Qt::UTC);
+        }
+    }
+
+    // If only one timestamp provided, set the other
+    if (fromStr.isEmpty() && !toStr.isEmpty()) {
+        startTime = endTime.addSecs(-60);
+    }
+    if (toStr.isEmpty() && !fromStr.isEmpty()) {
+        endTime = QDateTime::currentDateTime();
     }
 
     // Validate range
@@ -1037,6 +1097,7 @@ bool TelemetryApiService::parseTimeRange(const QHttpServerRequest &request,
         return false;
     }
 
+    qDebug() << "parseTimeRange successful: from" << startTime << "to" << endTime;
     return true;
 }
 

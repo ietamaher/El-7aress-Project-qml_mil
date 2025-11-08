@@ -75,7 +75,7 @@
 #include "telemetryauthservice.h"
 #include "logger/systemdatalogger.h"
 #include "models/domain/systemstatemodel.h"
-
+#include <QRegularExpression>
 /**
  * @brief Rate limiting tracker per IP address
  */
@@ -159,6 +159,7 @@ private:
     // ========================================================================
     // Endpoint Registration
     // ========================================================================
+    QHttpServerResponse createOptionsResponse() const;
 
     void registerEndpoints();
 
