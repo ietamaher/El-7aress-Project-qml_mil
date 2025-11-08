@@ -458,7 +458,8 @@ QHttpServerResponse TelemetryApiService::handleGetGimbalHistory(const QHttpServe
 
     // Get max samples from query (default: 5000 for performance)
     QUrlQuery query(request.url());
-    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    QString maxSamplesStr = query.queryItemValue("maxSamples");
+    int maxSamples = maxSamplesStr.isEmpty() ? 5000 : maxSamplesStr.toInt();
     if (maxSamples <= 0 || maxSamples > 50000) {
         maxSamples = 5000;  // Clamp to reasonable range
     }
@@ -496,7 +497,8 @@ QHttpServerResponse TelemetryApiService::handleGetImuHistory(const QHttpServerRe
 
     // Get max samples from query (default: 5000 for performance)
     QUrlQuery query(request.url());
-    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    QString maxSamplesStr = query.queryItemValue("maxSamples");
+    int maxSamples = maxSamplesStr.isEmpty() ? 5000 : maxSamplesStr.toInt();
     if (maxSamples <= 0 || maxSamples > 50000) {
         maxSamples = 5000;
     }
@@ -533,7 +535,8 @@ QHttpServerResponse TelemetryApiService::handleGetTrackingHistory(const QHttpSer
     }
 
     QUrlQuery query(request.url());
-    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    QString maxSamplesStr = query.queryItemValue("maxSamples");
+    int maxSamples = maxSamplesStr.isEmpty() ? 5000 : maxSamplesStr.toInt();
     if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
 
     auto history = m_dataLogger->getTrackingHistory(startTime, endTime);
@@ -564,7 +567,8 @@ QHttpServerResponse TelemetryApiService::handleGetWeaponHistory(const QHttpServe
     }
 
     QUrlQuery query(request.url());
-    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    QString maxSamplesStr = query.queryItemValue("maxSamples");
+    int maxSamples = maxSamplesStr.isEmpty() ? 5000 : maxSamplesStr.toInt();
     if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
 
     auto history = m_dataLogger->getWeaponStatusHistory(startTime, endTime);
@@ -595,7 +599,8 @@ QHttpServerResponse TelemetryApiService::handleGetCameraHistory(const QHttpServe
     }
 
     QUrlQuery query(request.url());
-    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    QString maxSamplesStr = query.queryItemValue("maxSamples");
+    int maxSamples = maxSamplesStr.isEmpty() ? 5000 : maxSamplesStr.toInt();
     if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
 
     auto history = m_dataLogger->getCameraStatusHistory(startTime, endTime);
@@ -626,7 +631,8 @@ QHttpServerResponse TelemetryApiService::handleGetSensorHistory(const QHttpServe
     }
 
     QUrlQuery query(request.url());
-    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    QString maxSamplesStr = query.queryItemValue("maxSamples");
+    int maxSamples = maxSamplesStr.isEmpty() ? 5000 : maxSamplesStr.toInt();
     if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
 
     auto history = m_dataLogger->getSensorHistory(startTime, endTime);
@@ -657,7 +663,8 @@ QHttpServerResponse TelemetryApiService::handleGetBallisticHistory(const QHttpSe
     }
 
     QUrlQuery query(request.url());
-    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    QString maxSamplesStr = query.queryItemValue("maxSamples");
+    int maxSamples = maxSamplesStr.isEmpty() ? 5000 : maxSamplesStr.toInt();
     if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
 
     auto history = m_dataLogger->getBallisticHistory(startTime, endTime);
@@ -688,7 +695,8 @@ QHttpServerResponse TelemetryApiService::handleGetDeviceHistory(const QHttpServe
     }
 
     QUrlQuery query(request.url());
-    int maxSamples = query.queryItemValue("maxSamples", "5000").toInt();
+    QString maxSamplesStr = query.queryItemValue("maxSamples");
+    int maxSamples = maxSamplesStr.isEmpty() ? 5000 : maxSamplesStr.toInt();
     if (maxSamples <= 0 || maxSamples > 50000) maxSamples = 5000;
 
     auto history = m_dataLogger->getDeviceStatusHistory(startTime, endTime);
