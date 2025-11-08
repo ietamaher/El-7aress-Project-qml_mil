@@ -641,8 +641,8 @@ QJsonObject TelemetryWebSocketServer::stateToJson(const SystemStateData& state,
         QJsonObject gimbal;
         gimbal["azimuth"] = state.gimbalAz;
         gimbal["elevation"] = state.gimbalEl;
-        gimbal["azimuthSpeed"] = state.azimuthSpeed;
-        gimbal["elevationSpeed"] = state.elevationSpeed;
+        gimbal["azimuthSpeed"] = static_cast<double>(state.azimuthSpeed);
+        gimbal["elevationSpeed"] = static_cast<double>(state.elevationSpeed);
         gimbal["opMode"] = static_cast<int>(state.opMode);
         gimbal["motionMode"] = static_cast<int>(state.motionMode);
         data["gimbal"] = gimbal;
