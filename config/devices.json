@@ -116,5 +116,77 @@
   "radar": {
     "port": "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A9J5K2L4-if00-port0",
     "baudRate": 115200
+  },
+  "riva": {
+    "comment": "NVIDIA RIVA Voice AI Configuration",
+    "mode": "dev",
+    "enableVoiceControl": true,
+    "enableBiometricAuth": false,
+    "wakeWord": "hi harres",
+    "dev": {
+      "comment": "Development mode - NVIDIA Cloud API (for testing on laptop)",
+      "serverUrl": "grpc.nvcf.nvidia.com:443",
+      "useSSL": true,
+      "apiKey": "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",
+      "asrFunctionId": "1598d209-5e27-4d3c-8079-4751568b1081",
+      "ttsFunctionId": "55cf67bf-600f-4b04-8eac-12ed39537a08",
+      "timeout": 30000
+    },
+    "prod": {
+      "comment": "Production mode - Local RIVA Server on Jetson AGX Orin",
+      "serverUrl": "localhost:50051",
+      "useSSL": false,
+      "apiKey": "",
+      "asrFunctionId": "",
+      "ttsFunctionId": "",
+      "timeout": 5000
+    },
+    "asr": {
+      "comment": "Automatic Speech Recognition settings",
+      "sampleRate": 16000,
+      "channels": 2,
+      "encoding": "LINEAR_PCM",
+      "languageCode": "en-US",
+      "interimResults": true,
+      "enableAutoPunctuation": true,
+      "profanityFilter": false,
+      "chunkDurationMs": 100,
+      "audioDevice": "default"
+    },
+    "tts": {
+      "comment": "Text-to-Speech settings",
+      "sampleRate": 22050,
+      "encoding": "LINEAR_PCM",
+      "languageCode": "en-US",
+      "voiceName": "",
+      "speakingRate": 1.0,
+      "pitch": 0.0,
+      "volumeGainDb": 0.0,
+      "saveAudioFiles": true,
+      "outputPath": "./data/tts_audio/"
+    },
+    "nlu": {
+      "comment": "Natural Language Understanding settings",
+      "confidenceThreshold": 0.5,
+      "enableSlotExtraction": true,
+      "enableContextTracking": false
+    },
+    "biometric": {
+      "comment": "Voice Biometric Authentication settings",
+      "voiceprintPath": "./config/voiceprints.json",
+      "similarityThreshold": 0.75,
+      "enrollmentSamplesRequired": 5,
+      "enableContinuousVerification": true,
+      "verificationIntervalSec": 30,
+      "sessionTimeoutMin": 10
+    },
+    "commands": {
+      "comment": "Command execution settings",
+      "enableConfirmation": true,
+      "confirmationTimeout": 10,
+      "feedbackVolume": 80,
+      "muteMicDuringTTS": true,
+      "logAllCommands": true
+    }
   }
 }

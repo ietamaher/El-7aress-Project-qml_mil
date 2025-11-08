@@ -127,6 +127,7 @@ public:
 
 private:
     static bool loadFromFile(const QString& filePath);
+    static void loadRivaConfig(const QString& externalPath);
     static QSerialPort::Parity parseParity(const QString& parityStr);
 
     static VideoConfig m_video;

@@ -1,4 +1,5 @@
 #include "deviceconfiguration.h"
+#include "rivaconfig.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -30,6 +31,10 @@ bool DeviceConfiguration::load(const QString& externalPath)
         qInfo() << "  Loading from external file:" << externalPath;
         if (loadFromFile(externalPath)) {
             qInfo() << "  ✓ Configuration loaded from external file";
+
+            // Load RIVA configuration (if present)
+            loadRivaConfig(externalPath);
+
             return true;
         }
         qWarning() << "  ⚠ Failed to parse external config, trying embedded resource...";
@@ -39,11 +44,27 @@ bool DeviceConfiguration::load(const QString& externalPath)
     qInfo() << "  Loading from embedded resource: qrc:/config/devices.json";
     if (loadFromFile(":/config/devices.json")) {
         qInfo() << "  ✓ Configuration loaded from embedded resource";
+
+        // Load RIVA configuration (if present)
+        loadRivaConfig(externalPath);
+
         return true;
     }
 
     qCritical() << "  ✗ Failed to load configuration from any source!";
     return false;
+}
+
+void DeviceConfiguration::loadRivaConfig(const QString& externalPath) {
+    // Try external file first
+    if (QFile::exists(externalPath)) {
+        if (RivaConfig::load(externalPath)) {
+            return;  // Successfully loaded RIVA config
+        }
+    }
+
+    // Fall back to embedded resource
+    RivaConfig::load(":/config/devices.json");
 }
 
 bool DeviceConfiguration::loadFromFile(const QString& filePath)
