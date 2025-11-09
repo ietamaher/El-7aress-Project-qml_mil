@@ -1,0 +1,89 @@
+services:
+  qt-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: myapp:dev
+    container_name: qt-app
+    # GPU (best-effort - modern compose supports device_requests; include runtime for compatibility)
+    runtime: nvidia
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_QPA_PLATFORM=xcb
+      - QT_DEBUG_PLUGINS=0
+      - GST_DEBUG=${GST_DEBUG:-2}
+      - LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
+    # Mounts
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${HOME}/yolov8s.onnx:/app/yolov8s.onnx:ro
+      - ./config/zones.json:/app/zones.json:ro
+      - ./logs:/app/logs:rw
+      - ./data:/app/data:rw
+      # give container access to serial by-id and pts — keep both for robustness
+      - /dev/serial/by-id:/dev/serial/by-id:rw
+      - /dev/pts:/dev/pts:rw
+      - /dev:/dev
+      - /etc/localtime:/etc/localtime:ro
+    # direct devices (optional mapping, keep if you want explicit device nodes)
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/video0:/dev/video0
+      - /dev/video2:/dev/video2
+    network_mode: host
+    privileged: true
+    stdin_open: true
+    tty: true
+    # run the exact binary you have in the image (adjust if different)
+    entrypoint: ["/app/QT6-gstreamer-example"]
+    restart: "no"
+
+    # Alternative device_requests block (uncomment if using docker-compose v2.4+ with GPU support)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # Optional helper service for simulation (only started with --profile simulation)
+  modbus-slave:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: myapp:dev
+    container_name: qt-app-simulation
+    # GPU (best-effort - modern compose supports device_requests; include runtime for compatibility)
+    runtime: nvidia
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_QPA_PLATFORM=xcb
+      - QT_DEBUG_PLUGINS=0
+      - GST_DEBUG=${GST_DEBUG:-2}
+      - LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${HOME}/yolov8s.onnx:/app/yolov8s.onnx:ro
+      - ./config/zones.json:/app/zones.json:ro
+      - ./logs:/app/logs:rw
+      - ./data:/app/data:rw
+      # give container access to serial by-id and pts — keep both for robustness
+      - /dev/serial/by-id:/dev/serial/by-id:rw
+      - /dev/pts:/dev/pts:rw
+      - /dev:/dev
+      - /etc/localtime:/etc/localtime:ro
+    # direct devices (optional mapping, keep if you want explicit device nodes)
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/video0:/dev/video0
+      - /dev/video2:/dev/video2
+    privileged: true
+    network_mode: host
+    command: ["/app/diagslave/diagslave", "-m", "rtu", "/dev/ttyVIRT0"]
+    restart: "no"
+

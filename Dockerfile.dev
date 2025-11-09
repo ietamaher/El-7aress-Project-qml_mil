@@ -1,0 +1,289 @@
+# Stage 0: OpenCV Builder with CUDA for GTX 1650
+FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 AS opencv-builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install OpenCV build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    build-essential cmake git pkg-config wget unzip curl \
+    libjpeg-dev libtiff-dev libpng-dev \
+    libavcodec-dev libavformat-dev libswscale-dev \
+    libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+    libgtk2.0-dev \
+    libtbb-dev libtbb2 \
+    libatlas-base-dev gfortran \
+    libv4l-dev v4l-utils \
+    python3.10-dev python3-numpy \
+    # CUDA-specific dependencies
+    libcudnn8-dev \
+    #libnvinfer-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download OpenCV 4.10.0
+WORKDIR /opencv_build
+RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.10.0.zip && \
+    wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.10.0.zip && \
+    unzip opencv.zip && \
+    unzip opencv_contrib.zip && \
+    rm opencv.zip opencv_contrib.zip
+
+# Build OpenCV with CUDA for GTX 1650 (compute capability 7.5)
+WORKDIR /opencv_build/opencv-4.10.0/build
+RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D OPENCV_EXTRA_MODULES_PATH=/opencv_build/opencv_contrib-4.10.0/modules \
+    -D OPENCV_GENERATE_PKGCONFIG=ON \
+    -D OPENCV_ENABLE_NONFREE=ON \
+    -D WITH_CUDA=ON \
+    -D WITH_CUDNN=ON \
+    -D CUDA_ARCH_BIN="7.5" \
+    -D CUDA_ARCH_PTX="" \
+    -D ENABLE_FAST_MATH=ON \
+    -D CUDA_FAST_MATH=ON \
+    -D WITH_CUBLAS=ON \
+    -D WITH_GSTREAMER=ON \
+    -D WITH_LIBV4L=ON \
+    -D WITH_GTK=ON \
+    -D WITH_FFMPEG=ON \
+    -D WITH_TBB=ON \
+    -D WITH_V4L=ON \
+    -D BUILD_opencv_python3=ON \
+    -D BUILD_EXAMPLES=OFF \
+    -D BUILD_DOCS=OFF \
+    -D BUILD_TESTS=OFF \
+    -D BUILD_PERF_TESTS=OFF \
+    -D BUILD_opencv_apps=OFF \
+    .. && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig
+
+# Stage 1: Qt Application Builder with VPI3
+FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 AS builder
+
+# Set environment variables
+ARG DEBIAN_FRONTEND=noninteractive
+ENV QT_VERSION=6.6.0
+ENV PRO_FILE=QT6-gstreamer-example.pro
+
+# Install software-properties-common first
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    software-properties-common \
+    gnupg \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add Jetson repository for VPI3 x86_64 packages
+RUN apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc && \
+    add-apt-repository 'deb https://repo.download.nvidia.com/jetson/x86_64/jammy r36.4 main'
+
+# Install VPI3 and all build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    # VPI3 packages
+    libnvvpi3 \
+    vpi3-dev \
+    vpi3-samples \
+    python3.10-vpi3 \
+    # Build tools
+    build-essential \
+    cmake \
+    git \
+    pkg-config \
+    dos2unix \
+    # GStreamer
+    libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-libav \
+    gstreamer1.0-tools \
+    gstreamer1.0-x \
+    gstreamer1.0-gl \
+    libgstreamer-gl1.0-0 \
+    # Qt dependencies
+    libdbus-1-3 \
+    libfontconfig1 \
+    libfreetype6 \
+    libicu70 \
+    libinput10 \
+    libjpeg-turbo8 \
+    libpng16-16 \
+    libzstd1 \
+    libmd4c0 \
+    libharfbuzz-icu0 \
+    libharfbuzz0b \
+    libproxy1v5 \
+    libbrotli1 \
+    libx11-6 \
+    libxext6 \
+    libxcb1 \
+    libxcb-glx0 \
+    libxcb-cursor0 \
+    libxcb-util1 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-render-util0 \
+    libxcb-icccm4 \
+    libxcb-shape0 \
+    libxcb-xinerama0 \
+    libxcb-randr0 \
+    libxcb-xkb1 \
+    libxkbcommon-x11-0 \
+    libglib2.0-0 \
+    # Other dependencies
+    libgtk2.0-dev \
+    libtbb-dev \
+    libtbb2 \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    libv4l-dev \
+    v4l-utils \
+    libsdl2-dev \
+    libeigen3-dev \
+    # Python
+    python3-pip \
+    python3-numpy \
+    libcudnn8 \
+    libcudnn8-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy OpenCV 4.10.0 with CUDA from opencv-builder
+COPY --from=opencv-builder /usr/local/include/opencv4 /usr/local/include/opencv4
+COPY --from=opencv-builder /usr/local/lib/libopencv* /usr/local/lib/
+COPY --from=opencv-builder /usr/local/lib/cmake/opencv4 /usr/local/lib/cmake/opencv4
+COPY --from=opencv-builder /usr/local/lib/pkgconfig/opencv4.pc /usr/local/lib/pkgconfig/
+COPY --from=opencv-builder /usr/local/lib/python3.10 /usr/local/lib/python3.10
+RUN ldconfig
+
+# Install Qt 6.6.0 via aqtinstall
+RUN pip3 install aqtinstall==3.1.8 && \
+    aqt install-qt --outputdir /opt/Qt/ linux desktop ${QT_VERSION} gcc_64 \
+    -m qtserialbus qtserialport qtmultimedia qthttpserver qtwebsockets
+
+# Set Qt environment variables
+ENV PATH="/opt/Qt/${QT_VERSION}/gcc_64/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/opt/Qt/${QT_VERSION}/gcc_64/lib:/usr/local/lib:/opt/nvidia/vpi3/lib/x86_64-linux-gnu:/usr/local/cuda-12.2/lib64"
+ENV QT_PLUGIN_PATH="/opt/Qt/${QT_VERSION}/gcc_64/plugins"
+ENV QML2_IMPORT_PATH="/opt/Qt/${QT_VERSION}/gcc_64/qml"
+ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"  
+ENV CUDA_HOME="/usr/local/cuda-12.2"
+
+# Copy source code and build
+COPY . /app
+WORKDIR /app
+RUN mkdir -p build && \
+    cd build && \
+    qmake ../${PRO_FILE} && \
+    make -j$(nproc) && \
+    ls -la 
+    
+# Stage 2: Runtime Image
+FROM nvidia/cuda:12.2.2-runtime-ubuntu22.04
+
+# Set environment variables
+ARG DEBIAN_FRONTEND=noninteractive
+ENV QT_VERSION=6.6.0
+
+# Install software-properties-common first
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    software-properties-common \
+    gnupg \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add Jetson repository for VPI3
+RUN apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc && \
+    add-apt-repository 'deb https://repo.download.nvidia.com/jetson/x86_64/jammy r36.4 main'
+
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    # VPI3 runtime
+    libnvvpi3 \
+    python3.10-vpi3 \
+    # Qt runtime libs
+    libdbus-1-3 \
+    libfontconfig1 \
+    libfreetype6 \
+    libicu70 \
+    libinput10 \
+    libjpeg-turbo8 \
+    libpng16-16 \
+    libzstd1 \
+    libmd4c0 \
+    libharfbuzz-icu0 \
+    libharfbuzz0b \
+    libproxy1v5 \
+    libbrotli1 \
+    # X11 for Qt GUI
+    libx11-6 \
+    libxext6 \
+    libxcb1 \
+    libxcb-glx0 \
+    libxcb-cursor0 \
+    libxcb-util1 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-render-util0 \
+    libxcb-icccm4 \
+    libxcb-shape0 \
+    libxcb-xinerama0 \
+    libxcb-randr0 \
+    libxcb-xkb1 \
+    libxkbcommon-x11-0 \
+    # GStreamer runtime
+    libglib2.0-0 \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-libav \
+    gstreamer1.0-tools \
+    gstreamer1.0-x \
+    gstreamer1.0-gl \
+    # Other runtime libs
+    libtbb12 \
+    libgtk2.0-0 \
+    libavcodec58 \
+    libavformat58 \
+    libswscale5 \
+    libv4l-0 \
+    libsdl2-2.0-0 \
+    python3-numpy \
+    libcudnn8 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy OpenCV libraries from opencv-builder
+COPY --from=opencv-builder /usr/local/lib/libopencv* /usr/local/lib/
+COPY --from=opencv-builder /usr/local/lib/python3.10 /usr/local/lib/python3.10
+COPY --from=builder /opt/Qt/${QT_VERSION}/gcc_64/qml /usr/local/qml/ 
+RUN ldconfig
+
+# Copy Qt 6.6.0 libs + plugins from builder
+COPY --from=builder /opt/Qt/${QT_VERSION}/gcc_64/lib /usr/local/lib/
+COPY --from=builder /opt/Qt/${QT_VERSION}/gcc_64/plugins /usr/local/plugins/
+
+# Copy VPI3 libraries explicitly (ensure they're available)
+COPY --from=builder /opt/nvidia/vpi3/lib/x86_64-linux-gnu /opt/nvidia/vpi3/lib/x86_64-linux-gnu
+
+# Copy application binary
+COPY --from=builder /app/build/QT6-gstreamer-example /app/QT6-gstreamer-example
+
+WORKDIR /app
+# Copy configuration
+COPY config/zones.json /app/zones.json
+
+# Set environment variables for runtime
+ENV LD_LIBRARY_PATH=/usr/local/lib:/opt/nvidia/vpi3/lib/x86_64-linux-gnu:/usr/local/cuda-12.2/lib64
+ENV QT_QPA_PLATFORM_PLUGIN_PATH=/usr/local/plugins
+ENV QML2_IMPORT_PATH=/usr/local/qml 
+ENV QT_QPA_PLATFORM=xcb
+ENV CUDA_HOME=/usr/local/cuda-12.2
+ENV PATH=/usr/local/cuda-12.2/bin:$PATH
+
+ENTRYPOINT ["./QT6-gstreamer-example"]
