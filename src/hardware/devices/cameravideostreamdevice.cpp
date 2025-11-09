@@ -335,6 +335,9 @@ void CameraVideoStreamDevice::onSystemStateChanged(const SystemStateData &newSta
     m_currentLeadAngleStatus = newState.currentLeadAngleStatus;  // ⭐ ADD
     m_currentLeadAngleOffsetAz = newState.leadAngleOffsetAz;     // ⭐ ADD
     m_currentLeadAngleOffsetEl = newState.leadAngleOffsetEl;
+
+    // ⭐ UPDATE DETECTION STATE
+    m_detectionEnabled.store(newState.detectionEnabled);
 }
 
 
