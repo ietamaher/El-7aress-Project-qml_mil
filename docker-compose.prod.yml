@@ -1,0 +1,135 @@
+# =============================================================================
+# Production Docker Compose for Jetson Orin AGX (Jetpack 6.2)
+# =============================================================================
+#
+# Usage:
+#   Build: docker-compose -f docker-compose.prod.yml build
+#   Run:   docker-compose -f docker-compose.prod.yml up
+#
+# Notes:
+# - Designed for NVIDIA Jetson Orin AGX running Jetpack 6.2
+# - Uses native Jetson CUDA/VPI3 support
+# - Configured for production deployment
+# =============================================================================
+
+services:
+  rcws-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: el-7aress:prod-jetson
+    container_name: rcws-production
+
+    # GPU support (Jetson native)
+    runtime: nvidia
+
+    environment:
+      # NVIDIA GPU settings
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+
+      # Display settings for eglfs (Jetson native framebuffer)
+      - QT_QPA_PLATFORM=eglfs
+      - QT_QPA_EGLFS_ALWAYS_SET_MODE=1
+      - QT_QPA_EGLFS_PHYSICAL_WIDTH=1920
+      - QT_QPA_EGLFS_PHYSICAL_HEIGHT=1080
+
+      # Alternative: Use xcb for X11 display (if running X server)
+      # - DISPLAY=${DISPLAY:-:0}
+      # - QT_QPA_PLATFORM=xcb
+
+      # Qt settings
+      - QT_DEBUG_PLUGINS=0
+      - QT_QPA_FONTDIR=/usr/share/fonts
+
+      # GStreamer debug level (0=none, 1=error, 2=warning, 3=info, 4=debug)
+      - GST_DEBUG=${GST_DEBUG:-2}
+      - GST_PLUGIN_PATH=/usr/lib/aarch64-linux-gnu/gstreamer-1.0
+
+      # Library paths
+      - LD_LIBRARY_PATH=/usr/local/lib:/usr/lib/aarch64-linux-gnu/tegra:${LD_LIBRARY_PATH}
+
+    # Volume mounts
+    volumes:
+      # X11 socket (only needed if using xcb platform)
+      # - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+      # YOLO model
+      - ${HOME}/yolov8s.onnx:/app/yolov8s.onnx:ro
+
+      # Configuration
+      - ./config/zones.json:/app/zones.json:ro
+      - ./config/devices.json:/app/config/devices.json:ro
+
+      # Logs and data (persistent)
+      - ./logs:/app/logs:rw
+      - ./data:/app/data:rw
+
+      # Serial devices (by-id for stable device names)
+      - /dev/serial/by-id:/dev/serial/by-id:rw
+      - /dev:/dev
+
+      # Time synchronization
+      - /etc/localtime:/etc/localtime:ro
+
+    # Device access
+    devices:
+      # GPU/DRM for display
+      - /dev/dri:/dev/dri
+
+      # Video devices (cameras)
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
+
+      # I2C (if needed for hardware communication)
+      # - /dev/i2c-0:/dev/i2c-0
+      # - /dev/i2c-1:/dev/i2c-1
+
+    # Network configuration
+    # Using host network for easier hardware access and API exposure
+    network_mode: host
+
+    # Privileged mode for hardware access (required for serial, GPIO, etc.)
+    privileged: true
+
+    # Always restart unless explicitly stopped
+    restart: unless-stopped
+
+    # Resource limits (adjust based on your requirements)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 8G
+    #     reservations:
+    #       memory: 4G
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "QT6-gstreamer-example"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Optional: Telemetry dashboard or monitoring service
+# Uncomment if you want to run a separate monitoring container
+#
+#  telemetry-dashboard:
+#    image: grafana/grafana:latest
+#    container_name: rcws-telemetry
+#    network_mode: host
+#    environment:
+#      - GF_SECURITY_ADMIN_PASSWORD=admin
+#    volumes:
+#      - grafana-storage:/var/lib/grafana
+#    restart: unless-stopped
+#
+#volumes:
+#  grafana-storage:

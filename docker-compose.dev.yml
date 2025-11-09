@@ -2,8 +2,8 @@ services:
   qt-app:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: myapp:dev
+      dockerfile: Dockerfile.dev
+    image: el-7aress:dev
     container_name: qt-app
     # GPU (best-effort - modern compose supports device_requests; include runtime for compatibility)
     runtime: nvidia
@@ -53,8 +53,8 @@ services:
   modbus-slave:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: myapp:dev
+      dockerfile: Dockerfile.dev
+    image: el-7aress:dev
     container_name: qt-app-simulation
     # GPU (best-effort - modern compose supports device_requests; include runtime for compatibility)
     runtime: nvidia
