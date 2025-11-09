@@ -409,17 +409,36 @@ void SafetyZoneController::setupEditParametersUI()
 
 void SafetyZoneController::routeUpToParameterPanel()
 {
-    m_paramViewModel->navigateUp();
+    int currentField = m_paramViewModel->activeField();
+    currentField = (currentField - 1 + 4) % 4; // 4 fields total (Enabled, Overridable, ValidateButton, CancelButton)
+    m_paramViewModel->setActiveField(currentField);
 }
 
 void SafetyZoneController::routeDownToParameterPanel()
 {
-    m_paramViewModel->navigateDown();
+    int currentField = m_paramViewModel->activeField();
+    currentField = (currentField + 1) % 4; // 4 fields total
+    m_paramViewModel->setActiveField(currentField);
 }
 
 void SafetyZoneController::routeSelectToParameterPanel()
 {
-    m_paramViewModel->confirmSelection();
+    int currentField = m_paramViewModel->activeField();
+
+    if (currentField == AreaZoneParameterViewModel::Field::ValidateButton) {
+        // Confirm save
+        transitionToState(State::ConfirmSave);
+    } else if (currentField == AreaZoneParameterViewModel::Field::CancelButton) {
+        // Cancel and return to select action
+        resetWipZone();
+        setupSelectActionUI();
+    } else if (currentField == AreaZoneParameterViewModel::Field::Enabled) {
+        // Toggle enabled state
+        m_paramViewModel->setIsEnabled(!m_paramViewModel->isEnabled());
+    } else if (currentField == AreaZoneParameterViewModel::Field::Overridable) {
+        // Toggle overridable state
+        m_paramViewModel->setIsOverridable(!m_paramViewModel->isOverridable());
+    }
 }
 
 // ============================================================================
@@ -510,24 +529,12 @@ void SafetyZoneController::loadWipZoneFromSystem(int zoneId)
 
 void SafetyZoneController::syncWipZoneToParameterPanel()
 {
-    m_paramViewModel->setZoneName(m_wipZone.name);
-    m_paramViewModel->setZoneType(m_wipZone.type);
-    m_paramViewModel->setEnabled(m_wipZone.enabled);
-    m_paramViewModel->setWidth(m_wipZone.widthMeters);
-    m_paramViewModel->setHeight(m_wipZone.heightMeters);
-    m_paramViewModel->setCenterAz(m_wipZone.centerAzimuth);
-    m_paramViewModel->setCenterEl(m_wipZone.centerElevation);
-    m_paramViewModel->setRotation(m_wipZone.rotationAngle);
+    m_paramViewModel->setIsEnabled(m_wipZone.isEnabled);
+    m_paramViewModel->setIsOverridable(m_wipZone.isOverridable);
 }
 
 void SafetyZoneController::syncParameterPanelToWipZone()
 {
-    m_wipZone.name = m_paramViewModel->zoneName();
-    m_wipZone.type = m_paramViewModel->zoneType();
-    m_wipZone.enabled = m_paramViewModel->enabled();
-    m_wipZone.widthMeters = m_paramViewModel->width();
-    m_wipZone.heightMeters = m_paramViewModel->height();
-    m_wipZone.centerAzimuth = m_paramViewModel->centerAz();
-    m_wipZone.centerElevation = m_paramViewModel->centerEl();
-    m_wipZone.rotationAngle = m_paramViewModel->rotation();
+    m_wipZone.isEnabled = m_paramViewModel->isEnabled();
+    m_wipZone.isOverridable = m_paramViewModel->isOverridable();
 }
