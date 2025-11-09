@@ -113,6 +113,8 @@ void ApplicationController::initialize()
             this, &ApplicationController::handleZoneDefinitions);
     connect(m_mainMenuController, &MainMenuController::systemStatusRequested,
             this, &ApplicationController::handleSystemStatus);
+    connect(m_mainMenuController, &MainMenuController::toggleDetectionRequested,
+            this, &ApplicationController::handleToggleDetection);
     connect(m_mainMenuController, &MainMenuController::shutdownSystemRequested,
             this, &ApplicationController::handleShutdown);
     connect(m_mainMenuController, &MainMenuController::radarTargetListRequested,
@@ -455,6 +457,32 @@ void ApplicationController::handleSystemStatus()
     hideAllMenus();
     m_systemStatusController->show();
     setMenuState(MenuState::SystemStatus);
+}
+
+void ApplicationController::handleToggleDetection()
+{
+    qDebug() << "ApplicationController: Toggle Detection requested";
+
+    if (m_systemStateModel) {
+        const auto& data = m_systemStateModel->data();
+
+        // Safety check: Only allow toggling if day camera is active
+        if (!data.activeCameraIsDay) {
+            qWarning() << "Cannot toggle detection - Night camera is active!";
+            hideAllMenus();
+            setMenuState(MenuState::None);
+            return;
+        }
+
+        // Toggle detection state
+        bool newState = !data.detectionEnabled;
+        m_systemStateModel->setDetectionEnabled(newState);
+
+        qInfo() << "Detection toggled to:" << (newState ? "ENABLED" : "DISABLED");
+    }
+
+    hideAllMenus();
+    setMenuState(MenuState::None);
 }
 
 void ApplicationController::handleShutdown()

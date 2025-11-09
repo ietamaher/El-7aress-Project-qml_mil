@@ -453,6 +453,27 @@ void OsdViewModel::updateWindageDisplay(bool modeActive, bool applied, float spe
     }
 }
 
+void OsdViewModel::updateDetectionDisplay(bool enabled)
+{
+    QString newText;
+    bool newVisible = false;
+
+    if (enabled) {
+        newText = "DETECTION: ACTIVE";
+        newVisible = true;
+    }
+
+    if (m_detectionText != newText) {
+        m_detectionText = newText;
+        emit detectionTextChanged();
+    }
+
+    if (m_detectionVisible != newVisible) {
+        m_detectionVisible = newVisible;
+        emit detectionVisibleChanged();
+    }
+}
+
 // ============================================================================
 // ZONE & STATUS UPDATES
 // ============================================================================

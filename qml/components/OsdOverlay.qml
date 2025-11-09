@@ -103,6 +103,18 @@ Item {
             styleColor: "black"
         }
 
+        // Detection Status
+        Text {
+            visible: viewModel ? viewModel.detectionVisible : false
+            text: viewModel ? viewModel.detectionText : ""
+            font.pixelSize: 16
+            font.bold: true
+            font.family: "Segoe UI"
+            color: "#00FF00"  // Green color for active detection
+            style: Text.Outline
+            styleColor: "black"
+        }
+
         // Lead Angle Status
         Text {
             visible: viewModel ? viewModel.leadAngleVisible : false

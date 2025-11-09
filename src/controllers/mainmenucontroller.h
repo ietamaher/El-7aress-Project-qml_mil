@@ -35,6 +35,7 @@ signals:
     void clearWindageRequested();
     void zoneDefinitionsRequested();
     void systemStatusRequested();
+    void toggleDetectionRequested();
     void shutdownSystemRequested();
     void helpAboutRequested();
     void radarTargetListRequested();
