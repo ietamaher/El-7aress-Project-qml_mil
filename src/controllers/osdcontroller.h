@@ -66,6 +66,7 @@ private:
     void updateStartupMessage(StartupState state);
     void checkDevicesAndAdvance(const SystemStateData& data);
     bool areCriticalDevicesConnected(const SystemStateData& data) const;
+    void checkForCriticalErrors(const SystemStateData& data);
 
     // Shared update logic
     //void updateViewModelFromSystemState(const SystemStateData& data);
