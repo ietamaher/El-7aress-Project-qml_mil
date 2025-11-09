@@ -35,7 +35,7 @@ public:
     explicit SectorScanZoneController(QObject* parent = nullptr);
 
     // BaseZoneController interface
-    ZoneType zoneType() const override { return ZoneType::AutoSectorScanZone; }
+    ZoneType zoneType() const override { return ZoneType::AutoSectorScan; }
     QString zoneTypeName() const override { return "SectorScan"; }
 
     void initialize() override;

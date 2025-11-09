@@ -34,7 +34,7 @@ public:
     explicit SafetyZoneController(QObject* parent = nullptr);
 
     // BaseZoneController interface
-    ZoneType zoneType() const override { return ZoneType::AreaZone; }
+    ZoneType zoneType() const override { return ZoneType::NoFire; }
     QString zoneTypeName() const override { return "SafetyZone"; }
 
     void initialize() override;

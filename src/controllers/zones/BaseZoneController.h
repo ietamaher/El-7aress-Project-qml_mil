@@ -67,10 +67,10 @@ public:
     bool isActive() const { return m_isActive; }
 
 public slots:
-    // Input handling (delegates to subclass if needed)
-    void onUpButtonPressed();
-    void onDownButtonPressed();
-    void onMenuValButtonPressed();
+    // Input handling (can be overridden by subclasses)
+    virtual void onUpButtonPressed();
+    virtual void onDownButtonPressed();
+    virtual void onMenuValButtonPressed();
 
 signals:
     void finished();
@@ -167,6 +167,7 @@ protected:
     ZoneDefinitionViewModel* viewModel() { return m_viewModel; }
     ZoneMapViewModel* mapViewModel() { return m_mapViewModel; }
     SystemStateModel* stateModel() { return m_stateModel; }
+    const SystemStateModel* stateModel() const { return m_stateModel; }
 
 private:
     // State

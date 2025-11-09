@@ -181,7 +181,7 @@ void BaseZoneController::navigateMenuUp()
     if (m_currentMenuIndex < 0) {
         m_currentMenuIndex = m_currentMenuItems.size() - 1;
     }
-    m_viewModel->setCurrentMenuIndex(m_currentMenuIndex);
+    m_viewModel->setCurrentIndex(m_currentMenuIndex);
 }
 
 void BaseZoneController::navigateMenuDown()
@@ -192,15 +192,15 @@ void BaseZoneController::navigateMenuDown()
     if (m_currentMenuIndex >= m_currentMenuItems.size()) {
         m_currentMenuIndex = 0;
     }
-    m_viewModel->setCurrentMenuIndex(m_currentMenuIndex);
+    m_viewModel->setCurrentIndex(m_currentMenuIndex);
 }
 
 void BaseZoneController::setMenuItems(const QStringList& items)
 {
     m_currentMenuItems = items;
     m_currentMenuIndex = 0;
-    m_viewModel->setMenuItems(items);
-    m_viewModel->setCurrentMenuIndex(0);
+    m_viewModel->setMenuOptions(items);
+    m_viewModel->setCurrentIndex(0);
 }
 
 QString BaseZoneController::selectedMenuItem() const
@@ -218,29 +218,29 @@ QString BaseZoneController::selectedMenuItem() const
 void BaseZoneController::setupMenuUI(const QString& title, const QStringList& menuItems)
 {
     m_viewModel->setTitle(title);
-    m_viewModel->setInstructionText("");
-    m_viewModel->setShowMenu(true);
+    m_viewModel->setInstruction("");
+    m_viewModel->setShowMainMenu(true);
     m_viewModel->setShowParameterPanel(false);
-    m_viewModel->setShowConfirmButtons(false);
+    m_viewModel->setShowConfirmDialog(false);
     setMenuItems(menuItems);
 }
 
 void BaseZoneController::setupMessageUI(const QString& message)
 {
     m_viewModel->setTitle("Zone Management");
-    m_viewModel->setInstructionText(message);
-    m_viewModel->setShowMenu(false);
+    m_viewModel->setInstruction(message);
+    m_viewModel->setShowMainMenu(false);
     m_viewModel->setShowParameterPanel(false);
-    m_viewModel->setShowConfirmButtons(false);
+    m_viewModel->setShowConfirmDialog(false);
 }
 
 void BaseZoneController::setupConfirmUI(const QString& title, const QString& question)
 {
     m_viewModel->setTitle(title);
-    m_viewModel->setInstructionText(question);
-    m_viewModel->setShowMenu(false);
+    m_viewModel->setInstruction(question);
+    m_viewModel->setShowMainMenu(false);
     m_viewModel->setShowParameterPanel(false);
-    m_viewModel->setShowConfirmButtons(true);
+    m_viewModel->setShowConfirmDialog(true);
 }
 
 void BaseZoneController::showErrorMessage(const QString& error)

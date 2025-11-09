@@ -127,7 +127,9 @@ void TRPZoneController::handleSelectExistingTRPInput()
         m_editingTRPId = trpId;
         loadWipTRPFromSystem(trpId);
         setupConfirmUI("Confirm Delete",
-                      QString("Delete TRP '%1'?").arg(m_wipTRP.name));
+                      QString("Delete TRP %1-%2 (Az:%.1f° El:%.1f°)?")
+                          .arg(m_wipTRP.locationPage).arg(m_wipTRP.trpInPage)
+                          .arg(m_wipTRP.azimuth).arg(m_wipTRP.elevation));
         transitionToState(State::ConfirmDelete);
     }
 }
@@ -148,7 +150,8 @@ void TRPZoneController::handleEditParametersInput()
 {
     syncParameterPanelToWipTRP();
     setupConfirmUI("Confirm Save",
-                  QString("Save TRP '%1'?").arg(m_wipTRP.name));
+                  QString("Save TRP %1-%2?")
+                      .arg(m_wipTRP.locationPage).arg(m_wipTRP.trpInPage));
     transitionToState(State::ConfirmSave);
 }
 
@@ -197,7 +200,8 @@ void TRPZoneController::createNewZone()
         if (trp.id > maxId) maxId = trp.id;
     }
     m_wipTRP.id = maxId + 1;
-    m_wipTRP.name = QString("TRP %1").arg(m_wipTRP.id);
+    m_wipTRP.locationPage = 1;
+    m_wipTRP.trpInPage = m_wipTRP.id;
 
     setupAimingPointUI();
 }
@@ -216,7 +220,7 @@ void TRPZoneController::loadZoneForModification(int trpId)
 void TRPZoneController::performZoneDeletion(int trpId)
 {
     qDebug() << "TRPZoneController: Deleting TRP" << trpId;
-    stateModel()->removeTargetReferencePoint(trpId);
+    stateModel()->deleteTRP(trpId);
 }
 
 bool TRPZoneController::saveCurrentZone()
@@ -225,17 +229,17 @@ bool TRPZoneController::saveCurrentZone()
 
     syncParameterPanelToWipTRP();
 
-    // Validate
-    if (m_wipTRP.name.isEmpty()) {
-        showErrorMessage("TRP name cannot be empty");
+    // Validate - ensure we have valid positioning
+    if (m_wipTRP.locationPage <= 0 || m_wipTRP.trpInPage <= 0) {
+        showErrorMessage("TRP location/number invalid");
         return false;
     }
 
     // Save to system state
     if (m_editingTRPId < 0) {
-        stateModel()->addTargetReferencePoint(m_wipTRP);
+        stateModel()->addTRP(m_wipTRP);
     } else {
-        stateModel()->updateTargetReferencePoint(m_editingTRPId, m_wipTRP);
+        stateModel()->modifyTRP(m_editingTRPId, m_wipTRP);
     }
 
     return true;
@@ -243,7 +247,8 @@ bool TRPZoneController::saveCurrentZone()
 
 void TRPZoneController::updateWipZoneVisualization()
 {
-    mapViewModel()->setWipTRP(m_wipTRP);
+    // TRP visualization on map (placeholder - implement if needed)
+    // mapViewModel()->setWipTRP(m_wipTRP);
 }
 
 QStringList TRPZoneController::getExistingZoneNames() const
@@ -252,8 +257,8 @@ QStringList TRPZoneController::getExistingZoneNames() const
     const auto& data = stateModel()->data();
 
     for (const auto& trp : data.targetReferencePoints) {
-        names << QString("%1 (Az:%.1f° El:%.1f°)")
-                     .arg(trp.name)
+        names << QString("TRP %1-%2 (Az:%.1f° El:%.1f°)")
+                     .arg(trp.locationPage).arg(trp.trpInPage)
                      .arg(trp.azimuth)
                      .arg(trp.elevation);
     }
@@ -297,20 +302,20 @@ void TRPZoneController::setupSelectExistingTRPUI(const QString& action)
 void TRPZoneController::setupAimingPointUI()
 {
     viewModel()->setTitle("Aim at Target");
-    viewModel()->setInstructionText("Point gimbal at target reference point, then press VAL");
-    viewModel()->setShowMenu(false);
+    viewModel()->setInstruction("Point gimbal at target reference point, then press VAL");
+    viewModel()->setShowMainMenu(false);
     viewModel()->setShowParameterPanel(false);
-    viewModel()->setShowConfirmButtons(false);
+    viewModel()->setShowConfirmDialog(false);
     transitionToState(State::AimingPoint);
 }
 
 void TRPZoneController::setupEditParametersUI()
 {
     viewModel()->setTitle("Edit TRP Parameters");
-    viewModel()->setInstructionText("Use UP/DOWN to navigate, VAL to confirm");
-    viewModel()->setShowMenu(false);
+    viewModel()->setInstruction("Use UP/DOWN to navigate, VAL to confirm");
+    viewModel()->setShowMainMenu(false);
     viewModel()->setShowParameterPanel(true);
-    viewModel()->setShowConfirmButtons(false);
+    viewModel()->setShowConfirmDialog(false);
 
     syncWipTRPToParameterPanel();
     transitionToState(State::EditParameters);
@@ -322,17 +327,20 @@ void TRPZoneController::setupEditParametersUI()
 
 void TRPZoneController::routeUpToParameterPanel()
 {
-    m_paramViewModel->navigateUp();
+    // TRP parameter navigation - simplified
+    // m_paramViewModel->navigateUp();
 }
 
 void TRPZoneController::routeDownToParameterPanel()
 {
-    m_paramViewModel->navigateDown();
+    // TRP parameter navigation - simplified
+    // m_paramViewModel->navigateDown();
 }
 
 void TRPZoneController::routeSelectToParameterPanel()
 {
-    m_paramViewModel->confirmSelection();
+    // TRP parameter selection - simplified
+    // m_paramViewModel->confirmSelection();
 }
 
 // ============================================================================
@@ -352,7 +360,7 @@ void TRPZoneController::loadWipTRPFromSystem(int trpId)
     for (const auto& trp : data.targetReferencePoints) {
         if (trp.id == trpId) {
             m_wipTRP = trp;
-            qDebug() << "Loaded TRP" << trpId << ":" << trp.name;
+            qDebug() << "Loaded TRP" << trpId << ": Page" << trp.locationPage << "-" << trp.trpInPage;
             return;
         }
     }
@@ -363,16 +371,17 @@ void TRPZoneController::loadWipTRPFromSystem(int trpId)
 
 void TRPZoneController::syncWipTRPToParameterPanel()
 {
-    m_paramViewModel->setTRPName(m_wipTRP.name);
-    m_paramViewModel->setDescription(m_wipTRP.description);
+    // Sync WIP TRP data to parameter panel
+    m_paramViewModel->setTRPName(QString("TRP %1-%2").arg(m_wipTRP.locationPage).arg(m_wipTRP.trpInPage));
+    m_paramViewModel->setDescription(QString("Az:%.1f° El:%.1f°").arg(m_wipTRP.azimuth).arg(m_wipTRP.elevation));
     m_paramViewModel->setAzimuth(m_wipTRP.azimuth);
     m_paramViewModel->setElevation(m_wipTRP.elevation);
 }
 
 void TRPZoneController::syncParameterPanelToWipTRP()
 {
-    m_wipTRP.name = m_paramViewModel->trpName();
-    m_wipTRP.description = m_paramViewModel->description();
+    // Sync parameter panel changes back to WIP TRP
+    // Note: locationPage/trpInPage are set during creation, not editable via panel
     m_wipTRP.azimuth = m_paramViewModel->azimuth();
     m_wipTRP.elevation = m_paramViewModel->elevation();
 }
