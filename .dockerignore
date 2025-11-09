@@ -1,0 +1,79 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!readme.md
+documentation/
+*.pdf
+*.txt
+
+# Build artifacts
+build/
+*.o
+*.so
+*.a
+moc_*
+qrc_*
+*.user
+*.autosave
+
+# Logs
+logs/
+*.log
+
+# Data
+data/
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Models (copy explicitly when needed)
+*.onnx
+*.pt
+*.pth
+*.weights
+
+# Scripts (not needed in container)
+scripts/
+
+# Web dashboard (if not needed)
+web-dashboard/
