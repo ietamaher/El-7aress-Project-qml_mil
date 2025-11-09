@@ -53,7 +53,11 @@ SOURCES += \
     src/controllers/weaponcontroller.cpp \
     src/controllers/windagecontroller.cpp \
     src/controllers/zeroingcontroller.cpp \
-    src/controllers/zonedefinitioncontroller.cpp \
+    src/controllers/zones/BaseZoneController.cpp \
+    src/controllers/zones/SafetyZoneController.cpp \
+    src/controllers/zones/SectorScanZoneController.cpp \
+    src/controllers/zones/TRPZoneController.cpp \
+    src/controllers/zones/ZoneManagementCoordinator.cpp \
     src/managers/HardwareManager.cpp \
     src/managers/ViewModelRegistry.cpp \
     src/managers/ControllerRegistry.cpp \
@@ -152,7 +156,11 @@ HEADERS += \
     src/controllers/weaponcontroller.h \
     src/controllers/windagecontroller.h \
     src/controllers/zeroingcontroller.h \
-    src/controllers/zonedefinitioncontroller.h \
+    src/controllers/zones/BaseZoneController.h \
+    src/controllers/zones/SafetyZoneController.h \
+    src/controllers/zones/SectorScanZoneController.h \
+    src/controllers/zones/TRPZoneController.h \
+    src/controllers/zones/ZoneManagementCoordinator.h \
     src/managers/HardwareManager.h \
     src/managers/ViewModelRegistry.h \
     src/managers/ControllerRegistry.h \
