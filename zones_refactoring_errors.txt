@@ -1,304 +1,425 @@
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.h:44: error: ‘void TRPZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-In file included from ../../src/controllers/zones/TRPZoneController.cpp:1:
-../../src/controllers/zones/TRPZoneController.h:44:10: error: ‘void TRPZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-   44 |     void onMenuValButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.h:45: error: ‘void TRPZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/TRPZoneController.h:45:10: error: ‘void TRPZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-   45 |     void onUpButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.h:46: error: ‘void TRPZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/TRPZoneController.h:46:10: error: ‘void TRPZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-   46 |     void onDownButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:44: error: ‘void SafetyZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-In file included from ../../src/controllers/zones/SafetyZoneController.cpp:1:
-../../src/controllers/zones/SafetyZoneController.h:44:10: error: ‘void SafetyZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-   44 |     void onMenuValButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:45: error: ‘void SafetyZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SafetyZoneController.h:45:10: error: ‘void SafetyZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-   45 |     void onUpButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:46: error: ‘void SafetyZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SafetyZoneController.h:46:10: error: ‘void SafetyZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-   46 |     void onDownButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:37: error: ‘AreaZone’ is not a member of ‘ZoneType’
-../../src/controllers/zones/SafetyZoneController.h: In member function ‘virtual ZoneType SafetyZoneController::zoneType() const’:
-../../src/controllers/zones/SafetyZoneController.h:37:59: error: ‘AreaZone’ is not a member of ‘ZoneType’
-   37 |     ZoneType zoneType() const override { return ZoneType::AreaZone; }
-      |                                                           ^~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:45: error: ‘void SectorScanZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-In file included from ../../src/controllers/zones/SectorScanZoneController.cpp:1:
-../../src/controllers/zones/SectorScanZoneController.h:45:10: error: ‘void SectorScanZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-   45 |     void onMenuValButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:46: error: ‘void SectorScanZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SectorScanZoneController.h:46:10: error: ‘void SectorScanZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-   46 |     void onUpButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:47: error: ‘void SectorScanZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SectorScanZoneController.h:47:10: error: ‘void SectorScanZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-   47 |     void onDownButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:38: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-../../src/controllers/zones/SectorScanZoneController.h: In member function ‘virtual ZoneType SectorScanZoneController::zoneType() const’:
-../../src/controllers/zones/SectorScanZoneController.h:38:59: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-   38 |     ZoneType zoneType() const override { return ZoneType::AutoSectorScanZone; }
-      |                                                           ^~~~~~~~~~~~~~~~~~
-      |                                                           AutoSectorScan
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:45: error: ‘void SectorScanZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-In file included from moc_SectorScanZoneController.cpp:9:
-../../src/controllers/zones/SectorScanZoneController.h:45:10: error: ‘void SectorScanZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-   45 |     void onMenuValButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:46: error: ‘void SectorScanZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SectorScanZoneController.h:46:10: error: ‘void SectorScanZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-   46 |     void onUpButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:47: error: ‘void SectorScanZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SectorScanZoneController.h:47:10: error: ‘void SectorScanZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-   47 |     void onDownButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:38: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-../../src/controllers/zones/SectorScanZoneController.h: In member function ‘virtual ZoneType SectorScanZoneController::zoneType() const’:
-../../src/controllers/zones/SectorScanZoneController.h:38:59: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-   38 |     ZoneType zoneType() const override { return ZoneType::AutoSectorScanZone; }
-      |                                                           ^~~~~~~~~~~~~~~~~~
-      |                                                           AutoSectorScan
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:44: error: ‘void SafetyZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-In file included from ../../src/controllers/zones/ZoneManagementCoordinator.cpp:2:
-../../src/controllers/zones/SafetyZoneController.h:44:10: error: ‘void SafetyZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-   44 |     void onMenuValButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:45: error: ‘void SafetyZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SafetyZoneController.h:45:10: error: ‘void SafetyZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-   45 |     void onUpButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:46: error: ‘void SafetyZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SafetyZoneController.h:46:10: error: ‘void SafetyZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-   46 |     void onDownButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:37: error: ‘AreaZone’ is not a member of ‘ZoneType’
-../../src/controllers/zones/SafetyZoneController.h: In member function ‘virtual ZoneType SafetyZoneController::zoneType() const’:
-../../src/controllers/zones/SafetyZoneController.h:37:59: error: ‘AreaZone’ is not a member of ‘ZoneType’
-   37 |     ZoneType zoneType() const override { return ZoneType::AreaZone; }
-      |                                                           ^~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:45: error: ‘void SectorScanZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-In file included from ../../src/controllers/zones/ZoneManagementCoordinator.cpp:3:
-../../src/controllers/zones/SectorScanZoneController.h: At global scope:
-../../src/controllers/zones/SectorScanZoneController.h:45:10: error: ‘void SectorScanZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-   45 |     void onMenuValButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:46: error: ‘void SectorScanZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SectorScanZoneController.h:46:10: error: ‘void SectorScanZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-   46 |     void onUpButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:47: error: ‘void SectorScanZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SectorScanZoneController.h:47:10: error: ‘void SectorScanZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-   47 |     void onDownButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.h:38: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-../../src/controllers/zones/SectorScanZoneController.h: In member function ‘virtual ZoneType SectorScanZoneController::zoneType() const’:
-../../src/controllers/zones/SectorScanZoneController.h:38:59: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-   38 |     ZoneType zoneType() const override { return ZoneType::AutoSectorScanZone; }
-      |                                                           ^~~~~~~~~~~~~~~~~~
-      |                                                           AutoSectorScan
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.h:44: error: ‘void TRPZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-In file included from ../../src/controllers/zones/ZoneManagementCoordinator.cpp:4:
-../../src/controllers/zones/TRPZoneController.h: At global scope:
-../../src/controllers/zones/TRPZoneController.h:44:10: error: ‘void TRPZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-   44 |     void onMenuValButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.h:45: error: ‘void TRPZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/TRPZoneController.h:45:10: error: ‘void TRPZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-   45 |     void onUpButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.h:46: error: ‘void TRPZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/TRPZoneController.h:46:10: error: ‘void TRPZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-   46 |     void onDownButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:44: error: ‘void SafetyZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-In file included from moc_SafetyZoneController.cpp:9:
-../../src/controllers/zones/SafetyZoneController.h:44:10: error: ‘void SafetyZoneController::onMenuValButtonPressed()’ marked ‘override’, but does not override
-   44 |     void onMenuValButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:45: error: ‘void SafetyZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SafetyZoneController.h:45:10: error: ‘void SafetyZoneController::onUpButtonPressed()’ marked ‘override’, but does not override
-   45 |     void onUpButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:46: error: ‘void SafetyZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-../../src/controllers/zones/SafetyZoneController.h:46:10: error: ‘void SafetyZoneController::onDownButtonPressed()’ marked ‘override’, but does not override
-   46 |     void onDownButtonPressed() override;
-      |          ^~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.h:37: error: ‘AreaZone’ is not a member of ‘ZoneType’
-../../src/controllers/zones/SafetyZoneController.h: In member function ‘virtual ZoneType SafetyZoneController::zoneType() const’:
-../../src/controllers/zones/SafetyZoneController.h:37:59: error: ‘AreaZone’ is not a member of ‘ZoneType’
-   37 |     ZoneType zoneType() const override { return ZoneType::AreaZone; }
-      |                                                           ^~~~~~~~
-:-1: error: [Makefile:39330: moc_SectorScanZoneController.o] Error 1
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:190: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::onUpButtonPressed()’:
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:190:26: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
+  190 |             m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
+      |                          ^~~~~~~~~~~~~~~~~~~
+      |                          setCurrentIndex
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:219: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::onDownButtonPressed()’:
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:219:26: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
+  219 |             m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
+      |                          ^~~~~~~~~~~~~~~~~~~
+      |                          setCurrentIndex
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:272: error: ‘AreaZone’ is not a member of ‘ZoneType’
+../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::selectZoneType()’:
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:272:42: error: ‘AreaZone’ is not a member of ‘ZoneType’
+  272 |         transitionToController(ZoneType::AreaZone);
+      |                                          ^~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:274: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:274:42: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+  274 |         transitionToController(ZoneType::AutoSectorScanZone);
+      |                                          ^~~~~~~~~~~~~~~~~~
+      |                                          AutoSectorScan
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:291: error: ‘AreaZone’ is not a member of ‘ZoneType’
+../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::transitionToController(ZoneType)’:
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:291:24: error: ‘AreaZone’ is not a member of ‘ZoneType’
+  291 |         case ZoneType::AreaZone:
+      |                        ^~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:296: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:296:24: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+  296 |         case ZoneType::AutoSectorScanZone:
+      |                        ^~~~~~~~~~~~~~~~~~
+      |                        AutoSectorScan
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:369: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::setupZoneTypeSelectionUI()’:
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:369:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
+  369 |     m_viewModel->setInstructionText("Select zone type to manage:");
+      |                  ^~~~~~~~~~~~~~~~~~
+      |                  setInstruction
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:370: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:370:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
+  370 |     m_viewModel->setShowMenu(true);
+      |                  ^~~~~~~~~~~
+      |                  setShowMap
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:372: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:372:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
+  372 |     m_viewModel->setShowConfirmButtons(false);
+      |                  ^~~~~~~~~~~~~~~~~~~~~
+      |                  setShowConfirmDialog
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:373: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setMenuItems’; did you mean ‘setMenuOptions’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:373:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setMenuItems’; did you mean ‘setMenuOptions’?
+  373 |     m_viewModel->setMenuItems(m_zoneTypeMenuItems);
+      |                  ^~~~~~~~~~~~
+      |                  setMenuOptions
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:374: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
+../../src/controllers/zones/ZoneManagementCoordinator.cpp:374:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
+  374 |     m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
+      |                  ^~~~~~~~~~~~~~~~~~~
+      |                  setCurrentIndex
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:33: error: no declaration matches ‘void SectorScanZoneController::show()’
+../../src/controllers/zones/SectorScanZoneController.cpp:33:6: error: no declaration matches ‘void SectorScanZoneController::show()’
+   33 | void SectorScanZoneController::show()
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+../../src/controllers/zones/SectorScanZoneController.cpp:33:6: note: no functions named ‘void SectorScanZoneController::show()’
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:138: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::handleSelectExistingZoneInput()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:138:71: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+  138 |                       QString("Delete scan zone '%1'?").arg(m_wipZone.name));
+      |                                                                       ^~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:169: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::handleEditParametersInput()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:169:65: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+  169 |                   QString("Save scan zone '%1'?").arg(m_wipZone.name));
+      |                                                                 ^~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:181: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::handleConfirmSaveInput()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:181:40: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+  181 |             emit zoneCreated(ZoneType::AutoSectorScanZone);
+      |                                        ^~~~~~~~~~~~~~~~~~
+      |                                        AutoSectorScan
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:183: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+../../src/controllers/zones/SectorScanZoneController.cpp:183:41: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+  183 |             emit zoneModified(ZoneType::AutoSectorScanZone, m_editingZoneId);
+      |                                         ^~~~~~~~~~~~~~~~~~
+      |                                         AutoSectorScan
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:196: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::handleConfirmDeleteInput()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:196:32: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
+  196 |     emit zoneDeleted(ZoneType::AutoSectorScanZone, m_editingZoneId);
+      |                                ^~~~~~~~~~~~~~~~~~
+      |                                AutoSectorScan
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:215: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual void SectorScanZoneController::createNewZone()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:215:34: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+  215 |     for (const auto& zone : data.autoSectorScanZones) {
+      |                                  ^~~~~~~~~~~~~~~~~~~
+      |                                  sectorScanZones
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:219: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+../../src/controllers/zones/SectorScanZoneController.cpp:219:15: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+  219 |     m_wipZone.name = QString("Scan %1").arg(m_wipZone.id);
+      |               ^~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:238: error: ‘class SystemStateModel’ has no member named ‘removeAutoSectorScanZone’; did you mean ‘deleteSectorScanZone’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual void SectorScanZoneController::performZoneDeletion(int)’:
+../../src/controllers/zones/SectorScanZoneController.cpp:238:19: error: ‘class SystemStateModel’ has no member named ‘removeAutoSectorScanZone’; did you mean ‘deleteSectorScanZone’?
+  238 |     stateModel()->removeAutoSectorScanZone(zoneId);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~
+      |                   deleteSectorScanZone
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:248: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual bool SectorScanZoneController::saveCurrentZone()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:248:19: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+  248 |     if (m_wipZone.name.isEmpty()) {
+      |                   ^~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:253: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+../../src/controllers/zones/SectorScanZoneController.cpp:253:19: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+  253 |     if (m_wipZone.scanRateDegreesPerSecond <= 0.0f) {
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:260: error: ‘class SystemStateModel’ has no member named ‘addAutoSectorScanZone’; did you mean ‘addSectorScanZone’?
+../../src/controllers/zones/SectorScanZoneController.cpp:260:23: error: ‘class SystemStateModel’ has no member named ‘addAutoSectorScanZone’; did you mean ‘addSectorScanZone’?
+  260 |         stateModel()->addAutoSectorScanZone(m_wipZone);
+      |                       ^~~~~~~~~~~~~~~~~~~~~
+      |                       addSectorScanZone
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:262: error: ‘class SystemStateModel’ has no member named ‘updateAutoSectorScanZone’; did you mean ‘deleteSectorScanZone’?
+../../src/controllers/zones/SectorScanZoneController.cpp:262:23: error: ‘class SystemStateModel’ has no member named ‘updateAutoSectorScanZone’; did you mean ‘deleteSectorScanZone’?
+  262 |         stateModel()->updateAutoSectorScanZone(m_editingZoneId, m_wipZone);
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~
+      |                       deleteSectorScanZone
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:275: error: ‘class ZoneMapViewModel’ has no member named ‘setWipSectorScanZone’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual void SectorScanZoneController::updateWipZoneVisualization()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:275:21: error: ‘class ZoneMapViewModel’ has no member named ‘setWipSectorScanZone’
+  275 |     mapViewModel()->setWipSectorScanZone(m_wipZone);
+      |                     ^~~~~~~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:283: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual QStringList SectorScanZoneController::getExistingZoneNames() const’:
+../../src/controllers/zones/SectorScanZoneController.cpp:283:34: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+  283 |     for (const auto& zone : data.autoSectorScanZones) {
+      |                                  ^~~~~~~~~~~~~~~~~~~
+      |                                  sectorScanZones
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:301: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual int SectorScanZoneController::getZoneIdFromMenuIndex(int) const’:
+../../src/controllers/zones/SectorScanZoneController.cpp:301:44: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+  301 |     if (menuIndex < 0 || menuIndex >= data.autoSectorScanZones.size()) {
+      |                                            ^~~~~~~~~~~~~~~~~~~
+      |                                            sectorScanZones
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:305: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+../../src/controllers/zones/SectorScanZoneController.cpp:305:17: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+  305 |     return data.autoSectorScanZones[menuIndex].id;
+      |                 ^~~~~~~~~~~~~~~~~~~
+      |                 sectorScanZones
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:329: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::setupAimingPoint1UI()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:329:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
+  329 |     viewModel()->setInstructionText("Point gimbal at scan start position, then press VAL");
+      |                  ^~~~~~~~~~~~~~~~~~
+      |                  setInstruction
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:330: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
+../../src/controllers/zones/SectorScanZoneController.cpp:330:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
+  330 |     viewModel()->setShowMenu(false);
+      |                  ^~~~~~~~~~~
+      |                  setShowMap
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:332: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
+../../src/controllers/zones/SectorScanZoneController.cpp:332:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
+  332 |     viewModel()->setShowConfirmButtons(false);
+      |                  ^~~~~~~~~~~~~~~~~~~~~
+      |                  setShowConfirmDialog
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:339: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::setupAimingPoint2UI()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:339:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
+  339 |     viewModel()->setInstructionText("Point gimbal at scan end position, then press VAL");
+      |                  ^~~~~~~~~~~~~~~~~~
+      |                  setInstruction
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:340: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
+../../src/controllers/zones/SectorScanZoneController.cpp:340:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
+  340 |     viewModel()->setShowMenu(false);
+      |                  ^~~~~~~~~~~
+      |                  setShowMap
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:342: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
+../../src/controllers/zones/SectorScanZoneController.cpp:342:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
+  342 |     viewModel()->setShowConfirmButtons(false);
+      |                  ^~~~~~~~~~~~~~~~~~~~~
+      |                  setShowConfirmDialog
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:348: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::setupEditParametersUI()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:348:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
+  348 |     viewModel()->setInstructionText("Use UP/DOWN to navigate, VAL to confirm");
+      |                  ^~~~~~~~~~~~~~~~~~
+      |                  setInstruction
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:349: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
+../../src/controllers/zones/SectorScanZoneController.cpp:349:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
+  349 |     viewModel()->setShowMenu(false);
+      |                  ^~~~~~~~~~~
+      |                  setShowMap
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:351: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
+../../src/controllers/zones/SectorScanZoneController.cpp:351:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
+  351 |     viewModel()->setShowConfirmButtons(false);
+      |                  ^~~~~~~~~~~~~~~~~~~~~
+      |                  setShowConfirmDialog
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:363: error: ‘class SectorScanParameterViewModel’ has no member named ‘navigateUp’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::routeUpToParameterPanel()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:363:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘navigateUp’
+  363 |     m_paramViewModel->navigateUp();
+      |                       ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:368: error: ‘class SectorScanParameterViewModel’ has no member named ‘navigateDown’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::routeDownToParameterPanel()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:368:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘navigateDown’
+  368 |     m_paramViewModel->navigateDown();
+      |                       ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:373: error: ‘class SectorScanParameterViewModel’ has no member named ‘confirmSelection’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::routeSelectToParameterPanel()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:373:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘confirmSelection’
+  373 |     m_paramViewModel->confirmSelection();
+      |                       ^~~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:384: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::calculateSectorGeometry()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:384:15: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+  384 |     m_wipZone.startAzimuth = m_point1Az;
+      |               ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:385: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:385:15: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+  385 |     m_wipZone.endAzimuth = m_point2Az;
+      |               ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:386: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+../../src/controllers/zones/SectorScanZoneController.cpp:386:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+  386 |     m_wipZone.scanElevation = (m_point1El + m_point2El) / 2.0f;
+      |               ^~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:389: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:389:37: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+  389 |     float span = std::abs(m_wipZone.endAzimuth - m_wipZone.startAzimuth);
+      |                                     ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:389: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:389:60: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+  389 |     float span = std::abs(m_wipZone.endAzimuth - m_wipZone.startAzimuth);
+      |                                                            ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:394: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:394:41: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+  394 |     qDebug() << "  Start:" << m_wipZone.startAzimuth << "End:" << m_wipZone.endAzimuth;
+      |                                         ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:394: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:394:77: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+  394 |     qDebug() << "  Start:" << m_wipZone.startAzimuth << "End:" << m_wipZone.endAzimuth;
+      |                                                                             ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:403: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::validateSectorGeometry()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:403:15: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+  403 |     m_wipZone.startAzimuth = normalizeAzimuthTo360(m_wipZone.startAzimuth);
+      |               ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:403: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:403:62: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+  403 |     m_wipZone.startAzimuth = normalizeAzimuthTo360(m_wipZone.startAzimuth);
+      |                                                              ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:404: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:404:15: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+  404 |     m_wipZone.endAzimuth = normalizeAzimuthTo360(m_wipZone.endAzimuth);
+      |               ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:404: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:404:60: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+  404 |     m_wipZone.endAzimuth = normalizeAzimuthTo360(m_wipZone.endAzimuth);
+      |                                                            ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:405: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+../../src/controllers/zones/SectorScanZoneController.cpp:405:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+  405 |     m_wipZone.scanElevation = normalizeElevation(m_wipZone.scanElevation);
+      |               ^~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:405: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+../../src/controllers/zones/SectorScanZoneController.cpp:405:60: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+  405 |     m_wipZone.scanElevation = normalizeElevation(m_wipZone.scanElevation);
+      |                                                            ^~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:408: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+../../src/controllers/zones/SectorScanZoneController.cpp:408:19: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+  408 |     if (m_wipZone.scanRateDegreesPerSecond <= 0.0f) {
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:409: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+../../src/controllers/zones/SectorScanZoneController.cpp:409:19: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+  409 |         m_wipZone.scanRateDegreesPerSecond = 5.0f;  // Default 5 deg/sec
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:420: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::resetWipZone()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:420:15: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
+  420 |     m_wipZone.enabled = true;
+      |               ^~~~~~~
+      |               isEnabled
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:421: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+../../src/controllers/zones/SectorScanZoneController.cpp:421:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+  421 |     m_wipZone.scanRateDegreesPerSecond = 5.0f;
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:432: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::loadWipZoneFromSystem(int)’:
+../../src/controllers/zones/SectorScanZoneController.cpp:432:34: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
+  432 |     for (const auto& zone : data.autoSectorScanZones) {
+      |                                  ^~~~~~~~~~~~~~~~~~~
+      |                                  sectorScanZones
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:446: error: ‘class SectorScanParameterViewModel’ has no member named ‘setZoneName’; did you mean ‘setObjectName’?
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::syncWipZoneToParameterPanel()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:446:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setZoneName’; did you mean ‘setObjectName’?
+  446 |     m_paramViewModel->setZoneName(m_wipZone.name);
+      |                       ^~~~~~~~~~~
+      |                       setObjectName
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:446: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+../../src/controllers/zones/SectorScanZoneController.cpp:446:45: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+  446 |     m_paramViewModel->setZoneName(m_wipZone.name);
+      |                                             ^~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:447: error: ‘class SectorScanParameterViewModel’ has no member named ‘setEnabled’; did you mean ‘setIsEnabled’?
+../../src/controllers/zones/SectorScanZoneController.cpp:447:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setEnabled’; did you mean ‘setIsEnabled’?
+  447 |     m_paramViewModel->setEnabled(m_wipZone.enabled);
+      |                       ^~~~~~~~~~
+      |                       setIsEnabled
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:447: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
+../../src/controllers/zones/SectorScanZoneController.cpp:447:44: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
+  447 |     m_paramViewModel->setEnabled(m_wipZone.enabled);
+      |                                            ^~~~~~~
+      |                                            isEnabled
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:448: error: ‘class SectorScanParameterViewModel’ has no member named ‘setStartAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:448:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setStartAzimuth’
+  448 |     m_paramViewModel->setStartAzimuth(m_wipZone.startAzimuth);
+      |                       ^~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:448: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:448:49: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+  448 |     m_paramViewModel->setStartAzimuth(m_wipZone.startAzimuth);
+      |                                                 ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:449: error: ‘class SectorScanParameterViewModel’ has no member named ‘setEndAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:449:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setEndAzimuth’
+  449 |     m_paramViewModel->setEndAzimuth(m_wipZone.endAzimuth);
+      |                       ^~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:449: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:449:47: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+  449 |     m_paramViewModel->setEndAzimuth(m_wipZone.endAzimuth);
+      |                                               ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:450: error: ‘class SectorScanParameterViewModel’ has no member named ‘setElevation’
+../../src/controllers/zones/SectorScanZoneController.cpp:450:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setElevation’
+  450 |     m_paramViewModel->setElevation(m_wipZone.scanElevation);
+      |                       ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:450: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+../../src/controllers/zones/SectorScanZoneController.cpp:450:46: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+  450 |     m_paramViewModel->setElevation(m_wipZone.scanElevation);
+      |                                              ^~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:451: error: ‘class SectorScanParameterViewModel’ has no member named ‘setScanRate’; did you mean ‘setScanSpeed’?
+../../src/controllers/zones/SectorScanZoneController.cpp:451:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setScanRate’; did you mean ‘setScanSpeed’?
+  451 |     m_paramViewModel->setScanRate(m_wipZone.scanRateDegreesPerSecond);
+      |                       ^~~~~~~~~~~
+      |                       setScanSpeed
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:451: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+../../src/controllers/zones/SectorScanZoneController.cpp:451:45: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+  451 |     m_paramViewModel->setScanRate(m_wipZone.scanRateDegreesPerSecond);
+      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:456: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::syncParameterPanelToWipZone()’:
+../../src/controllers/zones/SectorScanZoneController.cpp:456:15: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
+  456 |     m_wipZone.name = m_paramViewModel->zoneName();
+      |               ^~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:456: error: ‘class SectorScanParameterViewModel’ has no member named ‘zoneName’
+../../src/controllers/zones/SectorScanZoneController.cpp:456:40: error: ‘class SectorScanParameterViewModel’ has no member named ‘zoneName’
+  456 |     m_wipZone.name = m_paramViewModel->zoneName();
+      |                                        ^~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:457: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
+../../src/controllers/zones/SectorScanZoneController.cpp:457:15: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
+  457 |     m_wipZone.enabled = m_paramViewModel->enabled();
+      |               ^~~~~~~
+      |               isEnabled
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:457: error: ‘class SectorScanParameterViewModel’ has no member named ‘enabled’; did you mean ‘Enabled’?
+../../src/controllers/zones/SectorScanZoneController.cpp:457:43: error: ‘class SectorScanParameterViewModel’ has no member named ‘enabled’; did you mean ‘Enabled’?
+  457 |     m_wipZone.enabled = m_paramViewModel->enabled();
+      |                                           ^~~~~~~
+      |                                           Enabled
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:458: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:458:15: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
+  458 |     m_wipZone.startAzimuth = m_paramViewModel->startAzimuth();
+      |               ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:458: error: ‘class SectorScanParameterViewModel’ has no member named ‘startAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:458:48: error: ‘class SectorScanParameterViewModel’ has no member named ‘startAzimuth’
+  458 |     m_wipZone.startAzimuth = m_paramViewModel->startAzimuth();
+      |                                                ^~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:459: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:459:15: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
+  459 |     m_wipZone.endAzimuth = m_paramViewModel->endAzimuth();
+      |               ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:459: error: ‘class SectorScanParameterViewModel’ has no member named ‘endAzimuth’
+../../src/controllers/zones/SectorScanZoneController.cpp:459:46: error: ‘class SectorScanParameterViewModel’ has no member named ‘endAzimuth’
+  459 |     m_wipZone.endAzimuth = m_paramViewModel->endAzimuth();
+      |                                              ^~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:460: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+../../src/controllers/zones/SectorScanZoneController.cpp:460:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
+  460 |     m_wipZone.scanElevation = m_paramViewModel->elevation();
+      |               ^~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:460: error: ‘class SectorScanParameterViewModel’ has no member named ‘elevation’
+../../src/controllers/zones/SectorScanZoneController.cpp:460:49: error: ‘class SectorScanParameterViewModel’ has no member named ‘elevation’
+  460 |     m_wipZone.scanElevation = m_paramViewModel->elevation();
+      |                                                 ^~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:461: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+../../src/controllers/zones/SectorScanZoneController.cpp:461:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
+  461 |     m_wipZone.scanRateDegreesPerSecond = m_paramViewModel->scanRate();
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:461: error: ‘class SectorScanParameterViewModel’ has no member named ‘scanRate’
+../../src/controllers/zones/SectorScanZoneController.cpp:461:60: error: ‘class SectorScanParameterViewModel’ has no member named ‘scanRate’
+  461 |     m_wipZone.scanRateDegreesPerSecond = m_paramViewModel->scanRate();
+      |                                                            ^~~~~~~~
 /home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:29: error: no declaration matches ‘void TRPZoneController::show()’
 ../../src/controllers/zones/TRPZoneController.cpp:29:6: error: no declaration matches ‘void TRPZoneController::show()’
    29 | void TRPZoneController::show()
       |      ^~~~~~~~~~~~~~~~~
 ../../src/controllers/zones/TRPZoneController.cpp:29:6: note: no functions named ‘void TRPZoneController::show()’
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:130: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::handleSelectExistingTRPInput()’:
-../../src/controllers/zones/TRPZoneController.cpp:130:64: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-  130 |                       QString("Delete TRP '%1'?").arg(m_wipTRP.name));
-      |                                                                ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:151: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::handleEditParametersInput()’:
-../../src/controllers/zones/TRPZoneController.cpp:151:58: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-  151 |                   QString("Save TRP '%1'?").arg(m_wipTRP.name));
-      |                                                          ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:200: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘virtual void TRPZoneController::createNewZone()’:
-../../src/controllers/zones/TRPZoneController.cpp:200:14: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-  200 |     m_wipTRP.name = QString("TRP %1").arg(m_wipTRP.id);
-      |              ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:219: error: ‘class SystemStateModel’ has no member named ‘removeTargetReferencePoint’; did you mean ‘getTargetReferencePoints’?
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘virtual void TRPZoneController::performZoneDeletion(int)’:
-../../src/controllers/zones/TRPZoneController.cpp:219:19: error: ‘class SystemStateModel’ has no member named ‘removeTargetReferencePoint’; did you mean ‘getTargetReferencePoints’?
-  219 |     stateModel()->removeTargetReferencePoint(trpId);
-      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~
-      |                   getTargetReferencePoints
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:229: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘virtual bool TRPZoneController::saveCurrentZone()’:
-../../src/controllers/zones/TRPZoneController.cpp:229:18: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-  229 |     if (m_wipTRP.name.isEmpty()) {
-      |                  ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:236: error: ‘class SystemStateModel’ has no member named ‘addTargetReferencePoint’; did you mean ‘getTargetReferencePoints’?
-../../src/controllers/zones/TRPZoneController.cpp:236:23: error: ‘class SystemStateModel’ has no member named ‘addTargetReferencePoint’; did you mean ‘getTargetReferencePoints’?
-  236 |         stateModel()->addTargetReferencePoint(m_wipTRP);
-      |                       ^~~~~~~~~~~~~~~~~~~~~~~
-      |                       getTargetReferencePoints
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:238: error: ‘class SystemStateModel’ has no member named ‘updateTargetReferencePoint’; did you mean ‘getTargetReferencePoints’?
-../../src/controllers/zones/TRPZoneController.cpp:238:23: error: ‘class SystemStateModel’ has no member named ‘updateTargetReferencePoint’; did you mean ‘getTargetReferencePoints’?
-  238 |         stateModel()->updateTargetReferencePoint(m_editingTRPId, m_wipTRP);
-      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~
-      |                       getTargetReferencePoints
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:246: error: ‘class ZoneMapViewModel’ has no member named ‘setWipTRP’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘virtual void TRPZoneController::updateWipZoneVisualization()’:
-../../src/controllers/zones/TRPZoneController.cpp:246:21: error: ‘class ZoneMapViewModel’ has no member named ‘setWipTRP’
-  246 |     mapViewModel()->setWipTRP(m_wipTRP);
-      |                     ^~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:252: error: passing ‘const TRPZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘virtual QStringList TRPZoneController::getExistingZoneNames() const’:
-../../src/controllers/zones/TRPZoneController.cpp:252:35: error: passing ‘const TRPZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-  252 |     const auto& data = stateModel()->data();
-      |                                   ^
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:256: error: ‘const struct TargetReferencePoint’ has no member named ‘name’
-../../src/controllers/zones/TRPZoneController.cpp:256:31: error: ‘const struct TargetReferencePoint’ has no member named ‘name’
-  256 |                      .arg(trp.name)
-      |                               ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:270: error: passing ‘const TRPZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘virtual int TRPZoneController::getZoneIdFromMenuIndex(int) const’:
-../../src/controllers/zones/TRPZoneController.cpp:270:35: error: passing ‘const TRPZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-  270 |     const auto& data = stateModel()->data();
-      |                                   ^
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:300: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::setupAimingPointUI()’:
-../../src/controllers/zones/TRPZoneController.cpp:300:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  300 |     viewModel()->setInstructionText("Point gimbal at target reference point, then press VAL");
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:301: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/TRPZoneController.cpp:301:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  301 |     viewModel()->setShowMenu(false);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:303: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/TRPZoneController.cpp:303:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  303 |     viewModel()->setShowConfirmButtons(false);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:310: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::setupEditParametersUI()’:
-../../src/controllers/zones/TRPZoneController.cpp:310:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  310 |     viewModel()->setInstructionText("Use UP/DOWN to navigate, VAL to confirm");
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:311: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/TRPZoneController.cpp:311:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  311 |     viewModel()->setShowMenu(false);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:313: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/TRPZoneController.cpp:313:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  313 |     viewModel()->setShowConfirmButtons(false);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:325: error: ‘class TRPParameterViewModel’ has no member named ‘navigateUp’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::routeUpToParameterPanel()’:
-../../src/controllers/zones/TRPZoneController.cpp:325:23: error: ‘class TRPParameterViewModel’ has no member named ‘navigateUp’
-  325 |     m_paramViewModel->navigateUp();
-      |                       ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:330: error: ‘class TRPParameterViewModel’ has no member named ‘navigateDown’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::routeDownToParameterPanel()’:
-../../src/controllers/zones/TRPZoneController.cpp:330:23: error: ‘class TRPParameterViewModel’ has no member named ‘navigateDown’
-  330 |     m_paramViewModel->navigateDown();
-      |                       ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:335: error: ‘class TRPParameterViewModel’ has no member named ‘confirmSelection’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::routeSelectToParameterPanel()’:
-../../src/controllers/zones/TRPZoneController.cpp:335:23: error: ‘class TRPParameterViewModel’ has no member named ‘confirmSelection’
-  335 |     m_paramViewModel->confirmSelection();
-      |                       ^~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:355: error: ‘const struct TargetReferencePoint’ has no member named ‘name’
-../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::loadWipTRPFromSystem(int)’:
-../../src/controllers/zones/TRPZoneController.cpp:355:61: error: ‘const struct TargetReferencePoint’ has no member named ‘name’
-  355 |             qDebug() << "Loaded TRP" << trpId << ":" << trp.name;
-      |                                                             ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:366: error: ‘class TRPParameterViewModel’ has no member named ‘setTRPName’
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:375: error: ‘class TRPParameterViewModel’ has no member named ‘setTRPName’
 ../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::syncWipTRPToParameterPanel()’:
-../../src/controllers/zones/TRPZoneController.cpp:366:23: error: ‘class TRPParameterViewModel’ has no member named ‘setTRPName’
-  366 |     m_paramViewModel->setTRPName(m_wipTRP.name);
+../../src/controllers/zones/TRPZoneController.cpp:375:23: error: ‘class TRPParameterViewModel’ has no member named ‘setTRPName’
+  375 |     m_paramViewModel->setTRPName(QString("TRP %1-%2").arg(m_wipTRP.locationPage).arg(m_wipTRP.trpInPage));
       |                       ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:366: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-../../src/controllers/zones/TRPZoneController.cpp:366:43: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-  366 |     m_paramViewModel->setTRPName(m_wipTRP.name);
-      |                                           ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:367: error: ‘class TRPParameterViewModel’ has no member named ‘setDescription’
-../../src/controllers/zones/TRPZoneController.cpp:367:23: error: ‘class TRPParameterViewModel’ has no member named ‘setDescription’
-  367 |     m_paramViewModel->setDescription(m_wipTRP.description);
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:376: error: ‘class TRPParameterViewModel’ has no member named ‘setDescription’
+../../src/controllers/zones/TRPZoneController.cpp:376:23: error: ‘class TRPParameterViewModel’ has no member named ‘setDescription’
+  376 |     m_paramViewModel->setDescription(QString("Az:%.1f° El:%.1f°").arg(m_wipTRP.azimuth).arg(m_wipTRP.elevation));
       |                       ^~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:367: error: ‘struct TargetReferencePoint’ has no member named ‘description’
-../../src/controllers/zones/TRPZoneController.cpp:367:47: error: ‘struct TargetReferencePoint’ has no member named ‘description’
-  367 |     m_paramViewModel->setDescription(m_wipTRP.description);
-      |                                               ^~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:368: error: ‘class TRPParameterViewModel’ has no member named ‘setAzimuth’
-../../src/controllers/zones/TRPZoneController.cpp:368:23: error: ‘class TRPParameterViewModel’ has no member named ‘setAzimuth’
-  368 |     m_paramViewModel->setAzimuth(m_wipTRP.azimuth);
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:377: error: ‘class TRPParameterViewModel’ has no member named ‘setAzimuth’
+../../src/controllers/zones/TRPZoneController.cpp:377:23: error: ‘class TRPParameterViewModel’ has no member named ‘setAzimuth’
+  377 |     m_paramViewModel->setAzimuth(m_wipTRP.azimuth);
       |                       ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:369: error: ‘class TRPParameterViewModel’ has no member named ‘setElevation’
-../../src/controllers/zones/TRPZoneController.cpp:369:23: error: ‘class TRPParameterViewModel’ has no member named ‘setElevation’
-  369 |     m_paramViewModel->setElevation(m_wipTRP.elevation);
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:378: error: ‘class TRPParameterViewModel’ has no member named ‘setElevation’
+../../src/controllers/zones/TRPZoneController.cpp:378:23: error: ‘class TRPParameterViewModel’ has no member named ‘setElevation’
+  378 |     m_paramViewModel->setElevation(m_wipTRP.elevation);
       |                       ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:374: error: ‘struct TargetReferencePoint’ has no member named ‘name’
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:385: error: ‘class TRPParameterViewModel’ has no member named ‘azimuth’
 ../../src/controllers/zones/TRPZoneController.cpp: In member function ‘void TRPZoneController::syncParameterPanelToWipTRP()’:
-../../src/controllers/zones/TRPZoneController.cpp:374:14: error: ‘struct TargetReferencePoint’ has no member named ‘name’
-  374 |     m_wipTRP.name = m_paramViewModel->trpName();
-      |              ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:374: error: ‘class TRPParameterViewModel’ has no member named ‘trpName’
-../../src/controllers/zones/TRPZoneController.cpp:374:39: error: ‘class TRPParameterViewModel’ has no member named ‘trpName’
-  374 |     m_wipTRP.name = m_paramViewModel->trpName();
-      |                                       ^~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:375: error: ‘struct TargetReferencePoint’ has no member named ‘description’
-../../src/controllers/zones/TRPZoneController.cpp:375:14: error: ‘struct TargetReferencePoint’ has no member named ‘description’
-  375 |     m_wipTRP.description = m_paramViewModel->description();
-      |              ^~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:375: error: ‘class TRPParameterViewModel’ has no member named ‘description’
-../../src/controllers/zones/TRPZoneController.cpp:375:46: error: ‘class TRPParameterViewModel’ has no member named ‘description’
-  375 |     m_wipTRP.description = m_paramViewModel->description();
-      |                                              ^~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:376: error: ‘class TRPParameterViewModel’ has no member named ‘azimuth’
-../../src/controllers/zones/TRPZoneController.cpp:376:42: error: ‘class TRPParameterViewModel’ has no member named ‘azimuth’
-  376 |     m_wipTRP.azimuth = m_paramViewModel->azimuth();
+../../src/controllers/zones/TRPZoneController.cpp:385:42: error: ‘class TRPParameterViewModel’ has no member named ‘azimuth’
+  385 |     m_wipTRP.azimuth = m_paramViewModel->azimuth();
       |                                          ^~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:377: error: ‘class TRPParameterViewModel’ has no member named ‘elevation’
-../../src/controllers/zones/TRPZoneController.cpp:377:44: error: ‘class TRPParameterViewModel’ has no member named ‘elevation’
-  377 |     m_wipTRP.elevation = m_paramViewModel->elevation();
+/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/TRPZoneController.cpp:386: error: ‘class TRPParameterViewModel’ has no member named ‘elevation’
+../../src/controllers/zones/TRPZoneController.cpp:386:44: error: ‘class TRPParameterViewModel’ has no member named ‘elevation’
+  386 |     m_wipTRP.elevation = m_paramViewModel->elevation();
       |                                            ^~~~~~~~~
 /home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.cpp:38: error: no matching function for call to ‘ZoneGeometryService::ZoneGeometryService(SafetyZoneController*)’
 ../../src/controllers/zones/SafetyZoneController.cpp: In member function ‘virtual void SafetyZoneController::initialize()’:
@@ -355,20 +476,11 @@ In file included from moc_SafetyZoneController.cpp:9:
   323 |     mapViewModel()->setWipAreaZone(m_wipZone);
       |                     ^~~~~~~~~~~~~~
       |                     setWipZone
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.cpp:329: error: passing ‘const SafetyZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-../../src/controllers/zones/SafetyZoneController.cpp: In member function ‘virtual QStringList SafetyZoneController::getExistingZoneNames() const’:
-../../src/controllers/zones/SafetyZoneController.cpp:329:35: error: passing ‘const SafetyZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-  329 |     const auto& data = stateModel()->data();
-      |                                   ^
 /home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.cpp:332: error: ‘AreaZone::Type’ has not been declared
+../../src/controllers/zones/SafetyZoneController.cpp: In member function ‘virtual QStringList SafetyZoneController::getExistingZoneNames() const’:
 ../../src/controllers/zones/SafetyZoneController.cpp:332:51: error: ‘AreaZone::Type’ has not been declared
   332 |         QString typeStr = (zone.type == AreaZone::Type::NoFire) ? "NoFire" : "NoTraverse";
       |                                                   ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.cpp:345: error: passing ‘const SafetyZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-../../src/controllers/zones/SafetyZoneController.cpp: In member function ‘virtual int SafetyZoneController::getZoneIdFromMenuIndex(int) const’:
-../../src/controllers/zones/SafetyZoneController.cpp:345:35: error: passing ‘const SafetyZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-  345 |     const auto& data = stateModel()->data();
-      |                                   ^
 /home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.cpp:375: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
 ../../src/controllers/zones/SafetyZoneController.cpp: In member function ‘void SafetyZoneController::setupAimingCorner1UI()’:
 ../../src/controllers/zones/SafetyZoneController.cpp:375:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
@@ -647,349 +759,7 @@ In file included from moc_SafetyZoneController.cpp:9:
 ../../src/controllers/zones/SafetyZoneController.cpp:532:49: error: ‘class AreaZoneParameterViewModel’ has no member named ‘rotation’
   532 |     m_wipZone.rotationAngle = m_paramViewModel->rotation();
       |                                                 ^~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:33: error: no declaration matches ‘void SectorScanZoneController::show()’
-../../src/controllers/zones/SectorScanZoneController.cpp: At global scope:
-../../src/controllers/zones/SectorScanZoneController.cpp:33:6: error: no declaration matches ‘void SectorScanZoneController::show()’
-   33 | void SectorScanZoneController::show()
-      |      ^~~~~~~~~~~~~~~~~~~~~~~~
-../../src/controllers/zones/SectorScanZoneController.cpp:33:6: note: no functions named ‘void SectorScanZoneController::show()’
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:138: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::handleSelectExistingZoneInput()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:138:71: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-  138 |                       QString("Delete scan zone '%1'?").arg(m_wipZone.name));
-      |                                                                       ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:169: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::handleEditParametersInput()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:169:65: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-  169 |                   QString("Save scan zone '%1'?").arg(m_wipZone.name));
-      |                                                                 ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:181: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::handleConfirmSaveInput()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:181:40: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-  181 |             emit zoneCreated(ZoneType::AutoSectorScanZone);
-      |                                        ^~~~~~~~~~~~~~~~~~
-      |                                        AutoSectorScan
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:183: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-../../src/controllers/zones/SectorScanZoneController.cpp:183:41: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-  183 |             emit zoneModified(ZoneType::AutoSectorScanZone, m_editingZoneId);
-      |                                         ^~~~~~~~~~~~~~~~~~
-      |                                         AutoSectorScan
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:196: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::handleConfirmDeleteInput()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:196:32: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-  196 |     emit zoneDeleted(ZoneType::AutoSectorScanZone, m_editingZoneId);
-      |                                ^~~~~~~~~~~~~~~~~~
-      |                                AutoSectorScan
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:215: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual void SectorScanZoneController::createNewZone()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:215:34: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-  215 |     for (const auto& zone : data.autoSectorScanZones) {
-      |                                  ^~~~~~~~~~~~~~~~~~~
-      |                                  sectorScanZones
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:219: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-../../src/controllers/zones/SectorScanZoneController.cpp:219:15: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-  219 |     m_wipZone.name = QString("Scan %1").arg(m_wipZone.id);
-      |               ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:238: error: ‘class SystemStateModel’ has no member named ‘removeAutoSectorScanZone’; did you mean ‘deleteSectorScanZone’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual void SectorScanZoneController::performZoneDeletion(int)’:
-../../src/controllers/zones/SectorScanZoneController.cpp:238:19: error: ‘class SystemStateModel’ has no member named ‘removeAutoSectorScanZone’; did you mean ‘deleteSectorScanZone’?
-  238 |     stateModel()->removeAutoSectorScanZone(zoneId);
-      |                   ^~~~~~~~~~~~~~~~~~~~~~~~
-      |                   deleteSectorScanZone
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:248: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual bool SectorScanZoneController::saveCurrentZone()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:248:19: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-  248 |     if (m_wipZone.name.isEmpty()) {
-      |                   ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:253: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-../../src/controllers/zones/SectorScanZoneController.cpp:253:19: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-  253 |     if (m_wipZone.scanRateDegreesPerSecond <= 0.0f) {
-      |                   ^~~~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:260: error: ‘class SystemStateModel’ has no member named ‘addAutoSectorScanZone’; did you mean ‘addSectorScanZone’?
-../../src/controllers/zones/SectorScanZoneController.cpp:260:23: error: ‘class SystemStateModel’ has no member named ‘addAutoSectorScanZone’; did you mean ‘addSectorScanZone’?
-  260 |         stateModel()->addAutoSectorScanZone(m_wipZone);
-      |                       ^~~~~~~~~~~~~~~~~~~~~
-      |                       addSectorScanZone
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:262: error: ‘class SystemStateModel’ has no member named ‘updateAutoSectorScanZone’; did you mean ‘deleteSectorScanZone’?
-../../src/controllers/zones/SectorScanZoneController.cpp:262:23: error: ‘class SystemStateModel’ has no member named ‘updateAutoSectorScanZone’; did you mean ‘deleteSectorScanZone’?
-  262 |         stateModel()->updateAutoSectorScanZone(m_editingZoneId, m_wipZone);
-      |                       ^~~~~~~~~~~~~~~~~~~~~~~~
-      |                       deleteSectorScanZone
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:275: error: ‘class ZoneMapViewModel’ has no member named ‘setWipSectorScanZone’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual void SectorScanZoneController::updateWipZoneVisualization()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:275:21: error: ‘class ZoneMapViewModel’ has no member named ‘setWipSectorScanZone’
-  275 |     mapViewModel()->setWipSectorScanZone(m_wipZone);
-      |                     ^~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:281: error: passing ‘const SectorScanZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual QStringList SectorScanZoneController::getExistingZoneNames() const’:
-../../src/controllers/zones/SectorScanZoneController.cpp:281:35: error: passing ‘const SectorScanZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-  281 |     const auto& data = stateModel()->data();
-      |                                   ^
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:283: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-../../src/controllers/zones/SectorScanZoneController.cpp:283:34: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-  283 |     for (const auto& zone : data.autoSectorScanZones) {
-      |                                  ^~~~~~~~~~~~~~~~~~~
-      |                                  sectorScanZones
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:299: error: passing ‘const SectorScanZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘virtual int SectorScanZoneController::getZoneIdFromMenuIndex(int) const’:
-../../src/controllers/zones/SectorScanZoneController.cpp:299:35: error: passing ‘const SectorScanZoneController’ as ‘this’ argument discards qualifiers [-fpermissive]
-  299 |     const auto& data = stateModel()->data();
-      |                                   ^
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:301: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-../../src/controllers/zones/SectorScanZoneController.cpp:301:44: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-  301 |     if (menuIndex < 0 || menuIndex >= data.autoSectorScanZones.size()) {
-      |                                            ^~~~~~~~~~~~~~~~~~~
-      |                                            sectorScanZones
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:305: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-../../src/controllers/zones/SectorScanZoneController.cpp:305:17: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-  305 |     return data.autoSectorScanZones[menuIndex].id;
-      |                 ^~~~~~~~~~~~~~~~~~~
-      |                 sectorScanZones
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:329: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::setupAimingPoint1UI()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:329:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  329 |     viewModel()->setInstructionText("Point gimbal at scan start position, then press VAL");
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:330: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/SectorScanZoneController.cpp:330:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  330 |     viewModel()->setShowMenu(false);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:332: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/SectorScanZoneController.cpp:332:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  332 |     viewModel()->setShowConfirmButtons(false);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:339: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::setupAimingPoint2UI()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:339:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  339 |     viewModel()->setInstructionText("Point gimbal at scan end position, then press VAL");
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:340: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/SectorScanZoneController.cpp:340:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  340 |     viewModel()->setShowMenu(false);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:342: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/SectorScanZoneController.cpp:342:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  342 |     viewModel()->setShowConfirmButtons(false);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:348: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::setupEditParametersUI()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:348:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  348 |     viewModel()->setInstructionText("Use UP/DOWN to navigate, VAL to confirm");
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:349: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/SectorScanZoneController.cpp:349:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  349 |     viewModel()->setShowMenu(false);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:351: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/SectorScanZoneController.cpp:351:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  351 |     viewModel()->setShowConfirmButtons(false);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:363: error: ‘class SectorScanParameterViewModel’ has no member named ‘navigateUp’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::routeUpToParameterPanel()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:363:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘navigateUp’
-  363 |     m_paramViewModel->navigateUp();
-      |                       ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:368: error: ‘class SectorScanParameterViewModel’ has no member named ‘navigateDown’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::routeDownToParameterPanel()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:368:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘navigateDown’
-  368 |     m_paramViewModel->navigateDown();
-      |                       ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:373: error: ‘class SectorScanParameterViewModel’ has no member named ‘confirmSelection’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::routeSelectToParameterPanel()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:373:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘confirmSelection’
-  373 |     m_paramViewModel->confirmSelection();
-      |                       ^~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:384: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::calculateSectorGeometry()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:384:15: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-  384 |     m_wipZone.startAzimuth = m_point1Az;
-      |               ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:385: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:385:15: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-  385 |     m_wipZone.endAzimuth = m_point2Az;
-      |               ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:386: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-../../src/controllers/zones/SectorScanZoneController.cpp:386:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-  386 |     m_wipZone.scanElevation = (m_point1El + m_point2El) / 2.0f;
-      |               ^~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:389: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:389:37: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-  389 |     float span = std::abs(m_wipZone.endAzimuth - m_wipZone.startAzimuth);
-      |                                     ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:389: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:389:60: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-  389 |     float span = std::abs(m_wipZone.endAzimuth - m_wipZone.startAzimuth);
-      |                                                            ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:394: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:394:41: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-  394 |     qDebug() << "  Start:" << m_wipZone.startAzimuth << "End:" << m_wipZone.endAzimuth;
-      |                                         ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:394: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:394:77: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-  394 |     qDebug() << "  Start:" << m_wipZone.startAzimuth << "End:" << m_wipZone.endAzimuth;
-      |                                                                             ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:403: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::validateSectorGeometry()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:403:15: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-  403 |     m_wipZone.startAzimuth = normalizeAzimuthTo360(m_wipZone.startAzimuth);
-      |               ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:403: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:403:62: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-  403 |     m_wipZone.startAzimuth = normalizeAzimuthTo360(m_wipZone.startAzimuth);
-      |                                                              ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:404: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:404:15: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-  404 |     m_wipZone.endAzimuth = normalizeAzimuthTo360(m_wipZone.endAzimuth);
-      |               ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:404: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:404:60: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-  404 |     m_wipZone.endAzimuth = normalizeAzimuthTo360(m_wipZone.endAzimuth);
-      |                                                            ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:405: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-../../src/controllers/zones/SectorScanZoneController.cpp:405:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-  405 |     m_wipZone.scanElevation = normalizeElevation(m_wipZone.scanElevation);
-      |               ^~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:405: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-../../src/controllers/zones/SectorScanZoneController.cpp:405:60: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-  405 |     m_wipZone.scanElevation = normalizeElevation(m_wipZone.scanElevation);
-      |                                                            ^~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:408: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-../../src/controllers/zones/SectorScanZoneController.cpp:408:19: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-  408 |     if (m_wipZone.scanRateDegreesPerSecond <= 0.0f) {
-      |                   ^~~~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:409: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-../../src/controllers/zones/SectorScanZoneController.cpp:409:19: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-  409 |         m_wipZone.scanRateDegreesPerSecond = 5.0f;  // Default 5 deg/sec
-      |                   ^~~~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:420: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::resetWipZone()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:420:15: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
-  420 |     m_wipZone.enabled = true;
-      |               ^~~~~~~
-      |               isEnabled
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:421: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-../../src/controllers/zones/SectorScanZoneController.cpp:421:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-  421 |     m_wipZone.scanRateDegreesPerSecond = 5.0f;
-      |               ^~~~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:432: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::loadWipZoneFromSystem(int)’:
-../../src/controllers/zones/SectorScanZoneController.cpp:432:34: error: ‘const struct SystemStateData’ has no member named ‘autoSectorScanZones’; did you mean ‘sectorScanZones’?
-  432 |     for (const auto& zone : data.autoSectorScanZones) {
-      |                                  ^~~~~~~~~~~~~~~~~~~
-      |                                  sectorScanZones
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:446: error: ‘class SectorScanParameterViewModel’ has no member named ‘setZoneName’; did you mean ‘setObjectName’?
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::syncWipZoneToParameterPanel()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:446:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setZoneName’; did you mean ‘setObjectName’?
-  446 |     m_paramViewModel->setZoneName(m_wipZone.name);
-      |                       ^~~~~~~~~~~
-      |                       setObjectName
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:446: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-../../src/controllers/zones/SectorScanZoneController.cpp:446:45: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-  446 |     m_paramViewModel->setZoneName(m_wipZone.name);
-      |                                             ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:447: error: ‘class SectorScanParameterViewModel’ has no member named ‘setEnabled’; did you mean ‘setIsEnabled’?
-../../src/controllers/zones/SectorScanZoneController.cpp:447:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setEnabled’; did you mean ‘setIsEnabled’?
-  447 |     m_paramViewModel->setEnabled(m_wipZone.enabled);
-      |                       ^~~~~~~~~~
-      |                       setIsEnabled
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:447: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
-../../src/controllers/zones/SectorScanZoneController.cpp:447:44: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
-  447 |     m_paramViewModel->setEnabled(m_wipZone.enabled);
-      |                                            ^~~~~~~
-      |                                            isEnabled
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:448: error: ‘class SectorScanParameterViewModel’ has no member named ‘setStartAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:448:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setStartAzimuth’
-  448 |     m_paramViewModel->setStartAzimuth(m_wipZone.startAzimuth);
-      |                       ^~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:448: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:448:49: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-  448 |     m_paramViewModel->setStartAzimuth(m_wipZone.startAzimuth);
-      |                                                 ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:449: error: ‘class SectorScanParameterViewModel’ has no member named ‘setEndAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:449:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setEndAzimuth’
-  449 |     m_paramViewModel->setEndAzimuth(m_wipZone.endAzimuth);
-      |                       ^~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:449: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:449:47: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-  449 |     m_paramViewModel->setEndAzimuth(m_wipZone.endAzimuth);
-      |                                               ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:450: error: ‘class SectorScanParameterViewModel’ has no member named ‘setElevation’
-../../src/controllers/zones/SectorScanZoneController.cpp:450:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setElevation’
-  450 |     m_paramViewModel->setElevation(m_wipZone.scanElevation);
-      |                       ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:450: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-../../src/controllers/zones/SectorScanZoneController.cpp:450:46: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-  450 |     m_paramViewModel->setElevation(m_wipZone.scanElevation);
-      |                                              ^~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:451: error: ‘class SectorScanParameterViewModel’ has no member named ‘setScanRate’; did you mean ‘setScanSpeed’?
-../../src/controllers/zones/SectorScanZoneController.cpp:451:23: error: ‘class SectorScanParameterViewModel’ has no member named ‘setScanRate’; did you mean ‘setScanSpeed’?
-  451 |     m_paramViewModel->setScanRate(m_wipZone.scanRateDegreesPerSecond);
-      |                       ^~~~~~~~~~~
-      |                       setScanSpeed
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:451: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-../../src/controllers/zones/SectorScanZoneController.cpp:451:45: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-  451 |     m_paramViewModel->setScanRate(m_wipZone.scanRateDegreesPerSecond);
-      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:456: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-../../src/controllers/zones/SectorScanZoneController.cpp: In member function ‘void SectorScanZoneController::syncParameterPanelToWipZone()’:
-../../src/controllers/zones/SectorScanZoneController.cpp:456:15: error: ‘struct AutoSectorScanZone’ has no member named ‘name’
-  456 |     m_wipZone.name = m_paramViewModel->zoneName();
-      |               ^~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:456: error: ‘class SectorScanParameterViewModel’ has no member named ‘zoneName’
-../../src/controllers/zones/SectorScanZoneController.cpp:456:40: error: ‘class SectorScanParameterViewModel’ has no member named ‘zoneName’
-  456 |     m_wipZone.name = m_paramViewModel->zoneName();
-      |                                        ^~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:457: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
-../../src/controllers/zones/SectorScanZoneController.cpp:457:15: error: ‘struct AutoSectorScanZone’ has no member named ‘enabled’; did you mean ‘isEnabled’?
-  457 |     m_wipZone.enabled = m_paramViewModel->enabled();
-      |               ^~~~~~~
-      |               isEnabled
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:457: error: ‘class SectorScanParameterViewModel’ has no member named ‘enabled’; did you mean ‘Enabled’?
-../../src/controllers/zones/SectorScanZoneController.cpp:457:43: error: ‘class SectorScanParameterViewModel’ has no member named ‘enabled’; did you mean ‘Enabled’?
-  457 |     m_wipZone.enabled = m_paramViewModel->enabled();
-      |                                           ^~~~~~~
-      |                                           Enabled
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:458: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:458:15: error: ‘struct AutoSectorScanZone’ has no member named ‘startAzimuth’
-  458 |     m_wipZone.startAzimuth = m_paramViewModel->startAzimuth();
-      |               ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:458: error: ‘class SectorScanParameterViewModel’ has no member named ‘startAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:458:48: error: ‘class SectorScanParameterViewModel’ has no member named ‘startAzimuth’
-  458 |     m_wipZone.startAzimuth = m_paramViewModel->startAzimuth();
-      |                                                ^~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:459: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:459:15: error: ‘struct AutoSectorScanZone’ has no member named ‘endAzimuth’
-  459 |     m_wipZone.endAzimuth = m_paramViewModel->endAzimuth();
-      |               ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:459: error: ‘class SectorScanParameterViewModel’ has no member named ‘endAzimuth’
-../../src/controllers/zones/SectorScanZoneController.cpp:459:46: error: ‘class SectorScanParameterViewModel’ has no member named ‘endAzimuth’
-  459 |     m_wipZone.endAzimuth = m_paramViewModel->endAzimuth();
-      |                                              ^~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:460: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-../../src/controllers/zones/SectorScanZoneController.cpp:460:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanElevation’
-  460 |     m_wipZone.scanElevation = m_paramViewModel->elevation();
-      |               ^~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:460: error: ‘class SectorScanParameterViewModel’ has no member named ‘elevation’
-../../src/controllers/zones/SectorScanZoneController.cpp:460:49: error: ‘class SectorScanParameterViewModel’ has no member named ‘elevation’
-  460 |     m_wipZone.scanElevation = m_paramViewModel->elevation();
-      |                                                 ^~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:461: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-../../src/controllers/zones/SectorScanZoneController.cpp:461:15: error: ‘struct AutoSectorScanZone’ has no member named ‘scanRateDegreesPerSecond’
-  461 |     m_wipZone.scanRateDegreesPerSecond = m_paramViewModel->scanRate();
-      |               ^~~~~~~~~~~~~~~~~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SectorScanZoneController.cpp:461: error: ‘class SectorScanParameterViewModel’ has no member named ‘scanRate’
-../../src/controllers/zones/SectorScanZoneController.cpp:461:60: error: ‘class SectorScanParameterViewModel’ has no member named ‘scanRate’
-  461 |     m_wipZone.scanRateDegreesPerSecond = m_paramViewModel->scanRate();
-      |                                                            ^~~~~~~~
+:-1: error: [Makefile:26757: ZoneManagementCoordinator.o] Error 1
 /home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/SafetyZoneController.cpp:36: error: ‘staticMetaObject’ is not a member of ‘ZoneGeometryService’
 In file included from ../../src/controllers/zones/SafetyZoneController.cpp:7:
 ../../src/services/servicemanager.h: In instantiation of ‘T* ServiceManager::get() [with T = ZoneGeometryService]’:
@@ -997,132 +767,3 @@ In file included from ../../src/controllers/zones/SafetyZoneController.cpp:7:
 ../../src/services/servicemanager.h:19:69: error: ‘staticMetaObject’ is not a member of ‘ZoneGeometryService’
    19 |         return static_cast<T*>(m_services.value(T::staticMetaObject.className()));
       |                                                    ~~~~~~~~~~~~~~~~~^~~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:184: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-../../src/controllers/zones/BaseZoneController.cpp: In member function ‘void BaseZoneController::navigateMenuUp()’:
-../../src/controllers/zones/BaseZoneController.cpp:184:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-  184 |     m_viewModel->setCurrentMenuIndex(m_currentMenuIndex);
-      |                  ^~~~~~~~~~~~~~~~~~~
-      |                  setCurrentIndex
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:195: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-../../src/controllers/zones/BaseZoneController.cpp: In member function ‘void BaseZoneController::navigateMenuDown()’:
-../../src/controllers/zones/BaseZoneController.cpp:195:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-  195 |     m_viewModel->setCurrentMenuIndex(m_currentMenuIndex);
-      |                  ^~~~~~~~~~~~~~~~~~~
-      |                  setCurrentIndex
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:202: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setMenuItems’; did you mean ‘setMenuOptions’?
-../../src/controllers/zones/BaseZoneController.cpp: In member function ‘void BaseZoneController::setMenuItems(const QStringList&)’:
-../../src/controllers/zones/BaseZoneController.cpp:202:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setMenuItems’; did you mean ‘setMenuOptions’?
-  202 |     m_viewModel->setMenuItems(items);
-      |                  ^~~~~~~~~~~~
-      |                  setMenuOptions
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:203: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-../../src/controllers/zones/BaseZoneController.cpp:203:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-  203 |     m_viewModel->setCurrentMenuIndex(0);
-      |                  ^~~~~~~~~~~~~~~~~~~
-      |                  setCurrentIndex
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:221: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/BaseZoneController.cpp: In member function ‘void BaseZoneController::setupMenuUI(const QString&, const QStringList&)’:
-../../src/controllers/zones/BaseZoneController.cpp:221:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  221 |     m_viewModel->setInstructionText("");
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:222: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/BaseZoneController.cpp:222:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  222 |     m_viewModel->setShowMenu(true);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:224: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/BaseZoneController.cpp:224:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  224 |     m_viewModel->setShowConfirmButtons(false);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:231: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/BaseZoneController.cpp: In member function ‘void BaseZoneController::setupMessageUI(const QString&)’:
-../../src/controllers/zones/BaseZoneController.cpp:231:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  231 |     m_viewModel->setInstructionText(message);
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:232: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/BaseZoneController.cpp:232:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  232 |     m_viewModel->setShowMenu(false);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:234: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/BaseZoneController.cpp:234:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  234 |     m_viewModel->setShowConfirmButtons(false);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:240: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/BaseZoneController.cpp: In member function ‘void BaseZoneController::setupConfirmUI(const QString&, const QString&)’:
-../../src/controllers/zones/BaseZoneController.cpp:240:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  240 |     m_viewModel->setInstructionText(question);
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:241: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/BaseZoneController.cpp:241:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  241 |     m_viewModel->setShowMenu(false);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/BaseZoneController.cpp:243: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/BaseZoneController.cpp:243:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  243 |     m_viewModel->setShowConfirmButtons(true);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:190: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::onUpButtonPressed()’:
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:190:26: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-  190 |             m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
-      |                          ^~~~~~~~~~~~~~~~~~~
-      |                          setCurrentIndex
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:219: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::onDownButtonPressed()’:
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:219:26: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-  219 |             m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
-      |                          ^~~~~~~~~~~~~~~~~~~
-      |                          setCurrentIndex
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:272: error: ‘AreaZone’ is not a member of ‘ZoneType’
-../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::selectZoneType()’:
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:272:42: error: ‘AreaZone’ is not a member of ‘ZoneType’
-  272 |         transitionToController(ZoneType::AreaZone);
-      |                                          ^~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:274: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:274:42: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-  274 |         transitionToController(ZoneType::AutoSectorScanZone);
-      |                                          ^~~~~~~~~~~~~~~~~~
-      |                                          AutoSectorScan
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:291: error: ‘AreaZone’ is not a member of ‘ZoneType’
-../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::transitionToController(ZoneType)’:
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:291:24: error: ‘AreaZone’ is not a member of ‘ZoneType’
-  291 |         case ZoneType::AreaZone:
-      |                        ^~~~~~~~
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:296: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:296:24: error: ‘AutoSectorScanZone’ is not a member of ‘ZoneType’; did you mean ‘AutoSectorScan’?
-  296 |         case ZoneType::AutoSectorScanZone:
-      |                        ^~~~~~~~~~~~~~~~~~
-      |                        AutoSectorScan
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:369: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp: In member function ‘void ZoneManagementCoordinator::setupZoneTypeSelectionUI()’:
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:369:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setInstructionText’; did you mean ‘setInstruction’?
-  369 |     m_viewModel->setInstructionText("Select zone type to manage:");
-      |                  ^~~~~~~~~~~~~~~~~~
-      |                  setInstruction
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:370: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:370:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowMenu’; did you mean ‘setShowMap’?
-  370 |     m_viewModel->setShowMenu(true);
-      |                  ^~~~~~~~~~~
-      |                  setShowMap
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:372: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:372:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setShowConfirmButtons’; did you mean ‘setShowConfirmDialog’?
-  372 |     m_viewModel->setShowConfirmButtons(false);
-      |                  ^~~~~~~~~~~~~~~~~~~~~
-      |                  setShowConfirmDialog
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:373: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setMenuItems’; did you mean ‘setMenuOptions’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:373:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setMenuItems’; did you mean ‘setMenuOptions’?
-  373 |     m_viewModel->setMenuItems(m_zoneTypeMenuItems);
-      |                  ^~~~~~~~~~~~
-      |                  setMenuOptions
-/home/rapit/Desktop/Projet_RCWS/QT6-qml-migration/src/controllers/zones/ZoneManagementCoordinator.cpp:374: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-../../src/controllers/zones/ZoneManagementCoordinator.cpp:374:18: error: ‘class ZoneDefinitionViewModel’ has no member named ‘setCurrentMenuIndex’; did you mean ‘setCurrentIndex’?
-  374 |     m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
-      |                  ^~~~~~~~~~~~~~~~~~~
-      |                  setCurrentIndex

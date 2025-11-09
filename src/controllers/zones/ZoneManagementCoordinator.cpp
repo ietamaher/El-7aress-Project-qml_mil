@@ -187,7 +187,7 @@ void ZoneManagementCoordinator::onUpButtonPressed()
             if (m_zoneTypeMenuIndex < 0) {
                 m_zoneTypeMenuIndex = m_zoneTypeMenuItems.size() - 1;
             }
-            m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
+            m_viewModel->setCurrentIndex(m_zoneTypeMenuIndex);
             break;
 
         case CoordinatorState::ManagingSafetyZones:
@@ -216,7 +216,7 @@ void ZoneManagementCoordinator::onDownButtonPressed()
             if (m_zoneTypeMenuIndex >= m_zoneTypeMenuItems.size()) {
                 m_zoneTypeMenuIndex = 0;
             }
-            m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
+            m_viewModel->setCurrentIndex(m_zoneTypeMenuIndex);
             break;
 
         case CoordinatorState::ManagingSafetyZones:
@@ -269,9 +269,9 @@ void ZoneManagementCoordinator::selectZoneType()
     QString selection = m_zoneTypeMenuItems[m_zoneTypeMenuIndex];
 
     if (selection == "Safety Zones (NoFire/NoTraverse)") {
-        transitionToController(ZoneType::AreaZone);
+        transitionToController(ZoneType::NoFire);
     } else if (selection == "Auto Sector Scan Zones") {
-        transitionToController(ZoneType::AutoSectorScanZone);
+        transitionToController(ZoneType::AutoSectorScan);
     } else if (selection == "Target Reference Points (TRP)") {
         transitionToController(ZoneType::TargetReferencePoint);
     } else if (selection == "Exit") {
@@ -288,12 +288,12 @@ void ZoneManagementCoordinator::transitionToController(ZoneType type)
     m_selectedZoneType = type;
 
     switch (type) {
-        case ZoneType::AreaZone:
+        case ZoneType::NoFire:
             m_currentState = CoordinatorState::ManagingSafetyZones;
             m_safetyZoneController->show();
             break;
 
-        case ZoneType::AutoSectorScanZone:
+        case ZoneType::AutoSectorScan:
             m_currentState = CoordinatorState::ManagingSectorScans;
             m_sectorScanController->show();
             break;
@@ -366,12 +366,12 @@ void ZoneManagementCoordinator::setupZoneTypeSelectionUI()
     m_zoneTypeMenuIndex = 0;
 
     m_viewModel->setTitle("Zone Management");
-    m_viewModel->setInstructionText("Select zone type to manage:");
-    m_viewModel->setShowMenu(true);
+    m_viewModel->setInstruction("Select zone type to manage:");
+    m_viewModel->setShowMainMenu(true);
     m_viewModel->setShowParameterPanel(false);
-    m_viewModel->setShowConfirmButtons(false);
-    m_viewModel->setMenuItems(m_zoneTypeMenuItems);
-    m_viewModel->setCurrentMenuIndex(m_zoneTypeMenuIndex);
+    m_viewModel->setShowConfirmDialog(false);
+    m_viewModel->setMenuOptions(m_zoneTypeMenuItems);
+    m_viewModel->setCurrentIndex(m_zoneTypeMenuIndex);
 
     m_currentState = CoordinatorState::SelectingZoneType;
 }

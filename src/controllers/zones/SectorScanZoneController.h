@@ -39,6 +39,7 @@ public:
     QString zoneTypeName() const override { return "SectorScan"; }
 
     void initialize() override;
+    void show();
     void setParameterViewModel(SectorScanParameterViewModel* paramViewModel);
 
 public slots:

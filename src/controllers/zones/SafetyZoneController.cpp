@@ -372,30 +372,30 @@ void SafetyZoneController::setupSelectExistingZoneUI(const QString& action)
 void SafetyZoneController::setupAimingCorner1UI()
 {
     viewModel()->setTitle("Aim Corner 1");
-    viewModel()->setInstructionText("Point gimbal at first corner, then press VAL");
-    viewModel()->setShowMenu(false);
+    viewModel()->setInstruction("Point gimbal at first corner, then press VAL");
+    viewModel()->setShowMainMenu(false);
     viewModel()->setShowParameterPanel(false);
-    viewModel()->setShowConfirmButtons(false);
+    viewModel()->setShowConfirmDialog(false);
     transitionToState(State::AimingPoint);
 }
 
 void SafetyZoneController::setupAimingCorner2UI()
 {
     viewModel()->setTitle("Aim Corner 2");
-    viewModel()->setInstructionText("Point gimbal at second corner, then press VAL");
-    viewModel()->setShowMenu(false);
+    viewModel()->setInstruction("Point gimbal at second corner, then press VAL");
+    viewModel()->setShowMainMenu(false);
     viewModel()->setShowParameterPanel(false);
-    viewModel()->setShowConfirmButtons(false);
+    viewModel()->setShowConfirmDialog(false);
     // State remains AimingPoint
 }
 
 void SafetyZoneController::setupEditParametersUI()
 {
     viewModel()->setTitle("Edit Zone Parameters");
-    viewModel()->setInstructionText("Use UP/DOWN to navigate, VAL to confirm");
-    viewModel()->setShowMenu(false);
+    viewModel()->setInstruction("Use UP/DOWN to navigate, VAL to confirm");
+    viewModel()->setShowMainMenu(false);
     viewModel()->setShowParameterPanel(true);
-    viewModel()->setShowConfirmButtons(false);
+    viewModel()->setShowConfirmDialog(false);
 
     // Sync WIP zone to parameter panel
     syncWipZoneToParameterPanel();

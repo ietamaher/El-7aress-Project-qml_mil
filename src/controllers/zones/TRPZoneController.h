@@ -38,6 +38,7 @@ public:
     QString zoneTypeName() const override { return "TRP"; }
 
     void initialize() override;
+    void show();
     void setParameterViewModel(TRPParameterViewModel* paramViewModel);
 
 public slots:

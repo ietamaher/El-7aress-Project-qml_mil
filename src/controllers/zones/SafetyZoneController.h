@@ -38,6 +38,7 @@ public:
     QString zoneTypeName() const override { return "SafetyZone"; }
 
     void initialize() override;
+    void show();
     void setParameterViewModel(AreaZoneParameterViewModel* paramViewModel);
 
 public slots:

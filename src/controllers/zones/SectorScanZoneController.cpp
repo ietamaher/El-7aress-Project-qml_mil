@@ -135,7 +135,7 @@ void SectorScanZoneController::handleSelectExistingZoneInput()
         m_editingZoneId = zoneId;
         loadWipZoneFromSystem(zoneId);
         setupConfirmUI("Confirm Delete",
-                      QString("Delete scan zone '%1'?").arg(m_wipZone.name));
+                      QString("Delete scan zone #%1?").arg(m_wipZone.id));
         transitionToState(State::ConfirmDelete);
     }
 }
@@ -166,7 +166,7 @@ void SectorScanZoneController::handleEditParametersInput()
 {
     syncParameterPanelToWipZone();
     setupConfirmUI("Confirm Save",
-                  QString("Save scan zone '%1'?").arg(m_wipZone.name));
+                  QString("Save scan zone #%1?").arg(m_wipZone.id));
     transitionToState(State::ConfirmSave);
 }
 
@@ -178,9 +178,9 @@ void SectorScanZoneController::handleConfirmSaveInput()
         showSuccessMessage(msg);
 
         if (m_editingZoneId < 0) {
-            emit zoneCreated(ZoneType::AutoSectorScanZone);
+            emit zoneCreated(ZoneType::AutoSectorScan);
         } else {
-            emit zoneModified(ZoneType::AutoSectorScanZone, m_editingZoneId);
+            emit zoneModified(ZoneType::AutoSectorScan, m_editingZoneId);
         }
 
         resetWipZone();
@@ -193,7 +193,7 @@ void SectorScanZoneController::handleConfirmDeleteInput()
 {
     performZoneDeletion(m_editingZoneId);
     showSuccessMessage("Scan zone deleted successfully");
-    emit zoneDeleted(ZoneType::AutoSectorScanZone, m_editingZoneId);
+    emit zoneDeleted(ZoneType::AutoSectorScan, m_editingZoneId);
     resetWipZone();
 }
 
@@ -212,11 +212,10 @@ void SectorScanZoneController::createNewZone()
     // Assign next available ID
     const auto& data = stateModel()->data();
     int maxId = 0;
-    for (const auto& zone : data.autoSectorScanZones) {
+    for (const auto& zone : data.sectorScanZones) {
         if (zone.id > maxId) maxId = zone.id;
     }
     m_wipZone.id = maxId + 1;
-    m_wipZone.name = QString("Scan %1").arg(m_wipZone.id);
 
     setupAimingPoint1UI();
 }
@@ -235,7 +234,7 @@ void SectorScanZoneController::loadZoneForModification(int zoneId)
 void SectorScanZoneController::performZoneDeletion(int zoneId)
 {
     qDebug() << "SectorScanZoneController: Deleting zone" << zoneId;
-    stateModel()->removeAutoSectorScanZone(zoneId);
+    stateModel()->deleteSectorScanZone(zoneId);
 }
 
 bool SectorScanZoneController::saveCurrentZone()
@@ -245,21 +244,16 @@ bool SectorScanZoneController::saveCurrentZone()
     syncParameterPanelToWipZone();
 
     // Validate
-    if (m_wipZone.name.isEmpty()) {
-        showErrorMessage("Zone name cannot be empty");
-        return false;
-    }
-
-    if (m_wipZone.scanRateDegreesPerSecond <= 0.0f) {
+    if (m_wipZone.scanSpeed <= 0.0f) {
         showErrorMessage("Scan rate must be positive");
         return false;
     }
 
     // Save to system state
     if (m_editingZoneId < 0) {
-        stateModel()->addAutoSectorScanZone(m_wipZone);
+        stateModel()->addSectorScanZone(m_wipZone);
     } else {
-        stateModel()->updateAutoSectorScanZone(m_editingZoneId, m_wipZone);
+        stateModel()->modifySectorScanZone(m_editingZoneId, m_wipZone);
     }
 
     return true;
@@ -272,7 +266,21 @@ void SectorScanZoneController::updateWipZoneVisualization()
         return;
     }
 
-    mapViewModel()->setWipSectorScanZone(m_wipZone);
+    // Convert AutoSectorScanZone to QVariantMap for visualization
+    QVariantMap zoneMap;
+    zoneMap["id"] = m_wipZone.id;
+    zoneMap["isEnabled"] = m_wipZone.isEnabled;
+    zoneMap["az1"] = m_wipZone.az1;
+    zoneMap["el1"] = m_wipZone.el1;
+    zoneMap["az2"] = m_wipZone.az2;
+    zoneMap["el2"] = m_wipZone.el2;
+    zoneMap["scanSpeed"] = m_wipZone.scanSpeed;
+
+    // definingStart = point1 being defined, definingEnd = point2 being defined
+    bool definingStart = !m_point1Defined;
+    bool definingEnd = m_point1Defined && !m_point2Az && !m_point2El;
+
+    mapViewModel()->setWipZone(zoneMap, static_cast<int>(ZoneType::AutoSectorScan), definingStart, definingEnd);
 }
 
 QStringList SectorScanZoneController::getExistingZoneNames() const
@@ -280,7 +288,7 @@ QStringList SectorScanZoneController::getExistingZoneNames() const
     QStringList names;
     const auto& data = stateModel()->data();
 
-    for (const auto& zone : data.autoSectorScanZones) {
+    for (const auto& zone : data.sectorScanZones) {
         names << QString("%1 (%.1f°-%.1f°)")
                      .arg(zone.name)
                      .arg(zone.startAzimuth)
@@ -298,11 +306,11 @@ int SectorScanZoneController::getZoneIdFromMenuIndex(int menuIndex) const
 {
     const auto& data = stateModel()->data();
 
-    if (menuIndex < 0 || menuIndex >= data.autoSectorScanZones.size()) {
+    if (menuIndex < 0 || menuIndex >= data.sectorScanZones.size()) {
         return -1;
     }
 
-    return data.autoSectorScanZones[menuIndex].id;
+    return data.sectorScanZones[menuIndex].id;
 }
 
 // ============================================================================
@@ -326,29 +334,29 @@ void SectorScanZoneController::setupSelectExistingZoneUI(const QString& action)
 void SectorScanZoneController::setupAimingPoint1UI()
 {
     viewModel()->setTitle("Aim Scan Start");
-    viewModel()->setInstructionText("Point gimbal at scan start position, then press VAL");
-    viewModel()->setShowMenu(false);
+    viewModel()->setInstruction("Point gimbal at scan start position, then press VAL");
+    viewModel()->setShowMainMenu(false);
     viewModel()->setShowParameterPanel(false);
-    viewModel()->setShowConfirmButtons(false);
+    viewModel()->setShowConfirmDialog(false);
     transitionToState(State::AimingPoint);
 }
 
 void SectorScanZoneController::setupAimingPoint2UI()
 {
     viewModel()->setTitle("Aim Scan End");
-    viewModel()->setInstructionText("Point gimbal at scan end position, then press VAL");
-    viewModel()->setShowMenu(false);
+    viewModel()->setInstruction("Point gimbal at scan end position, then press VAL");
+    viewModel()->setShowMainMenu(false);
     viewModel()->setShowParameterPanel(false);
-    viewModel()->setShowConfirmButtons(false);
+    viewModel()->setShowConfirmDialog(false);
 }
 
 void SectorScanZoneController::setupEditParametersUI()
 {
     viewModel()->setTitle("Edit Scan Parameters");
-    viewModel()->setInstructionText("Use UP/DOWN to navigate, VAL to confirm");
-    viewModel()->setShowMenu(false);
+    viewModel()->setInstruction("Use UP/DOWN to navigate, VAL to confirm");
+    viewModel()->setShowMainMenu(false);
     viewModel()->setShowParameterPanel(true);
-    viewModel()->setShowConfirmButtons(false);
+    viewModel()->setShowConfirmDialog(false);
 
     syncWipZoneToParameterPanel();
     transitionToState(State::EditParameters);
@@ -360,17 +368,36 @@ void SectorScanZoneController::setupEditParametersUI()
 
 void SectorScanZoneController::routeUpToParameterPanel()
 {
-    m_paramViewModel->navigateUp();
+    int currentField = m_paramViewModel->activeField();
+    currentField = (currentField - 1 + 4) % 4; // 4 fields total (Enabled, ScanSpeed, ValidateButton, CancelButton)
+    m_paramViewModel->setActiveField(currentField);
 }
 
 void SectorScanZoneController::routeDownToParameterPanel()
 {
-    m_paramViewModel->navigateDown();
+    int currentField = m_paramViewModel->activeField();
+    currentField = (currentField + 1) % 4; // 4 fields total
+    m_paramViewModel->setActiveField(currentField);
 }
 
 void SectorScanZoneController::routeSelectToParameterPanel()
 {
-    m_paramViewModel->confirmSelection();
+    int currentField = m_paramViewModel->activeField();
+
+    if (currentField == SectorScanParameterViewModel::Field::ValidateButton) {
+        // Confirm save
+        transitionToState(State::ConfirmSave);
+    } else if (currentField == SectorScanParameterViewModel::Field::CancelButton) {
+        // Cancel and return to select action
+        resetWipZone();
+        setupSelectActionUI();
+    } else if (currentField == SectorScanParameterViewModel::Field::Enabled) {
+        // Toggle enabled state
+        m_paramViewModel->setIsEnabled(!m_paramViewModel->isEnabled());
+    } else if (currentField == SectorScanParameterViewModel::Field::ScanSpeed) {
+        // Start editing scan speed value
+        m_paramViewModel->setIsEditingValue(true);
+    }
 }
 
 // ============================================================================
@@ -417,8 +444,8 @@ void SectorScanZoneController::validateSectorGeometry()
 void SectorScanZoneController::resetWipZone()
 {
     m_wipZone = AutoSectorScanZone{};
-    m_wipZone.enabled = true;
-    m_wipZone.scanRateDegreesPerSecond = 5.0f;
+    m_wipZone.isEnabled = true;
+    m_wipZone.scanSpeed = 5.0f;
     m_editingZoneId = -1;
     m_point1Defined = false;
     m_point1Az = m_point1El = 0.0f;
@@ -429,10 +456,10 @@ void SectorScanZoneController::loadWipZoneFromSystem(int zoneId)
 {
     const auto& data = stateModel()->data();
 
-    for (const auto& zone : data.autoSectorScanZones) {
+    for (const auto& zone : data.sectorScanZones) {
         if (zone.id == zoneId) {
             m_wipZone = zone;
-            qDebug() << "Loaded scan zone" << zoneId << ":" << zone.name;
+            qDebug() << "Loaded scan zone #" << zoneId;
             return;
         }
     }
@@ -443,20 +470,12 @@ void SectorScanZoneController::loadWipZoneFromSystem(int zoneId)
 
 void SectorScanZoneController::syncWipZoneToParameterPanel()
 {
-    m_paramViewModel->setZoneName(m_wipZone.name);
-    m_paramViewModel->setEnabled(m_wipZone.enabled);
-    m_paramViewModel->setStartAzimuth(m_wipZone.startAzimuth);
-    m_paramViewModel->setEndAzimuth(m_wipZone.endAzimuth);
-    m_paramViewModel->setElevation(m_wipZone.scanElevation);
-    m_paramViewModel->setScanRate(m_wipZone.scanRateDegreesPerSecond);
+    m_paramViewModel->setIsEnabled(m_wipZone.isEnabled);
+    m_paramViewModel->setScanSpeed(static_cast<int>(m_wipZone.scanSpeed));
 }
 
 void SectorScanZoneController::syncParameterPanelToWipZone()
 {
-    m_wipZone.name = m_paramViewModel->zoneName();
-    m_wipZone.enabled = m_paramViewModel->enabled();
-    m_wipZone.startAzimuth = m_paramViewModel->startAzimuth();
-    m_wipZone.endAzimuth = m_paramViewModel->endAzimuth();
-    m_wipZone.scanElevation = m_paramViewModel->elevation();
-    m_wipZone.scanRateDegreesPerSecond = m_paramViewModel->scanRate();
+    m_wipZone.isEnabled = m_paramViewModel->isEnabled();
+    m_wipZone.scanSpeed = static_cast<float>(m_paramViewModel->scanSpeed());
 }
