@@ -168,21 +168,29 @@ void ServoDriverDevice::processMessage(const Message& message) {
         // Merge partial data with current data
         auto currentData = data();
         auto newData = std::make_shared<ServoDriverData>(*currentData);
-        
+
         const ServoDriverData& partialData = dataMsg->data();
-        
-        // Update only non-zero fields (allows partial updates)
-        if (partialData.position != 0.0f) {
+
+        bool dataChanged = false;
+
+        // Update fields that have changed (comparing with current value, NOT zero!)
+        // CRITICAL FIX: Zero is a VALID value (0.0° = home position, 0.0°C = valid temp)
+        if (!qFuzzyCompare(partialData.position + 1.0f, currentData->position + 1.0f)) {
             newData->position = partialData.position;
+            dataChanged = true;
         }
-        if (partialData.driverTemp != 0.0f) {
+        if (!qFuzzyCompare(partialData.driverTemp + 1.0f, currentData->driverTemp + 1.0f)) {
             newData->driverTemp = partialData.driverTemp;
+            dataChanged = true;
         }
-        if (partialData.motorTemp != 0.0f) {
+        if (!qFuzzyCompare(partialData.motorTemp + 1.0f, currentData->motorTemp + 1.0f)) {
             newData->motorTemp = partialData.motorTemp;
+            dataChanged = true;
         }
-        
-        updateData(newData);
+
+        if (dataChanged) {
+            updateData(newData);
+        }
         emit servoDataChanged(*newData);
         
     } else if (message.typeId() == Message::Type::ServoDriverAlarmType) {

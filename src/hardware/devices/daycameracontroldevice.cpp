@@ -87,15 +87,24 @@ void DayCameraControlDevice::processMessage(const Message& message) {
         auto newData = std::make_shared<DayCameraData>(*currentData);
 
         const DayCameraData& partial = dataMsg->data();
-        if (partial.zoomPosition != 0) {
+
+        bool dataChanged = false;
+
+        // CRITICAL FIX: Compare with current value, NOT zero!
+        // Zero is a VALID value (zoom position 0 = minimum zoom, focus 0 = minimum focus)
+        if (partial.zoomPosition != currentData->zoomPosition) {
             newData->zoomPosition = partial.zoomPosition;
             newData->currentHFOV = partial.currentHFOV;
+            dataChanged = true;
         }
-        if (partial.focusPosition != 0) {
+        if (partial.focusPosition != currentData->focusPosition) {
             newData->focusPosition = partial.focusPosition;
+            dataChanged = true;
         }
 
-        updateData(newData);
+        if (dataChanged) {
+            updateData(newData);
+        }
         emit dayCameraDataChanged(*newData);
     }
 }

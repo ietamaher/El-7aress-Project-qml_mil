@@ -153,43 +153,40 @@ void ServoActuatorDevice::mergePartialData(const ServoActuatorData& partialData)
     resetCommunicationWatchdog();
 
     bool dataChanged = false;
-    
-    // Merge only non-zero/non-default values
-    if (partialData.position_mm != 0.0 && 
-        !qFuzzyCompare(partialData.position_mm, currentData->position_mm)) {
+
+    // CRITICAL FIX: Compare with current value, NOT zero!
+    // Zero is a VALID value (0.0mm = home position, 0.0mm/s = stopped, 0.0°C = valid temp)
+    // Using +1.0 offset for qFuzzyCompare to handle zero values correctly
+    if (!qFuzzyCompare(partialData.position_mm + 1.0, currentData->position_mm + 1.0)) {
         newData->position_mm = partialData.position_mm;
         dataChanged = true;
     }
-    
-    if (partialData.velocity_mm_s != 0.0 && 
-        !qFuzzyCompare(partialData.velocity_mm_s, currentData->velocity_mm_s)) {
+
+    if (!qFuzzyCompare(partialData.velocity_mm_s + 1.0, currentData->velocity_mm_s + 1.0)) {
         newData->velocity_mm_s = partialData.velocity_mm_s;
         dataChanged = true;
     }
-    
-    if (partialData.temperature_c != 0.0 && 
-        !qFuzzyCompare(partialData.temperature_c, currentData->temperature_c)) {
+
+    if (!qFuzzyCompare(partialData.temperature_c + 1.0, currentData->temperature_c + 1.0)) {
         newData->temperature_c = partialData.temperature_c;
         dataChanged = true;
     }
-    
-    if (partialData.busVoltage_v != 0.0 && 
-        !qFuzzyCompare(partialData.busVoltage_v, currentData->busVoltage_v)) {
+
+    if (!qFuzzyCompare(partialData.busVoltage_v + 1.0, currentData->busVoltage_v + 1.0)) {
         newData->busVoltage_v = partialData.busVoltage_v;
         dataChanged = true;
     }
-    
-    if (partialData.torque_percent != 0.0 && 
-        !qFuzzyCompare(partialData.torque_percent, currentData->torque_percent)) {
+
+    if (!qFuzzyCompare(partialData.torque_percent + 1.0, currentData->torque_percent + 1.0)) {
         newData->torque_percent = partialData.torque_percent;
         dataChanged = true;
     }
-    
+
     if (partialData.status != currentData->status) {
         newData->status = partialData.status;
         dataChanged = true;
     }
-    
+
     if (dataChanged) {
         updateData(newData);
         emit actuatorDataChanged(*newData);
