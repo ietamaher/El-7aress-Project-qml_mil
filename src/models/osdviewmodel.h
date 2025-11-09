@@ -69,6 +69,9 @@ class OsdViewModel : public QObject
     Q_PROPERTY(QString windageText READ windageText NOTIFY windageTextChanged)
     Q_PROPERTY(bool windageVisible READ windageVisible NOTIFY windageVisibleChanged)
 
+    Q_PROPERTY(QString detectionText READ detectionText NOTIFY detectionTextChanged)
+    Q_PROPERTY(bool detectionVisible READ detectionVisible NOTIFY detectionVisibleChanged)
+
     // ========================================================================
     // ZONE WARNINGS
     // ========================================================================
@@ -142,6 +145,9 @@ public:
     QString windageText() const { return m_windageText; }
     bool windageVisible() const { return m_windageVisible; }
 
+    QString detectionText() const { return m_detectionText; }
+    bool detectionVisible() const { return m_detectionVisible; }
+
     QString zoneWarningText() const { return m_zoneWarningText; }
     bool zoneWarningVisible() const { return m_zoneWarningVisible; }
 
@@ -190,6 +196,7 @@ public slots:
 
     void updateZeroingDisplay(bool modeActive, bool applied, float azOffset, float elOffset);
     void updateWindageDisplay(bool modeActive, bool applied, float speedKnots);
+    void updateDetectionDisplay(bool enabled);
 
     void updateZoneWarning(bool inNoFireZone, bool inNoTraverseLimit);
     void updateLeadAngleDisplay(const QString& statusText);
@@ -244,6 +251,9 @@ signals:
 
     void windageTextChanged();
     void windageVisibleChanged();
+
+    void detectionTextChanged();
+    void detectionVisibleChanged();
 
     void zoneWarningTextChanged();
     void zoneWarningVisibleChanged();
@@ -308,6 +318,9 @@ private:
 
     QString m_windageText;
     bool m_windageVisible;
+
+    QString m_detectionText;
+    bool m_detectionVisible;
 
     QString m_zoneWarningText;
     bool m_zoneWarningVisible;

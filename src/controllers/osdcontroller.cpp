@@ -275,6 +275,9 @@ void OsdController::onFrameDataReady(const FrameData& frmdata)
         frmdata.windageSpeedKnots
         );
 
+    // === DETECTION ===
+    m_viewModel->updateDetectionDisplay(frmdata.detectionEnabled);
+
     // === ZONE WARNINGS ===
     m_viewModel->updateZoneWarning(
         frmdata.isReticleInNoFireZone,
@@ -345,6 +348,9 @@ void OsdController::onFrameDataReady(const FrameData& frmdata)
         data.windageAppliedToBallistics,
         data.windageSpeedKnots
         );
+
+    // Detection
+    m_viewModel->updateDetectionDisplay(data.detectionEnabled);
 
     // Zone warnings
     m_viewModel->updateZoneWarning(

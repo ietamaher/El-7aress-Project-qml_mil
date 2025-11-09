@@ -72,6 +72,7 @@ private slots:
     void handleClearWindage();
     void handleZoneDefinitions();
     void handleSystemStatus();
+    void handleToggleDetection();
     void handleShutdown();
     void handleRadarTargetList();
     void handleHelpAbout();

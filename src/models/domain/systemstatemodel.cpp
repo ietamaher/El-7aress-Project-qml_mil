@@ -132,6 +132,23 @@ void SystemStateModel::setUpTrack(bool pressed) { if(m_currentStateData.upTrack 
 void SystemStateModel::setUpSw(bool pressed) { if(m_currentStateData.menuUp != pressed) { m_currentStateData.menuUp = pressed; emit dataChanged(m_currentStateData); } }
 void SystemStateModel::setActiveCameraIsDay(bool pressed) { if(m_currentStateData.activeCameraIsDay != pressed) { m_currentStateData.activeCameraIsDay = pressed; emit dataChanged(m_currentStateData); } }
 
+void SystemStateModel::setDetectionEnabled(bool enabled)
+{
+    QMutexLocker locker(&m_mutex);
+
+    // Safety check: Only allow enabling detection if day camera is active
+    if (enabled && !m_currentStateData.activeCameraIsDay) {
+        qWarning() << "SystemStateModel: Cannot enable detection - Night camera is active!";
+        return;
+    }
+
+    if (m_currentStateData.detectionEnabled != enabled) {
+        m_currentStateData.detectionEnabled = enabled;
+        emit dataChanged(m_currentStateData);
+        qInfo() << "SystemStateModel: Detection" << (enabled ? "ENABLED" : "DISABLED");
+    }
+}
+
 // --- Area Zone Methods Implementation ---
 const std::vector<AreaZone>& SystemStateModel::getAreaZones() const {
     return m_currentStateData.areaZones;
@@ -733,6 +750,13 @@ void SystemStateModel::onPlc21DataChanged(const Plc21PanelData &pData)
 
     newData.gimbalSpeed = pData.speedSW;
     newData.plc21Connected = pData.isConnected;
+
+    // Auto-disable detection when switching to night camera
+    if (!newData.activeCameraIsDay && m_currentStateData.activeCameraIsDay) {
+        // Switched from day to night camera
+        newData.detectionEnabled = false;
+        qInfo() << "SystemStateModel: Night camera activated - Detection auto-disabled";
+    }
 
     updateData(newData);
 }

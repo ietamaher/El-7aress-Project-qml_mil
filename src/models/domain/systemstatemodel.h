@@ -137,6 +137,13 @@ public:
      */
     void setActiveCameraIsDay(bool pressed);
 
+    /**
+     * @brief Enables or disables object detection (YOLOv8).
+     * Detection is only available when the day camera is active.
+     * @param enabled True to enable detection, false to disable.
+     */
+    void setDetectionEnabled(bool enabled);
+
     // =================================
     // WEAPON CONTROL AND TRACKING
     // =================================

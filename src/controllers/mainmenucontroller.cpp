@@ -33,6 +33,18 @@ void MainMenuController::initialize()
 
 QStringList MainMenuController::buildMainMenuOptions() const
 {
+    const auto& data = m_stateModel->data();
+
+    // Build detection option with dynamic state display
+    QString detectionOption;
+    if (!data.activeCameraIsDay) {
+        detectionOption = "Detection (Night - Unavailable)";
+    } else {
+        detectionOption = data.detectionEnabled
+            ? "Detection: ENABLED"
+            : "Detection: DISABLED";
+    }
+
     QStringList options;
     options << "--- RETICLE & DISPLAY ---"
             << "Personalize Reticle"
@@ -45,6 +57,7 @@ QStringList MainMenuController::buildMainMenuOptions() const
             << "--- SYSTEM ---"
             << "Zone Definitions"
             << "System Status"
+            << detectionOption
             << "Shutdown System"
             << "--- INFO ---"
             << "Help/About"
@@ -120,6 +133,15 @@ void MainMenuController::handleMenuOptionSelected(const QString& option)
     else if (option == "System Status") {
         emit systemStatusRequested();
        // emit menuFinished();
+    }
+    else if (option.startsWith("Detection")) {
+        if (option.contains("Unavailable")) {
+            qDebug() << "Detection unavailable - Night camera is active";
+            emit menuFinished();
+        } else {
+            emit toggleDetectionRequested();
+            emit menuFinished();
+        }
     }
     else if (option == "Shutdown System") {
         emit shutdownSystemRequested();
