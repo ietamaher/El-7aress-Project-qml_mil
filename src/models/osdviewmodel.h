@@ -5,7 +5,9 @@
 #include <QColor>
 #include <QRectF>
 #include <QString>
+#include <QVariantList>
 #include "models/domain/systemstatedata.h" // For enums
+#include "utils/inference.h" // For YoloDetection
 
 class OsdViewModel : public QObject
 {
@@ -71,6 +73,7 @@ class OsdViewModel : public QObject
 
     Q_PROPERTY(QString detectionText READ detectionText NOTIFY detectionTextChanged)
     Q_PROPERTY(bool detectionVisible READ detectionVisible NOTIFY detectionVisibleChanged)
+    Q_PROPERTY(QVariantList detectionBoxes READ detectionBoxes NOTIFY detectionBoxesChanged)
 
     // ========================================================================
     // ZONE WARNINGS
@@ -147,6 +150,7 @@ public:
 
     QString detectionText() const { return m_detectionText; }
     bool detectionVisible() const { return m_detectionVisible; }
+    QVariantList detectionBoxes() const { return m_detectionBoxes; }
 
     QString zoneWarningText() const { return m_zoneWarningText; }
     bool zoneWarningVisible() const { return m_zoneWarningVisible; }
@@ -197,6 +201,7 @@ public slots:
     void updateZeroingDisplay(bool modeActive, bool applied, float azOffset, float elOffset);
     void updateWindageDisplay(bool modeActive, bool applied, float speedKnots);
     void updateDetectionDisplay(bool enabled);
+    void updateDetectionBoxes(const std::vector<YoloDetection>& detections);
 
     void updateZoneWarning(bool inNoFireZone, bool inNoTraverseLimit);
     void updateLeadAngleDisplay(const QString& statusText);
@@ -254,6 +259,7 @@ signals:
 
     void detectionTextChanged();
     void detectionVisibleChanged();
+    void detectionBoxesChanged();
 
     void zoneWarningTextChanged();
     void zoneWarningVisibleChanged();
@@ -321,6 +327,7 @@ private:
 
     QString m_detectionText;
     bool m_detectionVisible;
+    QVariantList m_detectionBoxes;
 
     QString m_zoneWarningText;
     bool m_zoneWarningVisible;
