@@ -60,24 +60,61 @@ HardwareManager::~HardwareManager()
 {
     qInfo() << "HardwareManager: Shutting down...";
 
+    // CRITICAL FIX: Handle thread cleanup with proper timeout recovery
+    // Military systems must shutdown gracefully without resource leaks
+
     // Stop video processors
     if (m_dayVideoProcessor && m_dayVideoProcessor->isRunning()) {
         m_dayVideoProcessor->stop();
-        m_dayVideoProcessor->wait(2000);
+        if (!m_dayVideoProcessor->wait(2000)) {
+            qWarning() << "Day video processor did not stop gracefully - forcing termination";
+            m_dayVideoProcessor->terminate();
+            if (!m_dayVideoProcessor->wait(1000)) {
+                qCritical() << "Failed to terminate day video processor - RESOURCE LEAK!";
+            }
+        } else {
+            qInfo() << "  ✓ Day video processor stopped gracefully";
+        }
     }
+
     if (m_nightVideoProcessor && m_nightVideoProcessor->isRunning()) {
         m_nightVideoProcessor->stop();
-        m_nightVideoProcessor->wait(2000);
+        if (!m_nightVideoProcessor->wait(2000)) {
+            qWarning() << "Night video processor did not stop gracefully - forcing termination";
+            m_nightVideoProcessor->terminate();
+            if (!m_nightVideoProcessor->wait(1000)) {
+                qCritical() << "Failed to terminate night video processor - RESOURCE LEAK!";
+            }
+        } else {
+            qInfo() << "  ✓ Night video processor stopped gracefully";
+        }
     }
 
     // Stop servo threads
     if (m_servoAzThread && m_servoAzThread->isRunning()) {
         m_servoAzThread->quit();
-        m_servoAzThread->wait(1000);
+        if (!m_servoAzThread->wait(1000)) {
+            qWarning() << "Servo azimuth thread did not quit gracefully - forcing termination";
+            m_servoAzThread->terminate();
+            if (!m_servoAzThread->wait(1000)) {
+                qCritical() << "Failed to terminate servo azimuth thread - RESOURCE LEAK!";
+            }
+        } else {
+            qInfo() << "  ✓ Servo azimuth thread stopped gracefully";
+        }
     }
+
     if (m_servoElThread && m_servoElThread->isRunning()) {
         m_servoElThread->quit();
-        m_servoElThread->wait(1000);
+        if (!m_servoElThread->wait(1000)) {
+            qWarning() << "Servo elevation thread did not quit gracefully - forcing termination";
+            m_servoElThread->terminate();
+            if (!m_servoElThread->wait(1000)) {
+                qCritical() << "Failed to terminate servo elevation thread - RESOURCE LEAK!";
+            }
+        } else {
+            qInfo() << "  ✓ Servo elevation thread stopped gracefully";
+        }
     }
 
     qInfo() << "HardwareManager: Shutdown complete.";
