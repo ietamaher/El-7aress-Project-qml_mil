@@ -474,6 +474,31 @@ void OsdViewModel::updateDetectionDisplay(bool enabled)
     }
 }
 
+void OsdViewModel::updateDetectionBoxes(const std::vector<YoloDetection>& detections)
+{
+    // Convert YoloDetections to QVariantList for QML
+    QVariantList newBoxes;
+
+    for (const auto& det : detections) {
+        QVariantMap box;
+        box["x"] = det.box.x;
+        box["y"] = det.box.y;
+        box["width"] = det.box.width;
+        box["height"] = det.box.height;
+        box["className"] = QString::fromStdString(det.className);
+        box["confidence"] = det.confidence;
+        box["colorR"] = det.color.r;
+        box["colorG"] = det.color.g;
+        box["colorB"] = det.color.b;
+
+        newBoxes.append(box);
+    }
+
+    // Always update (even if empty to clear old boxes)
+    m_detectionBoxes = newBoxes;
+    emit detectionBoxesChanged();
+}
+
 // ============================================================================
 // ZONE & STATUS UPDATES
 // ============================================================================

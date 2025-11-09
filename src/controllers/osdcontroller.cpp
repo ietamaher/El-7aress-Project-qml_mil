@@ -277,6 +277,7 @@ void OsdController::onFrameDataReady(const FrameData& frmdata)
 
     // === DETECTION ===
     m_viewModel->updateDetectionDisplay(frmdata.detectionEnabled);
+    m_viewModel->updateDetectionBoxes(frmdata.detections);
 
     // === ZONE WARNINGS ===
     m_viewModel->updateZoneWarning(
