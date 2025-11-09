@@ -134,7 +134,7 @@ void SystemStateModel::setActiveCameraIsDay(bool pressed) { if(m_currentStateDat
 
 void SystemStateModel::setDetectionEnabled(bool enabled)
 {
-    QMutexLocker locker(&m_mutex);
+    //QMutexLocker locker(&m_mutex);
 
     // Safety check: Only allow enabling detection if day camera is active
     if (enabled && !m_currentStateData.activeCameraIsDay) {

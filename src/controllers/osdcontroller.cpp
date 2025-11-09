@@ -114,12 +114,12 @@ void OsdController::checkForCriticalErrors(const SystemStateData& data)
         return;
     }
 
-    if (!data.azConnected) {
+    if (!data.azServoConnected) {
         showErrorMessage("AZIMUTH SERVO DISCONNECTED - Cannot slew horizontally");
         return;
     }
 
-    if (!data.elConnected) {
+    if (!data.elServoConnected) {
         showErrorMessage("ELEVATION SERVO DISCONNECTED - Cannot slew vertically");
         return;
     }
@@ -505,9 +505,9 @@ bool OsdController::areCriticalDevicesConnected(const SystemStateData& data) con
 {
     // Critical devices: IMU, Azimuth servo, Elevation servo
     // Cameras are not critical for basic operation
-    bool critical = data.imuConnected &&
-                   data.azConnected &&
-                   data.elConnected;
+    bool critical = data.imuConnected; // &&
+                 //  data.azServoConnected &&
+                  // data.elServoConnected;
 
     if (critical) {
         qDebug() << "[OsdController] All critical devices connected";
