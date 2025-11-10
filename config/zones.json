@@ -1,0 +1,109 @@
+{
+    "areaZones": [
+        {
+            "endAzimuth": 30,
+            "id": 1,
+            "isEnabled": false,
+            "isFactorySet": false,
+            "isOverridable": false,
+            "maxElevation": 20,
+            "maxRange": 0,
+            "minElevation": -10,
+            "minRange": 0,
+            "name": "",
+            "startAzimuth": 340,
+            "type": 2
+        },
+        {
+            "endAzimuth": 150,
+            "id": 2,
+            "isEnabled": true,
+            "isFactorySet": false,
+            "isOverridable": false,
+            "maxElevation": 10,
+            "maxRange": 0,
+            "minElevation": 0,
+            "minRange": -5,
+            "name": "",
+            "startAzimuth": 100,
+            "type": 3
+        }
+    ],
+    "nextAreaZoneId": 3,
+    "nextSectorScanId": 6,
+    "nextTRPId": 4,
+    "sectorScanZones": [
+        {
+            "az1": 350,
+            "az2": 350,
+            "el1": 10,
+            "el2": 0,
+            "id": 1,
+            "isEnabled": true,
+            "scanSpeed": 20
+        },
+        {
+            "az1": 200,
+            "az2": 200,
+            "el1": -5.095799922943115,
+            "el2": 44.63460159301758,
+            "id": 2,
+            "isEnabled": true,
+            "scanSpeed": 20
+        },
+        {
+            "az1": 10,
+            "az2": 65,
+            "el1": 44.63460159301758,
+            "el2": 0,
+            "id": 3,
+            "isEnabled": true,
+            "scanSpeed": 20
+        },
+        {
+            "az1": 30,
+            "az2": 100,
+            "el1": 20,
+            "el2": -10,
+            "id": 4,
+            "isEnabled": true,
+            "scanSpeed": 20
+        },
+        {
+            "az1": 0,
+            "az2": 0,
+            "el1": 0,
+            "el2": 0,
+            "id": 5,
+            "isEnabled": false,
+            "scanSpeed": 14
+        }
+    ],
+    "targetReferencePoints": [
+        {
+            "azimuth": 40,
+            "elevation": 35,
+            "haltTime": 5,
+            "id": 1,
+            "locationPage": 1,
+            "trpInPage": 1
+        },
+        {
+            "azimuth": 40,
+            "elevation": -5,
+            "haltTime": 10,
+            "id": 2,
+            "locationPage": 1,
+            "trpInPage": 1
+        },
+        {
+            "azimuth": 120,
+            "elevation": 30,
+            "haltTime": 29,
+            "id": 3,
+            "locationPage": 2,
+            "trpInPage": 4
+        }
+    ],
+    "zoneFileVersion": 1
+}
