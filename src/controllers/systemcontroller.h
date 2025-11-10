@@ -2,7 +2,6 @@
 #define SYSTEMCONTROLLER_H
 
 #include <QObject>
-#include <QHttpServer>
 
 // Forward declarations - Managers
 class HardwareManager;
@@ -11,11 +10,7 @@ class ControllerRegistry;
 
 // Forward declarations - Models & Services
 class SystemStateModel;
-class SystemDataLogger;
 class VideoImageProvider;
-class TelemetryAuthService;
-class TelemetryApiService;
-class TelemetryWebSocketServer;
 
 class QQmlApplicationEngine;
 
@@ -66,9 +61,6 @@ public:
 private:
     // Helper methods
     void createManagers();
-    void createDataLogger();
-    void createApiServer();
-    void createTelemetryServices();  // NEW: Create modern telemetry API services
     void connectVideoToProvider();
 
     // ========================================================================
@@ -84,14 +76,7 @@ private:
     ControllerRegistry* m_controllerRegistry = nullptr;
 
     // Services
-    SystemDataLogger* m_dataLogger = nullptr;
-    QHttpServer* m_apiServer = nullptr;  // Legacy API (will be deprecated)
     VideoImageProvider* m_videoProvider = nullptr;
-
-    // Telemetry Services (NEW)
-    TelemetryAuthService* m_telemetryAuthService = nullptr;
-    TelemetryApiService* m_telemetryApiService = nullptr;
-    TelemetryWebSocketServer* m_telemetryWebSocketServer = nullptr;
 };
 
 #endif // SYSTEMCONTROLLER_H

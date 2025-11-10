@@ -1,7 +1,6 @@
 #include "windagecontroller.h"
 #include "models/windageviewmodel.h"
 #include "models/domain/systemstatemodel.h"
-#include "services/servicemanager.h"
 #include <QDebug>
 
 WindageController::WindageController(QObject *parent)

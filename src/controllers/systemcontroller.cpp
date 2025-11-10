@@ -15,14 +15,7 @@
 
 // Models & Services
 #include "models/domain/systemstatemodel.h"
-#include "logger/systemdatalogger.h"
 #include "video/videoimageprovider.h"
-
-// Telemetry Services
-#include "services/telemetryauthservice.h"
-#include "services/telemetryapiservice.h"
-#include "services/telemetrywebsocketserver.h"
-#include "services/telemetryconfig.h"
 
 // Hardware Devices (for video connection)
 #include "hardware/devices/cameravideostreamdevice.h"
@@ -30,9 +23,6 @@
 #include <QQmlContext>
 #include <QQmlApplicationEngine>
 #include <QDebug>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QFile>
 
 SystemController::SystemController(QObject *parent)
     : QObject(parent)
@@ -62,31 +52,28 @@ void SystemController::initializeHardware()
     m_systemStateModel = new SystemStateModel(this);
     qInfo() << "  ✓ SystemStateModel created";
 
-    // 2. Create Data Logger
-    createDataLogger();
-
-    // 3. Create managers
+    // 2. Create managers
     createManagers();
 
-    // 4. Create hardware using HardwareManager
+    // 3. Create hardware using HardwareManager
     if (!m_hardwareManager->createHardware()) {
         qCritical() << "Failed to create hardware!";
         return;
     }
 
-    // 5. Connect devices to models
+    // 4. Connect devices to models
     if (!m_hardwareManager->connectDevicesToModels()) {
         qCritical() << "Failed to connect devices to models!";
         return;
     }
 
-    // 6. Connect models to SystemState
+    // 5. Connect models to SystemState
     if (!m_hardwareManager->connectModelsToSystemState()) {
         qCritical() << "Failed to connect models to system state!";
         return;
     }
 
-    // 7. Create hardware controllers
+    // 6. Create hardware controllers
     if (!m_controllerRegistry->createHardwareControllers()) {
         qCritical() << "Failed to create hardware controllers!";
         return;
@@ -182,12 +169,6 @@ void SystemController::startSystem()
         qInfo() << "  ✓ Gimbal alarms cleared";
     }
 
-    // 4. Create API server (legacy)
-    createApiServer();
-
-    // 5. Create and start telemetry services (NEW)
-    createTelemetryServices();
-
     qInfo() << "=== PHASE 3 COMPLETE - SYSTEM RUNNING ===\n";
 }
 
@@ -214,159 +195,6 @@ void SystemController::createManagers()
     );
 
     qInfo() << "    ✓ All managers created";
-}
-
-void SystemController::createDataLogger()
-{
-    qInfo() << "  Creating data logger...";
-
-    const auto& perfConf = DeviceConfiguration::performance();
-    const auto& sysConf = DeviceConfiguration::system();
-
-    SystemDataLogger::LoggerConfig loggerConfig;
-    loggerConfig.gimbalMotionBufferSize = perfConf.gimbalMotionBufferSize;
-    loggerConfig.imuDataBufferSize = perfConf.imuDataBufferSize;
-    loggerConfig.trackingDataBufferSize = perfConf.trackingDataBufferSize;
-    loggerConfig.enableDatabasePersistence = sysConf.enableDataLogger;
-    loggerConfig.databasePath = sysConf.databasePath;
-
-    m_dataLogger = new SystemDataLogger(loggerConfig, this);
-
-    // Connect SystemStateModel to DataLogger
-    connect(m_systemStateModel, &SystemStateModel::dataChanged,
-            m_dataLogger, &SystemDataLogger::onSystemStateChanged);
-
-    qInfo() << "    ✓ DataLogger created and connected";
-}
-
-void SystemController::createApiServer()
-{
-    qInfo() << "  Creating API server...";
-
-    m_apiServer = new QHttpServer(this);
-
-    // API endpoint: Get gimbal history
-    m_apiServer->route("/api/gimbal-history", [this](const QHttpServerRequest &request) {
-        QDateTime endTime = QDateTime::currentDateTime();
-        QDateTime startTime = endTime.addSecs(-60);
-
-        auto history = m_dataLogger->getGimbalMotionHistory(startTime, endTime);
-
-        QJsonArray jsonArray;
-        for (const auto& point : history) {
-            QJsonObject obj;
-            obj["timestamp"] = point.timestamp.toMSecsSinceEpoch();
-            obj["az"] = point.gimbalAz;
-            obj["el"] = point.gimbalEl;
-            jsonArray.append(obj);
-        }
-
-        return QHttpServerResponse(jsonArray);
-    });
-
-    // API endpoint: Get system status
-    m_apiServer->route("/api/status", [this](const QHttpServerRequest &request) {
-        const auto& data = m_systemStateModel->data();
-
-        QJsonObject status;
-        status["armed"] = data.gunArmed;
-        status["ready"] = data.isReady();
-        status["azimuth"] = data.gimbalAz;
-        status["elevation"] = data.gimbalEl;
-        status["tracking"] = data.trackingActive;
-        status["camera"] = data.activeCameraIsDay ? "day" : "night";
-
-        return QHttpServerResponse(status);
-    });
-
-    m_apiServer->listen(QHostAddress::Any, 8080);
-    qInfo() << "    ✓ API Server listening on port 8080";
-}
-
-void SystemController::createTelemetryServices()
-{
-    qInfo() << "  Creating telemetry services...";
-
-    // 1. Create Telemetry Configuration
-    TelemetryConfig telemetryConfig;
-
-    // Load configuration from file or use defaults
-    const auto& sysConf = DeviceConfiguration::system();
-
-    // HTTP API configuration
-    telemetryConfig.httpApi.enabled = true;
-    telemetryConfig.httpApi.bindAddress = "0.0.0.0";
-    telemetryConfig.httpApi.port = 8443;  // Different port from legacy API
-    telemetryConfig.httpApi.enableCors = true;
-    telemetryConfig.httpApi.corsOrigins = {"*"};  // Change in production!
-    telemetryConfig.httpApi.rateLimitPerMinute = 120;
-
-    // WebSocket configuration
-    telemetryConfig.webSocket.enabled = true;  // Phase 2: Real-time streaming
-    telemetryConfig.webSocket.port = 8444;
-    telemetryConfig.webSocket.updateRateHz = 10;
-    telemetryConfig.webSocket.maxConnections = 50;
-    telemetryConfig.webSocket.heartbeatIntervalSec = 30;
-
-    // TLS configuration
-    telemetryConfig.tls.enabled = false;  // Disabled by default (enable in production)
-    // telemetryConfig.tls.certificatePath = "/path/to/cert.pem";
-    // telemetryConfig.tls.privateKeyPath = "/path/to/key.pem";
-
-    // Export configuration
-    telemetryConfig.exportSettings.enableCsvExport = true;
-    telemetryConfig.exportSettings.exportDirectory = "./data/exports";
-    telemetryConfig.exportSettings.maxExportRangeDays = 30;
-
-    // 2. Create Authentication Service
-    TelemetryAuthService::Config authConfig;
-    authConfig.jwtSecret = "RCWS_SECURE_SECRET_KEY_CHANGE_IN_PRODUCTION_2025";  // MUST CHANGE!
-    authConfig.tokenExpirationMinutes = 60;
-    authConfig.enableIpWhitelist = false;  // Disabled by default
-    authConfig.enableAuditLogging = true;
-    authConfig.auditLogPath = "./logs/telemetry_audit.log";
-
-    m_telemetryAuthService = new TelemetryAuthService(authConfig, this);
-    qInfo() << "    ✓ TelemetryAuthService created";
-
-    // Load users from file if exists
-    if (QFile::exists("./config/telemetry_users.json")) {
-        m_telemetryAuthService->loadUsers("./config/telemetry_users.json");
-    }
-
-    // 3. Create API Service
-    m_telemetryApiService = new TelemetryApiService(
-        telemetryConfig,
-        m_dataLogger,
-        m_systemStateModel,
-        m_telemetryAuthService,
-        this
-    );
-    qInfo() << "    ✓ TelemetryApiService created";
-
-    // 4. Start API Service
-    if (m_telemetryApiService->start()) {
-        qInfo() << "    ✓ Telemetry API Server started:" << m_telemetryApiService->getServerUrl();
-        qInfo() << "    ℹ Default credentials: admin / admin123 (CHANGE IMMEDIATELY!)";
-    } else {
-        qWarning() << "    ✗ Failed to start Telemetry API Server";
-    }
-
-    // 5. Create and start WebSocket Server
-    m_telemetryWebSocketServer = new TelemetryWebSocketServer(
-        telemetryConfig.webSocket,
-        m_telemetryAuthService,
-        m_systemStateModel,
-        this
-    );
-    qInfo() << "    ✓ TelemetryWebSocketServer created";
-
-    if (m_telemetryWebSocketServer->start()) {
-        qInfo() << "    ✓ WebSocket Server started:" << m_telemetryWebSocketServer->getServerUrl();
-        qInfo() << "    ℹ Update rate:" << telemetryConfig.webSocket.updateRateHz << "Hz";
-    } else {
-        qWarning() << "    ✗ Failed to start WebSocket Server";
-    }
 }
 
 void SystemController::connectVideoToProvider()

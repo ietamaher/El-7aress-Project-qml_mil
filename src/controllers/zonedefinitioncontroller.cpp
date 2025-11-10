@@ -5,7 +5,6 @@
 #include "models/sectorscanparameterviewmodel.h"
 #include "models/trpparameterviewmodel.h"
 #include "models/domain/systemstatemodel.h"
-#include "services/servicemanager.h"
 #include <QDebug>
 #include <algorithm>
 

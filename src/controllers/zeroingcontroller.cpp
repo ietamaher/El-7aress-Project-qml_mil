@@ -1,7 +1,6 @@
 #include "zeroingcontroller.h"
 #include "models/zeroingviewmodel.h"
 #include "models/domain/systemstatemodel.h"
-#include "services/servicemanager.h"
 #include <QDebug>
 
 ZeroingController::ZeroingController(QObject *parent)

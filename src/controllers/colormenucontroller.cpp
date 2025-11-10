@@ -1,5 +1,4 @@
 #include "controllers/colormenucontroller.h"
-#include "services/servicemanager.h"
 #include "models/osdviewmodel.h"
 #include "models/domain/systemstatemodel.h"
 #include <QDebug>

@@ -1,4 +1,4 @@
-QT += quick serialbus serialport dbus sql httpserver websockets concurrent
+QT += quick serialbus serialport dbus
 
 #LIBS += -L/usr/lib/x86_64-linux-gnu/gstreamer-1.0 -lgstxvimagesink
 INCLUDEPATH += "/usr/include/gstreamer-1.0"
@@ -69,7 +69,6 @@ SOURCES += \
     src/hardware/devices/radardevice.cpp \
     src/hardware/devices/servoactuatordevice.cpp \
     src/hardware/devices/servodriverdevice.cpp \
-    src/logger/systemdatalogger.cpp \
     src/main.cpp \
     src/models/aboutviewmodel.cpp \
     src/models/areazoneparameterviewmodel.cpp \
@@ -85,11 +84,6 @@ SOURCES += \
     src/models/zeroingviewmodel.cpp \
     src/models/zonedefinitionviewmodel.cpp \
     src/models/zonemapviewmodel.cpp \
-    src/services/servicemanager.cpp \
-    src/services/telemetryapiservice.cpp \
-    src/services/telemetryauthservice.cpp \
-    src/services/telemetryconfig.cpp \
-    src/services/telemetrywebsocketserver.cpp \
     src/services/zonegeometryservice.cpp \
     src/utils/ballisticsprocessor.cpp \
     src/utils/colorutils.cpp \
@@ -170,7 +164,6 @@ HEADERS += \
     src/hardware/devices/servoactuatordevice.h \
     src/hardware/devices/servodriverdevice.h \
     src/hardware/devices/vpi_helpers.h \
-    src/logger/systemdatalogger.h \
     src/models/aboutviewmodel.h \
     src/models/areazoneparameterviewmodel.h \
     src/models/domain/daycameradatamodel.h \
@@ -195,11 +188,6 @@ HEADERS += \
     src/models/zeroingviewmodel.h \
     src/models/zonedefinitionviewmodel.h \
     src/models/zonemapviewmodel.h \
-    src/services/servicemanager.h \
-    src/services/telemetryapiservice.h \
-    src/services/telemetryauthservice.h \
-    src/services/telemetryconfig.h \
-    src/services/telemetrywebsocketserver.h \
     src/services/zonegeometryservice.h \
     src/utils/TimestampLogger.h \
     src/utils/ballisticsprocessor.h \
