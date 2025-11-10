@@ -2,6 +2,7 @@
 #define APPLICATIONCONTROLLER_H
 
 #include <QObject>
+#include "models/domain/systemstatemodel.h"
 
 // Forward declarations
 class MainMenuController;
