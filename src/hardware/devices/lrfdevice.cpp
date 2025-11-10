@@ -161,7 +161,9 @@ void LRFDevice::handleCommandResponseTimeout() {
 
     auto currentData = data();
     auto newData = std::make_shared<LrfData>(*currentData);
-    newData->isFault = true;
+    // FIXED: Don't set isFault on communication timeout
+    // isFault should ONLY be set by parser when hardware reports fault via status byte
+    // Communication timeout only affects connection state, not hardware fault state
     newData->isConnected = false;
     updateData(newData);
     emit lrfDataChanged(newData);

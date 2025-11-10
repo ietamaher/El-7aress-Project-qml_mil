@@ -137,10 +137,7 @@ void ServoDriverDevice::onModbusReplyReady(QModbusReply* reply) {
 
     if (reply->error() != QModbusDevice::NoError) {
         qWarning() << m_identifier << "Modbus error:" << reply->errorString();
-        auto newData = std::make_shared<ServoDriverData>(*data());
-        newData->isConnected = false;
-        updateData(newData);
-        emit servoDataChanged(*newData);
+        setConnectionState(false);  // Only emits if state actually changes
         reply->deleteLater();
         return;
     }
@@ -190,8 +187,8 @@ void ServoDriverDevice::processMessage(const Message& message) {
 
         if (dataChanged) {
             updateData(newData);
+            emit servoDataChanged(*newData);  // Only emit when data actually changed
         }
-        emit servoDataChanged(*newData);
         
     } else if (message.typeId() == Message::Type::ServoDriverAlarmType) {
         auto const* alarmMsg = static_cast<const ServoDriverAlarmMessage*>(&message);

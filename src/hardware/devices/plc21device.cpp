@@ -16,7 +16,9 @@ Plc21Device::Plc21Device(const QString& identifier, QObject* parent)
 {
     connect(m_pollTimer, &QTimer::timeout, this, &Plc21Device::pollTimerTimeout);
 
-    m_communicationWatchdog->setSingleShot(false);
+    // FIXED: Changed from false to true - watchdog should be single-shot
+    // Gets restarted on each successful communication (resetCommunicationWatchdog)
+    m_communicationWatchdog->setSingleShot(true);
     m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
     connect(m_communicationWatchdog, &QTimer::timeout,
             this, &Plc21Device::onCommunicationWatchdogTimeout);
