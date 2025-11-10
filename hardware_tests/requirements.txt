@@ -1,0 +1,8 @@
+# Hardware Test Scripts Requirements
+# Install with: pip3 install -r requirements.txt
+
+# Serial communication library
+pyserial>=3.5
+
+# Modbus RTU/TCP protocol library
+pymodbus>=3.5.0
