@@ -186,6 +186,13 @@ void ApplicationController::initialize()
         qDebug() << "ApplicationController: AboutController signals connected";
     }
 
+    // =========================================================================
+    // HARDWARE BUTTON MONITORING (PLC21 switches)
+    // =========================================================================
+    connect(m_systemStateModel, &SystemStateModel::dataChanged,
+            this, &ApplicationController::onSystemStateChanged);
+    qDebug() << "ApplicationController: SystemStateModel button monitoring connected";
+
     qDebug() << "ApplicationController: All signal connections established";
 }
 
@@ -577,4 +584,32 @@ void ApplicationController::handleReturnToMainMenu()
     showMainMenu();
 
     qDebug() << "  New state:" << static_cast<int>(m_currentMenuState);
+}
+
+// ============================================================================
+// HARDWARE BUTTON MONITORING
+// ============================================================================
+
+void ApplicationController::onSystemStateChanged(const SystemStateData& newState)
+{
+    // Rising edge detection for menuUp button (false → true = button press)
+    if (newState.menuUp && !m_previousMenuUpState) {
+        qDebug() << "ApplicationController: Hardware UP button pressed";
+        onUpButtonPressed();
+    }
+    m_previousMenuUpState = newState.menuUp;
+
+    // Rising edge detection for menuDown button (false → true = button press)
+    if (newState.menuDown && !m_previousMenuDownState) {
+        qDebug() << "ApplicationController: Hardware DOWN button pressed";
+        onDownButtonPressed();
+    }
+    m_previousMenuDownState = newState.menuDown;
+
+    // Rising edge detection for menuVal button (false → true = button press)
+    if (newState.menuVal && !m_previousMenuValState) {
+        qDebug() << "ApplicationController: Hardware MENU/VAL button pressed";
+        onMenuValButtonPressed();
+    }
+    m_previousMenuValState = newState.menuVal;
 }

@@ -89,6 +89,10 @@ private slots:
 
     void handleReturnToMainMenu();
 
+private slots:
+    // Monitor button state changes from hardware
+    void onSystemStateChanged(const SystemStateData& newState);
+
 private:
     void setMenuState(MenuState state);
     void hideAllMenus();
@@ -100,6 +104,11 @@ private:
     void handleMenuValInProcedure();
 
     MenuState m_currentMenuState;
+
+    // Button state tracking for edge detection (rising edge = button press)
+    bool m_previousMenuUpState = false;
+    bool m_previousMenuDownState = false;
+    bool m_previousMenuValState = false;
 
     // Dependencies (injected by SystemController)
     MainMenuController* m_mainMenuController;
