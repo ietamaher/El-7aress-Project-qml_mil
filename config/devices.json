@@ -84,13 +84,19 @@
       "port": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if00",
       "baudRate": 115200,
       "slaveId": 31,
-      "parity": "even"
+      "parity": "even",
+      "pollIntervalMs": 50,
+      "timeoutMs": 500,
+      "retries": 3
     },
     "plc42": {
       "port": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if02",
       "baudRate": 115200,
       "slaveId": 31,
-      "parity": "even"
+      "parity": "even",
+      "pollIntervalMs": 50,
+      "timeoutMs": 500,
+      "retries": 3
     }
   },
   "servo": {
@@ -99,14 +105,22 @@
       "port": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if04",
       "baudRate": 230400,
       "slaveId": 2,
-      "parity": "none"
+      "parity": "none",
+      "pollIntervalMs": 50,
+      "temperatureIntervalMs": 2000,
+      "timeoutMs": 500,
+      "retries": 3
     },
     "elevation": {
       "name": "el",
       "port": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if06",
       "baudRate": 230400,
       "slaveId": 1,
-      "parity": "none"
+      "parity": "none",
+      "pollIntervalMs": 50,
+      "temperatureIntervalMs": 2000,
+      "timeoutMs": 500,
+      "retries": 3
     }
   },
   "actuator": {
