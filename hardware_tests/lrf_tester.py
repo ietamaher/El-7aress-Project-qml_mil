@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-LRF Tester - Laser Range Finder
-Tests the Laser Range Finder via serial communication
-Reads distance measurements (50m - 4000m range)
+LRF Tester - Laser Range Finder (SAFE DIAGNOSTIC MODE)
+Tests the LRF via serial communication - DIAGNOSTICS ONLY
+Reads: Status, Temperature, Error Codes, Device Info
+
+⚠️ SAFETY: NO DISTANCE MEASUREMENTS - DIAGNOSTICS ONLY
+This script will NOT fire the laser or measure distances.
 
 Configuration loaded from: ../config/devices.json
 """
@@ -28,84 +31,139 @@ def load_config():
         print("ERROR: 'lrf' configuration not found in devices.json")
         sys.exit(1)
 
-# --- LRF Protocol (Example - adapt to your actual LRF protocol) ---
-COMMAND_GET_DISTANCE = b'D\r\n'  # Example command, adjust as needed
-POLL_INTERVAL_S = 0.5  # 500 ms
+# --- LRF SAFE Commands (Diagnostics Only - NO Laser Firing) ---
+# Adjust these commands based on your specific LRF model manual
 
-def parse_distance(line):
-    """
-    Parse distance from LRF response
-    Adjust this based on your actual LRF protocol
-    """
+CMD_GET_STATUS = b'S\r\n'           # Get system status
+CMD_GET_TEMPERATURE = b'T\r\n'      # Get internal temperature
+CMD_GET_ERROR_CODE = b'E\r\n'       # Get error/fault codes
+CMD_GET_DEVICE_INFO = b'I\r\n'      # Get device info (SN, firmware, etc.)
+CMD_GET_VOLTAGE = b'V\r\n'          # Get power supply voltage
+CMD_SELF_TEST = b'X\r\n'            # Self-test (no laser)
+
+POLL_INTERVAL_S = 2.0  # 2 seconds between checks
+
+def send_command(ser, command, description):
+    """Send a diagnostic command and read response"""
     try:
-        # Example: Response might be "D:1234.5\r\n" or just "1234.5\r\n"
-        line = line.strip()
+        ser.write(command)
+        time.sleep(0.2)  # Wait for response
 
-        # Try to extract numeric value
-        if ':' in line:
-            distance_str = line.split(':')[1]
+        response = ser.readline()
+        if response:
+            try:
+                line = response.decode('ascii', errors='ignore').strip()
+                return line
+            except UnicodeDecodeError:
+                return f"[Binary: {response.hex()}]"
         else:
-            distance_str = line
+            return "[No response]"
+    except Exception as e:
+        return f"[Error: {e}]"
 
-        distance = float(distance_str)
-        return distance
-    except (ValueError, IndexError) as e:
-        print(f"Parse error: {e} | Raw: {line}")
+def parse_temperature(response):
+    """Parse temperature response - adjust for your LRF"""
+    try:
+        # Example formats: "T:25.5" or "TEMP:25.5C" or just "25.5"
+        response = response.replace('T:', '').replace('TEMP:', '').replace('C', '').replace('°', '').strip()
+        temp = float(response)
+        return temp
+    except (ValueError, AttributeError):
         return None
+
+def parse_status(response):
+    """Parse status response - adjust for your LRF"""
+    # Example: "STATUS:OK" or "READY" or hex code
+    response = response.upper()
+    if 'OK' in response or 'READY' in response:
+        return '✓ OK'
+    elif 'ERROR' in response or 'FAULT' in response:
+        return '✗ ERROR'
+    elif 'WARN' in response:
+        return '⚠ WARNING'
+    else:
+        return f'? {response}'
 
 def main():
     # Load configuration
     config = load_config()
     SERIAL_PORT = config['port']
     BAUD_RATE = config['baudRate']
-    MIN_RANGE = config['minRange']
-    MAX_RANGE = config['maxRange']
 
     print("=" * 70)
-    print("  LRF TESTER - Laser Range Finder")
+    print("  LRF TESTER - SAFE DIAGNOSTIC MODE")
+    print("=" * 70)
+    print("⚠️  SAFETY: This script performs DIAGNOSTICS ONLY")
+    print("    NO distance measurements - NO laser firing")
     print("=" * 70)
     print(f"Configuration:")
     print(f"  Port: {SERIAL_PORT}")
     print(f"  Baud Rate: {BAUD_RATE}")
-    print(f"  Range: {MIN_RANGE}m - {MAX_RANGE}m")
+    print("=" * 70)
+    print("NOTE: Adjust commands (CMD_GET_*) based on your LRF model manual")
     print("=" * 70)
     print(f"Attempting to connect...")
 
     try:
         with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1) as ser:
             print("✓ Connection successful!")
-            print("Starting continuous measurements (Press Ctrl+C to stop)...")
             print("=" * 70)
-            print("NOTE: Adjust COMMAND_GET_DISTANCE and parse_distance() for your LRF model")
+            print("Starting diagnostic monitoring (Press Ctrl+C to stop)...")
             print("=" * 70)
+
+            cycle_count = 0
 
             while True:
-                # Send distance request command
-                ser.write(COMMAND_GET_DISTANCE)
+                cycle_count += 1
+                print(f"\n[Cycle {cycle_count}] {time.strftime('%H:%M:%S')}")
+                print("-" * 70)
 
-                # Read response (up to newline)
-                response = ser.readline()
+                # 1. Get Device Status
+                print("1. Device Status:      ", end="")
+                status_response = send_command(ser, CMD_GET_STATUS, "Status")
+                status = parse_status(status_response)
+                print(f"{status} | Raw: {status_response}")
 
-                if response:
-                    try:
-                        line = response.decode('ascii', errors='ignore')
-                        distance = parse_distance(line)
-
-                        if distance is not None:
-                            # Check if in valid range
-                            if MIN_RANGE <= distance <= MAX_RANGE:
-                                status = "✓"
-                            else:
-                                status = "⚠"
-
-                            print(f"{status} Distance: {distance:>8.2f} m | Raw: {line.strip()}")
-                        else:
-                            print(f"✗ Invalid response: {line.strip()}")
-                    except UnicodeDecodeError:
-                        print(f"✗ Decode error: {response.hex()}")
+                # 2. Get Temperature
+                print("2. Temperature:        ", end="")
+                temp_response = send_command(ser, CMD_GET_TEMPERATURE, "Temperature")
+                temp = parse_temperature(temp_response)
+                if temp is not None:
+                    # Check temperature ranges
+                    if temp < 0 or temp > 60:
+                        indicator = "⚠"
+                    else:
+                        indicator = "✓"
+                    print(f"{indicator} {temp:>5.1f}°C | Raw: {temp_response}")
                 else:
-                    print("⚠ No response (timeout)")
+                    print(f"? {temp_response}")
 
+                # 3. Get Error Codes
+                print("3. Error Codes:        ", end="")
+                error_response = send_command(ser, CMD_GET_ERROR_CODE, "Error")
+                if 'NO ERROR' in error_response.upper() or error_response == '0':
+                    print(f"✓ No errors | Raw: {error_response}")
+                else:
+                    print(f"⚠ {error_response}")
+
+                # 4. Get Supply Voltage
+                print("4. Supply Voltage:     ", end="")
+                voltage_response = send_command(ser, CMD_GET_VOLTAGE, "Voltage")
+                print(f"{voltage_response}")
+
+                # 5. Device Info (only first cycle to avoid spam)
+                if cycle_count == 1:
+                    print("\n--- Device Information (One-time) ---")
+                    info_response = send_command(ser, CMD_GET_DEVICE_INFO, "Info")
+                    print(f"Device Info: {info_response}")
+
+                    # Self-test (no laser)
+                    print("Running self-test (no laser)...", end="")
+                    test_response = send_command(ser, CMD_SELF_TEST, "Self-Test")
+                    print(f" {test_response}")
+                    print("-" * 70)
+
+                # Wait before next cycle
                 time.sleep(POLL_INTERVAL_S)
 
     except serial.SerialException as e:
@@ -115,8 +173,11 @@ def main():
         sys.exit(1)
     except KeyboardInterrupt:
         print("\n" + "=" * 70)
-        print("Measurements stopped by user. Exiting.")
+        print("Diagnostic monitoring stopped by user. Exiting.")
         print("=" * 70)
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

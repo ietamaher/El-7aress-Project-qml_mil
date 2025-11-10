@@ -49,12 +49,22 @@ Roll:    -0.25° | Pitch:     2.13° | Yaw:   180.45° | RateX:     0.12°/s | R
 
 ---
 
-### 2. LRF Tester - `lrf_tester.py`
+### 2. LRF Tester - `lrf_tester.py` ⚠️ SAFE MODE
 
-Tests the Laser Range Finder via serial communication.
+Tests the Laser Range Finder via serial communication - **DIAGNOSTICS ONLY**.
+
+**⚠️ SAFETY: NO DISTANCE MEASUREMENTS**
+- This script does NOT fire the laser
+- This script does NOT measure distances
+- Diagnostics only for safety reasons
 
 **Reads:**
-- Distance measurements (50m - 4000m range)
+- Device status (OK/ERROR/WARNING)
+- Internal temperature (0-60°C range check)
+- Error codes / fault status
+- Supply voltage
+- Device information (serial number, firmware)
+- Self-test results (no laser)
 
 **Configuration:** `config/devices.json` → `lrf`
 
@@ -63,7 +73,21 @@ Tests the Laser Range Finder via serial communication.
 python3 lrf_tester.py
 ```
 
-**Note:** You may need to adjust `COMMAND_GET_DISTANCE` and `parse_distance()` based on your specific LRF model.
+**Expected Output:**
+```
+[Cycle 1] 14:30:25
+----------------------------------------------------------------------
+1. Device Status:       ✓ OK | Raw: STATUS:READY
+2. Temperature:         ✓  25.3°C | Raw: T:25.3
+3. Error Codes:         ✓ No errors | Raw: 0
+4. Supply Voltage:      12.5V
+
+--- Device Information (One-time) ---
+Device Info: LRF-1000 SN:12345 FW:2.1.4
+Running self-test (no laser)... PASS
+```
+
+**Note:** You may need to adjust diagnostic commands (`CMD_GET_STATUS`, `CMD_GET_TEMPERATURE`, etc.) based on your specific LRF model manual.
 
 ---
 
@@ -373,11 +397,34 @@ Then you can run scripts directly:
 
 ## ⚠️ Safety Notes
 
-1. **Actuator Testing**: NEVER test with live ammunition loaded
-2. **Servo Testing**: Ensure gimbal has free range of motion before powering on
-3. **Emergency Stop**: Always have PLC42 emergency stop accessible
-4. **Thermal Camera**: Avoid pointing at sun or intense heat sources
-5. **Electrical Safety**: Disconnect power before connecting/disconnecting devices
+1. **LRF Testing**: The LRF tester performs DIAGNOSTICS ONLY
+   - NO distance measurements
+   - NO laser firing
+   - Only status, temperature, and error code checks
+   - For distance measurements, use the main RCWS application
+
+2. **Actuator Testing**: NEVER test with live ammunition loaded
+   - Ensure weapon is completely safe and cleared
+   - Remove all ammunition before testing
+
+3. **Servo Testing**: Ensure gimbal has free range of motion before powering on
+   - Check for obstructions
+   - Verify mechanical limits are correct
+   - Start with low speed tests
+
+4. **Emergency Stop**: Always have PLC42 emergency stop accessible
+   - Test emergency stop before other tests
+   - Know where it is located
+   - Ensure it's functional
+
+5. **Thermal Camera**: Avoid pointing at sun or intense heat sources
+   - Can damage sensor
+   - Use lens cap when not in use
+
+6. **Electrical Safety**: Disconnect power before connecting/disconnecting devices
+   - Power off system before cable changes
+   - Check polarity before connecting
+   - Ensure proper grounding
 
 ---
 
