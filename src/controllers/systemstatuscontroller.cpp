@@ -222,6 +222,9 @@ QStringList SystemStatusController::buildAlarmsList(const SystemStateData& data)
     if (!data.plc42Connected) {
         alarms.append("⚠ PLC42 Disconnected");
     }
+    if (!data.actuatorConnected) {
+        alarms.append("⚠ Servo Actuator Disconnected");
+    }
 
     // LRF faults
     if (data.lrfFault) {
