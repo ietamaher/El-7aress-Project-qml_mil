@@ -394,7 +394,7 @@ void SystemController::startSystem()
     // Night Camera Transport (Serial)
     QJsonObject nightCameraTransportConfig;
     nightCameraTransportConfig["port"] = videoConf.nightControlPort;
-    nightCameraTransportConfig["baudRate"] = 57600;  // TAU2 standard
+    nightCameraTransportConfig["baudRate"] = 921600;  // FLIR Boson 640 standard
     nightCameraTransportConfig["parity"] = static_cast<int>(QSerialPort::NoParity);
     m_nightCameraTransport->open(nightCameraTransportConfig);
 

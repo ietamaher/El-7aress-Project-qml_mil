@@ -135,7 +135,7 @@ namespace Ballistics {
 namespace Protocol {
     // Serial port settings
     constexpr int PELCO_D_BAUDRATE = 9600;
-    constexpr int TAU2_BAUDRATE = 57600;
+    constexpr int TAU2_BAUDRATE = 921600;  // FLIR Boson 640 uses 921600, not TAU2's 57600
     constexpr int DEFAULT_SERIAL_BAUDRATE = 115200;
     constexpr int MODBUS_RTU_BAUDRATE = 115200;
     constexpr int SERVO_HIGH_SPEED_BAUDRATE = 230400;
