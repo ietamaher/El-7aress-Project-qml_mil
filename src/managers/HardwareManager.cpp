@@ -331,6 +331,7 @@ void HardwareManager::createDevices()
     qInfo() << "  Creating devices...";
 
     const auto& videoConf = DeviceConfiguration::video();
+    const auto& imuConf = DeviceConfiguration::imu();
     const auto& servoAzConf = DeviceConfiguration::servoAz();
     const auto& servoElConf = DeviceConfiguration::servoEl();
 
@@ -338,9 +339,15 @@ void HardwareManager::createDevices()
     m_dayCamControl = new DayCameraControlDevice("dayCamera", this);
     m_dayCamControl->setDependencies(m_dayCameraTransport, m_dayCameraParser);
 
-    // IMU (Modbus RTU)
+    // IMU (3DM-GX3-25 - Serial Binary Protocol)
     m_gyroDevice = new ImuDevice("imu", this);
     m_gyroDevice->setDependencies(m_imuTransport, m_imuParser);
+
+    // Pass IMU configuration (sampling rate, tilt threshold)
+    QJsonObject imuConfig;
+    imuConfig["samplingRateHz"] = imuConf.samplingRateHz;
+    imuConfig["tiltWarningThreshold"] = imuConf.tiltWarningThreshold;
+    m_gyroDevice->setProperty("config", imuConfig);
 
     // Joystick (SDL2 - no transport needed)
     m_joystickDevice = new JoystickDevice(this);
