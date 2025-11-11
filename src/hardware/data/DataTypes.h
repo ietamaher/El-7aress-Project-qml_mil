@@ -55,6 +55,13 @@ struct NightCameraData {
     quint8 lut = 0;
     quint8 cameraStatus = 0;
 
+    // Temperature (0x20 READ_TEMP_SENSOR)
+    qint16 fpaTemperature = 0;  // Celsius × 10 (e.g., 325 = 32.5°C)
+
+    // Pan/Tilt for zoom navigation (0x70 PAN_AND_TILT)
+    qint16 panPosition = 0;   // -82 to +82
+    qint16 tiltPosition = 0;  // -68 to +68
+
     bool operator!=(const NightCameraData &other) const {
         return (isConnected != other.isConnected ||
                 errorState != other.errorState ||
@@ -63,7 +70,10 @@ struct NightCameraData {
                 digitalZoomLevel != other.digitalZoomLevel ||
                 !qFuzzyCompare(currentHFOV, other.currentHFOV) ||
                 videoMode != other.videoMode ||
-                cameraStatus != other.cameraStatus);
+                cameraStatus != other.cameraStatus ||
+                fpaTemperature != other.fpaTemperature ||
+                panPosition != other.panPosition ||
+                tiltPosition != other.tiltPosition);
     }
 };
 

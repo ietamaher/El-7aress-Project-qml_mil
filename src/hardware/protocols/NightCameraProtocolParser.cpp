@@ -77,9 +77,21 @@ MessagePtr NightCameraProtocolParser::parsePacket(const QByteArray& packet) {
 
     // Parse based on function code
     if (functionCode == 0x06 && !payloadData.isEmpty()) {
+        // STATUS_REQUEST response
         data.cameraStatus = static_cast<quint8>(payloadData[0]);
-    } else if (functionCode == 0x0B) {
+    } else if (functionCode == 0x0C) {
+        // DO_FFC response - FFC completed
         data.ffcInProgress = false;
+    } else if (functionCode == 0x20 && payloadData.size() >= 2) {
+        // READ_TEMP_SENSOR response - Temperature in Celsius × 10
+        data.fpaTemperature = (static_cast<qint16>(static_cast<quint8>(payloadData[0])) << 8) |
+                              static_cast<qint16>(static_cast<quint8>(payloadData[1]));
+    } else if (functionCode == 0x70 && payloadData.size() >= 4) {
+        // PAN_AND_TILT response
+        data.tiltPosition = (static_cast<qint16>(static_cast<quint8>(payloadData[0])) << 8) |
+                            static_cast<qint16>(static_cast<quint8>(payloadData[1]));
+        data.panPosition = (static_cast<qint16>(static_cast<quint8>(payloadData[2])) << 8) |
+                           static_cast<qint16>(static_cast<quint8>(payloadData[3]));
     }
 
     return std::make_unique<NightCameraDataMessage>(data);

@@ -140,7 +140,8 @@ void SystemStatusController::onSystemStateChanged(const SystemStateData& data)
         data.nightFfcInProgress,
         data.nightCameraError,
         data.nightCameraStatus,
-        data.nightVideoMode
+        data.nightVideoMode,
+        data.nightFpaTemperature
         );
 
     // Update PLC Status

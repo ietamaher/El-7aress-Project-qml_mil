@@ -36,6 +36,8 @@ public:
     Q_INVOKABLE void setDigitalZoom(quint8 zoomLevel);
     Q_INVOKABLE void setVideoModeLUT(quint16 mode);
     Q_INVOKABLE void getCameraStatus();
+    Q_INVOKABLE void readFpaTemperature();
+    Q_INVOKABLE void setPanTilt(qint16 tilt, qint16 pan);
 
 signals:
     void nightCameraDataChanged(const NightCameraData& data);

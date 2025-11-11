@@ -708,9 +708,10 @@ void SystemStateModel::onNightCameraDataChanged(const NightCameraData &nightData
     newData.nightCameraConnected = nightData.isConnected;
     newData.nightCameraError = nightData.errorState;
     newData.nightCameraStatus = nightData.cameraStatus;
-    newData.nightDigitalZoomLevel = nightData.digitalZoomLevel; 
+    newData.nightDigitalZoomLevel = nightData.digitalZoomLevel;
     newData.nightFfcInProgress = nightData.ffcInProgress;
     newData.nightVideoMode = nightData.videoMode;
+    newData.nightFpaTemperature = nightData.fpaTemperature;
     updateData(newData);
 
 }

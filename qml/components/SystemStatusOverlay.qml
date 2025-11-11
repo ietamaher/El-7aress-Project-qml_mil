@@ -353,6 +353,7 @@ Rectangle {
 
                             StatusRow { label: "FOV:"; value: viewModel ? viewModel.nightCamFovText : "N/A" }
                             StatusRow { label: "Zoom:"; value: viewModel ? viewModel.nightCamZoomText : "N/A" }
+                            StatusRow { label: "Temp:"; value: viewModel ? viewModel.nightCamTempText : "N/A" }
                             StatusRow { label: "LUT:"; value: viewModel ? viewModel.nightCamVideoModeText : "N/A" }
                             StatusRow {
                                 label: "FFC:"

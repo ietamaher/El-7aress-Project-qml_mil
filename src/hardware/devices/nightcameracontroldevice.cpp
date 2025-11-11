@@ -110,7 +110,9 @@ void NightCameraControlDevice::performFFC() {
     updateData(newData);
     emit nightCameraDataChanged(*newData);
 
-    sendCommand(0x0B, QByteArray::fromHex("0001"));
+    // 0x0C = DO_FFC (no arguments required)
+    sendCommand(0x0C, QByteArray());
+    qDebug() << m_identifier << "FFC commanded";
 }
 
 void NightCameraControlDevice::setDigitalZoom(quint8 zoomLevel) {
@@ -142,6 +144,7 @@ void NightCameraControlDevice::getCameraStatus() {
 
 void NightCameraControlDevice::checkCameraStatus() {
     getCameraStatus();
+    readFpaTemperature();
 }
 
 void NightCameraControlDevice::resetCommunicationWatchdog() {
@@ -168,4 +171,33 @@ void NightCameraControlDevice::onCommunicationWatchdogTimeout() {
     qWarning() << m_identifier << "Communication timeout - no data received for"
                << COMMUNICATION_TIMEOUT_MS << "ms";
     setConnectionState(false);
+}
+
+void NightCameraControlDevice::readFpaTemperature() {
+    // 0x20 READ_TEMP_SENSOR
+    // Argument: 0x0002 = request temperature in Celsius × 10
+    sendCommand(0x20, QByteArray::fromHex("0002"));
+}
+
+void NightCameraControlDevice::setPanTilt(qint16 tilt, qint16 pan) {
+    // 0x70 PAN_AND_TILT
+    // Clamp values to valid ranges
+    tilt = qBound(qint16(-68), tilt, qint16(68));
+    pan = qBound(qint16(-82), pan, qint16(82));
+
+    auto newData = std::make_shared<NightCameraData>(*data());
+    newData->tiltPosition = tilt;
+    newData->panPosition = pan;
+    updateData(newData);
+    emit nightCameraDataChanged(*newData);
+
+    // Build command: Bytes 0-1 = Tilt (signed), Bytes 2-3 = Pan (signed)
+    QByteArray panTiltArg;
+    panTiltArg.append(static_cast<char>((tilt >> 8) & 0xFF));
+    panTiltArg.append(static_cast<char>(tilt & 0xFF));
+    panTiltArg.append(static_cast<char>((pan >> 8) & 0xFF));
+    panTiltArg.append(static_cast<char>(pan & 0xFF));
+
+    sendCommand(0x70, panTiltArg);
+    qDebug() << m_identifier << "Set pan/tilt: tilt =" << tilt << ", pan =" << pan;
 }

@@ -40,6 +40,7 @@ SystemStatusViewModel::SystemStatusViewModel(QObject *parent)
     , m_nightCamActive(false)
     , m_nightCamFovText("N/A")
     , m_nightCamZoomText("N/A")
+    , m_nightCamTempText("N/A")
     , m_nightCamFfcInProgress(false)
     , m_nightCamError(false)
     , m_plc21Connected(false)
@@ -350,7 +351,7 @@ void SystemStatusViewModel::updateDayCamera(bool connected, bool isActive, float
 // ============================================================================
 void SystemStatusViewModel::updateNightCamera(bool connected, bool isActive, float fov,
                                               quint8 digitalZoom, bool ffcInProgress,
-                                              bool error, quint8 errorCode, quint16 videoMode)
+                                              bool error, quint8 errorCode, quint16 videoMode, qint16 fpaTemp)
 {
     if (m_nightCamConnected != connected) {
         m_nightCamConnected = connected;
@@ -372,6 +373,13 @@ void SystemStatusViewModel::updateNightCamera(bool connected, bool isActive, flo
     if (m_nightCamZoomText != newZoom) {
         m_nightCamZoomText = newZoom;
         emit nightCamZoomTextChanged();
+    }
+
+    // Update temperature (fpaTemp is in Celsius × 10, e.g., 325 = 32.5°C)
+    QString newTemp = connected ? QString::number(fpaTemp / 10.0, 'f', 1) + "°C" : "N/A";
+    if (m_nightCamTempText != newTemp) {
+        m_nightCamTempText = newTemp;
+        emit nightCamTempTextChanged();
     }
 
     QString newVideoMode = QString("LUT %1").arg(videoMode);

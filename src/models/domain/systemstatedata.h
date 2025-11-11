@@ -356,6 +356,7 @@ struct SystemStateData {
     quint8 nightDigitalZoomLevel = 1;   ///< Night camera digital zoom level (FIXED TYPE: was bool, now quint8)
     bool nightFfcInProgress = false;    ///< Night camera FFC (Flat Field Correction) in progress status
     quint16 nightVideoMode = 0;         ///< Night camera video mode (e.g., 0=Normal, 1=Low Light, etc.)
+    qint16 nightFpaTemperature = 0;     ///< Night camera FPA temperature in Celsius × 10
 
     // Camera Control
     bool activeCameraIsDay = false;     ///< True if day camera is active, false if night camera
@@ -661,7 +662,8 @@ struct SystemStateData {
                nightDigitalZoomLevel == other.nightDigitalZoomLevel &&
                nightFfcInProgress == other.nightFfcInProgress &&
                nightVideoMode == other.nightVideoMode &&
-               
+               nightFpaTemperature == other.nightFpaTemperature &&
+
                // Camera Control
                activeCameraIsDay == other.activeCameraIsDay &&
                

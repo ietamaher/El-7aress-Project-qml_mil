@@ -89,6 +89,7 @@ class SystemStatusViewModel : public QObject
     Q_PROPERTY(bool nightCamActive READ nightCamActive NOTIFY nightCamActiveChanged)
     Q_PROPERTY(QString nightCamFovText READ nightCamFovText NOTIFY nightCamFovTextChanged)
     Q_PROPERTY(QString nightCamZoomText READ nightCamZoomText NOTIFY nightCamZoomTextChanged)
+    Q_PROPERTY(QString nightCamTempText READ nightCamTempText NOTIFY nightCamTempTextChanged)
     Q_PROPERTY(bool nightCamFfcInProgress READ nightCamFfcInProgress NOTIFY nightCamFfcInProgressChanged)
     Q_PROPERTY(bool nightCamError READ nightCamError NOTIFY nightCamErrorChanged)
     Q_PROPERTY(QString nightCamVideoModeText READ nightCamVideoModeText NOTIFY nightCamVideoModeTextChanged)
@@ -196,6 +197,7 @@ public:
     bool nightCamActive() const { return m_nightCamActive; }
     QString nightCamFovText() const { return m_nightCamFovText; }
     QString nightCamZoomText() const { return m_nightCamZoomText; }
+    QString nightCamTempText() const { return m_nightCamTempText; }
     bool nightCamFfcInProgress() const { return m_nightCamFfcInProgress; }
     bool nightCamError() const { return m_nightCamError; }
     QString nightCamVideoModeText() const { return m_nightCamVideoModeText; }
@@ -258,7 +260,7 @@ public slots:
                          quint16 focus, bool autofocus, bool error, quint8 errorCode);
 
     void updateNightCamera(bool connected, bool isActive, float fov, quint8 digitalZoom,
-                           bool ffcInProgress, bool error, quint8 errorCode, quint16 videoMode);
+                           bool ffcInProgress, bool error, quint8 errorCode, quint16 videoMode, qint16 fpaTemp);
 
     void updatePlcStatus(bool plc21Conn, bool plc42Conn, bool stationEn, bool gunArm);
 
@@ -333,6 +335,7 @@ signals:
     void nightCamActiveChanged();
     void nightCamFovTextChanged();
     void nightCamZoomTextChanged();
+    void nightCamTempTextChanged();
     void nightCamFfcInProgressChanged();
     void nightCamErrorChanged();
     void nightCamVideoModeTextChanged();
@@ -449,6 +452,7 @@ private:
     bool m_nightCamActive;
     QString m_nightCamFovText;
     QString m_nightCamZoomText;
+    QString m_nightCamTempText;
     bool m_nightCamFfcInProgress;
     bool m_nightCamError;  // ✅ FIXED: Changed from quint8 to bool
     QString m_nightCamVideoModeText;
