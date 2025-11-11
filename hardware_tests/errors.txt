@@ -1,59 +1,307 @@
-Imu3DMGX3Parser: Checksum mismatch! Expected 10c8 got e9c
-Imu3DMGX3Parser: Checksum mismatch! Expected f01 got df7
-Imu3DMGX3Parser: Checksum mismatch! Expected e44 got 8fc
-"servoActuator" Timeout waiting for response to: "VL"
-[Gimbal] New Gyro Bias - X: -0.00345905 Y: 0.0132402 Z: 0.0146537
-Imu3DMGX3Parser: Checksum mismatch! Expected d72 got 69cf
-Imu3DMGX3Parser: Unknown command byte bd
-Imu3DMGX3Parser: Unknown command byte 4e
-Imu3DMGX3Parser: Unknown command byte 84
-Imu3DMGX3Parser: Unknown command byte 13
-Imu3DMGX3Parser: Unknown command byte 3c
-Imu3DMGX3Parser: Unknown command byte e5
-Imu3DMGX3Parser: Unknown command byte 23
-Imu3DMGX3Parser: Unknown command byte 4c
-Imu3DMGX3Parser: Unknown command byte 3f
-Imu3DMGX3Parser: Unknown command byte bc
-Imu3DMGX3Parser: Unknown command byte d3
-Imu3DMGX3Parser: Unknown command byte a3
-Imu3DMGX3Parser: Unknown command byte bb
-Imu3DMGX3Parser: Unknown command byte 2d
-Imu3DMGX3Parser: Unknown command byte dd
-Imu3DMGX3Parser: Unknown command byte f1
-Imu3DMGX3Parser: Unknown command byte 39
-Imu3DMGX3Parser: Unknown command byte 68
-Imu3DMGX3Parser: Unknown command byte 23
-Imu3DMGX3Parser: Unknown command byte 60
-Imu3DMGX3Parser: Unknown command byte 3b
-Imu3DMGX3Parser: Unknown command byte 61
+09:01:05: Debugging /home/rapit/El-7aress-Project-qml_mil/build/Desktop-Debug/QT6-gstreamer-example -qmljsdebugger=port:43387,block,services:DebugMessages,QmlDebugger,V8Debugger,QmlInspector,DebugTranslation ...
+QML debugging is enabled. Only use this in a safe environment.
+Loading device configuration...
+  Loading from embedded resource: qrc:/config/devices.json
+  ✓ Configuration loaded from embedded resource
+SystemController: Created
+=== PHASE 1: Hardware Initialization ===
+Zeroing cleared.
+Windage cleared.
+Could not open file for reading: "zones.json" "No such file or directory"
+  ✓ SystemStateModel created
+  Creating managers...
+    ✓ All managers created
+=== HardwareManager: Creating Hardware ===
+  Creating transport layer...
+    ✓ Transport layer created
+  Creating protocol parsers...
+    ✓ Protocol parsers created
+  Creating devices...
+Cam 0 : Source Dim= 1280 x 720 , Output Dim= 1024 x 768
+Cam 1 : Source Dim= 1280 x 720 , Output Dim= 1024 x 768
+    ✓ Devices created with dependency injection
+  Creating data models...
+    ✓ Data models created
+  ✓ Hardware creation complete
+=== HardwareManager: Connecting Devices to Models ===
+  ✓ Devices connected to models
+=== HardwareManager: Connecting Models to SystemState ===
+  ✓ Models connected to SystemStateModel
+=== ControllerRegistry: Creating Hardware Controllers ===
+Unknown motion mode: 5
+[GimbalController] Mode set to 5
+CameraController initialized. Active camera is: Night
+  ✓ Hardware controllers created
+=== PHASE 1 COMPLETE ===
+
+QML Debugger: Waiting for connection on port 43387...
+=== PHASE 2: QML System Initialization ===
+  ✓ VideoImageProvider registered
+  Connecting video streams to provider...
+    ✓ Day camera connected to video provider
+    ✓ Night camera connected to video provider
+=== ViewModelRegistry: Creating ViewModels ===
+  ✓ All ViewModels created
+=== ControllerRegistry: Creating QML Controllers ===
+OsdController: ViewModel set: OsdViewModel(0xaaaaab0d7000)
+OsdController: StateModel set: SystemStateModel(0xaaaaab25e350)
+SystemStatusController: ViewModel set
+SystemStatusController: StateModel set
+AboutController: Constructor
+AboutController: ViewModel set
+AboutController: StateModel set
+  ✓ QML controllers created
+=== ControllerRegistry: Initializing Controllers ===
+OsdController::initialize()
+OsdController initialized successfully
+ColorMenuController::initialize()
+  m_viewModel: MenuViewModel(0xaaaaab012180)
+  m_osdViewModel: OsdViewModel(0xaaaaab0d7000)
+  m_stateModel: SystemStateModel(0xaaaaab25e350)
+ZoneDefinitionController initialized
+SystemStatusController::initialize()
+SystemStatusController initialized successfully
+AboutController::initialize()
+AboutController initialized successfully
+ApplicationController: Initializing...
+ApplicationController: SystemStatusController signals connected
+ApplicationController: AboutController signals connected
+ApplicationController: SystemStateModel button monitoring connected
+ApplicationController: All signal connections established
+  ✓ All controllers initialized
+=== ControllerRegistry: Connecting Video to OSD ===
+  ✓ Day camera → OSD controller connected
+  ✓ Night camera → OSD controller connected
+  ✓ Video-to-OSD connection complete
+=== ViewModelRegistry: Registering ViewModels with QML ===
+  ✓ All ViewModels registered with QML context
+=== ControllerRegistry: Registering with QML ===
+  ✓ Controllers registered with QML context
+=== PHASE 2 COMPLETE ===
+
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera
+qml: About dialog created. visible= false accentColor= #46e2a5
+qrc:/qml/components/OsdOverlay.qml:244: TypeError: Cannot read property 'visible' of null
+qrc:/qml/components/OsdOverlay.qml:560: TypeError: Cannot read property 'parent' of null
+qrc:/qml/views/main.qml:61: ReferenceError: osdViewModelInstance is not defined
+qrc:/qml/views/main.qml:85: ReferenceError: osdViewModelInstance is not defined
+qrc:/qml/components/ZeroingOverlay.qml:15:5: Unable to assign [undefined] to QColor
+qrc:/qml/components/ZoneDefinitionOverlay.qml:363:17: Unable to assign [undefined] to bool
+=== PHASE 3: System Startup ===
+[OsdController] Starting event-driven startup sequence
+[OsdController] Startup message: "SYSTEM INITIALIZATION..."
+[OsdViewModel] Startup message updated: Visible= true Text= "SYSTEM INITIALIZATION..."
+  ✓ OSD startup sequence started
+=== HardwareManager: Starting Hardware ===
+  Opening transport connections...
+ModbusTransport: Setting slave ID to 31
+ModbusTransport: Opening port "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if00" at 115200 baud
+ModbusTransport: State changed to "Connecting" for slave 31
+ModbusTransport: State changed to "Connected" for slave 31
+ModbusTransport: Connected successfully to "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if00" with slave ID 31
+ModbusTransport: Setting slave ID to 31
+ModbusTransport: Opening port "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if02" at 115200 baud
+ModbusTransport: State changed to "Connecting" for slave 31
+ModbusTransport: State changed to "Connected" for slave 31
+ModbusTransport: Connected successfully to "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if02" with slave ID 31
+ModbusTransport: Setting slave ID to 2
+ModbusTransport: Opening port "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if04" at 230400 baud
+ModbusTransport: State changed to "Connecting" for slave 2
+ModbusTransport: State changed to "Connected" for slave 2
+ModbusTransport: Connected successfully to "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if04" with slave ID 2
+ModbusTransport: Setting slave ID to 1
+ModbusTransport: Opening port "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if06" at 230400 baud
+ModbusTransport: State changed to "Connecting" for slave 1
+ModbusTransport: State changed to "Connected" for slave 1
+ModbusTransport: Connected successfully to "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BC046FABCD-if06" with slave ID 1
+    ✓ Transport connections opened
+  Initializing devices...
+"dayCamera" initialized successfully
+"imu" initializing 3DM-GX3-25...
+"imu" **IMPORTANT**: Device must be stationary for gyro bias capture!
+"imu" Capturing gyro bias (10 seconds)...
+JoystickDevice: SDL joystick subsystem initialized
+JoystickDevice: Found 2 joystick(s)
+JoystickDevice: Index 0 GUID: 030000004f0400000204000011010000
+JoystickDevice: Opened joystick: Thustmaster Joystick - HOTAS Warthog
+  Axes: 2
+  Buttons: 19
+  Hats: 1
+JoystickDevice: Initialized successfully
+"nightCamera" initialized successfully
+"plc21" initializing...
+"plc21" initialized successfully with poll interval: 50 ms
+"plc42" initializing...
+"plc42" initialized successfully with poll interval: 50 ms
+LRF initialized successfully
+"radar" initialized successfully
+"servoActuator" initialized successfully
+"az" initializing...
+"az" initialized successfully with poll interval: 50 ms
+"el" initializing...
+"el" initialized successfully with poll interval: 50 ms
+    ✓ All devices initialized
+  Configuring camera defaults...
+    ✓ Camera defaults configured
+  ✓ Day camera thread started
+CameraVideoStreamDevice thread started for Camera 0
+Cam 0  GStreamer Pipeline: "v4l2src device=/dev/video0 do-timestamp=true ! video/x-raw,format=YUY2,width=1280,height=720,framerate=30/1 ! videocrop top=0 left= 0 bottom=0  right=0 ! videoscale ! video/x-raw,width=1024,height=768 ! queue max-size-buffers=2 leaky=downstream ! appsink name=mysink emit-signals=true max-buffers=2 drop=true sync=false"
+  ✓ Night camera thread started
+  ✓ Hardware started successfully
+  ✓ Gimbal alarms cleared
+=== PHASE 3 COMPLETE - SYSTEM RUNNING ===
+
+CameraVideoStreamDevice thread started for Camera 1
+Cam 1  GStreamer Pipeline: "v4l2src device=/dev/video1 do-timestamp=true ! video/x-raw,format=YUY2,width=1280,height=720,framerate=30/1 ! videocrop top=28 left= 116 bottom=60  right=116 ! videoscale ! video/x-raw,width=1024,height=768 ! queue max-size-buffers=2 leaky=downstream ! appsink name=mysink emit-signals=true max-buffers=2 drop=true sync=false"
+"dayCamera" connected
+LRF connected
+GStreamer initialized successfully for Camera 1
+GStreamer initialized successfully for Camera 0
+"plc21" connected
+[MODEL] Transitioning to Surveillance Mode.
+[ManualMotionMode] Enter
+[GimbalController] Mode set to 0
+[ManualMotionMode] Exit
+[ManualMotionMode] Enter
+[GimbalController] Mode set to 0
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074502
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074512
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074533
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074568
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074601
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074644
+Cam 1 : CUDA device initialized successfully
+Cam 0 : CUDA device initialized successfully
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074667
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074701
+LRF command response timeout!
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074734
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074767
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074801
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074843
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074867
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074901
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074934
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848074967
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848075000
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848075034
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848075067
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848075101
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848075133
+VPI initialized successfully for Camera 0
+GStreamer pipeline is PLAYING for Camera 0
+Running GStreamer main loop for Camera 0
+VPI initialized successfully for Camera 1
+GStreamer pipeline is PLAYING for Camera 1
+Running GStreamer main loop for Camera 1
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848075167
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848075200
+qrc:/qml/views/main.qml:20:5: QML QQuickImage: Failed to get image from provider: image://video/camera?1762848075234
+[OsdController] Startup message: "DETECTING STATIC CONDITION..."
+[OsdViewModel] Startup message updated: Visible= true Text= "DETECTING STATIC CONDITION..."
+"plc42" Modbus error: "Request timeout."
+"az" Modbus error: "Request timeout."
+"el" Modbus error: "Request timeout."
 "plc42" Communication timeout - no data received for 3000 ms
-"imu" Communication timeout - no data received for 3000 ms
-"imu" disconnected
-Imu3DMGX3Parser: Checksum mismatch! Expected 898 got 3fbc
-Imu3DMGX3Parser: Unknown command byte a4
-Imu3DMGX3Parser: Unknown command byte fc
-Imu3DMGX3Parser: Unknown command byte ba
-Imu3DMGX3Parser: Unknown command byte c
-Imu3DMGX3Parser: Unknown command byte 2a
-Imu3DMGX3Parser: Unknown command byte 78
-Imu3DMGX3Parser: Unknown command byte 38
-Imu3DMGX3Parser: Unknown command byte bb
-Imu3DMGX3Parser: Unknown command byte a1
-Imu3DMGX3Parser: Unknown command byte 40
-Imu3DMGX3Parser: Unknown command byte ba
-Imu3DMGX3Parser: Unknown command byte 90
-Imu3DMGX3Parser: Unknown command byte 9e
-Imu3DMGX3Parser: Unknown command byte 38
-Imu3DMGX3Parser: Unknown command byte a
-Imu3DMGX3Parser: Unknown command byte 74
-Imu3DMGX3Parser: Unknown command byte 52
-Imu3DMGX3Parser: Unknown command byte a
-Imu3DMGX3Parser: Unknown command byte e
-Imu3DMGX3Parser: Unknown command byte 8
+"az" Communication timeout - no data received for 3000 ms
+"el" Communication timeout - no data received for 3000 ms
+LRF connected
+qml: [UI] MENU/VAL button clicked
+ApplicationController: MENU/VAL button pressed in state 0
+ApplicationController: showMainMenu() called
+ZeroingController::hide() called
+ZeroingController: State transition from 0 to 0
+ZeroingController::updateUI() for state 0
+ZoneDefinitionController: hide() called
+AboutController: Hiding About/Help dialog
+ApplicationController: Menu state changed to 1
+"plc42" Write error: "Request timeout."
+"plc42" Communication timeout - no data received for 3000 ms
+"servoActuator" Timeout waiting for response to: "SR"
+"plc42" Write error: "Request timeout."
+"servoActuator" Timeout waiting for response to: "AP"
+"servoActuator" Timeout waiting for response to: "VL"
+"plc42" Write error: "Request timeout."
+"plc42" Communication timeout - no data received for 3000 ms
+"servoActuator" Timeout waiting for response to: "TQ"
+Imu3DMGX3Parser: Gyro bias captured successfully - X: "-0.0019" deg/s Y: "-0.0039" deg/s Z: "-0.0013" deg/s
+"imu" Gyro bias capture completed
+"imu" Starting polling mode at 100 Hz
+"imu" initialized successfully!
+[OsdController] IMU connected - gyro bias capture complete, data flowing
 "imu" connected
-Imu3DMGX3Parser: Checksum mismatch! Expected f0e got f02
-Imu3DMGX3Parser: Unknown command byte ef
-Imu3DMGX3Parser: Unknown command byte 0
-Imu3DMGX3Parser: Unknown command byte 35
-Imu3DMGX3Parser: Unknown command byte 1
+Imu3DMGX3Parser: Checksum mismatch! Expected f05 got 90cf
+Imu3DMGX3Parser: Unknown command byte bd
+Imu3DMGX3Parser: Unknown command byte 92
+Imu3DMGX3Parser: Unknown command byte 2b
+Imu3DMGX3Parser: Unknown command byte 40
+Imu3DMGX3Parser: Unknown command byte bc
+Imu3DMGX3Parser: Unknown command byte 8d
+Imu3DMGX3Parser: Unknown command byte b8
+Imu3DMGX3Parser: Unknown command byte 19
+Imu3DMGX3Parser: Unknown command byte 3f
+Imu3DMGX3Parser: Too many consecutive errors ( 10 ) - clearing buffer to resync
+Imu3DMGX3Parser: Checksum mismatch! Expected 0 got 8ff7
+"nightCamera" Communication timeout - no data received for 10000 ms
+"radar" Communication timeout - no data received for 10000 ms
+"servoActuator" Timeout waiting for response to: "RT1"
+Imu3DMGX3Parser: Checksum mismatch! Expected ed4 got c8cf
+Imu3DMGX3Parser: Unknown command byte bd
+Imu3DMGX3Parser: Unknown command byte 90
+Imu3DMGX3Parser: Unknown command byte 27
+Imu3DMGX3Parser: Unknown command byte 90
+Imu3DMGX3Parser: Unknown command byte bc
+Imu3DMGX3Parser: Unknown command byte 7a
+Imu3DMGX3Parser: Unknown command byte bd
+Imu3DMGX3Parser: Unknown command byte d7
+Imu3DMGX3Parser: Unknown command byte 3f
+Imu3DMGX3Parser: Too many consecutive errors ( 10 ) - clearing buffer to resync
+Imu3DMGX3Parser: Checksum mismatch! Expected 0 got 8ff7
+Imu3DMGX3Parser: Checksum mismatch! Expected ef7 got e08
+Imu3DMGX3Parser: Checksum mismatch! Expected 1120 got 84cf
+Imu3DMGX3Parser: Unknown command byte bd
+Imu3DMGX3Parser: Unknown command byte 8e
+Imu3DMGX3Parser: Unknown command byte fa
+Imu3DMGX3Parser: Unknown command byte d7
+Imu3DMGX3Parser: Unknown command byte bc
+Imu3DMGX3Parser: Unknown command byte 66
+Imu3DMGX3Parser: Unknown command byte 1f
+Imu3DMGX3Parser: Unknown command byte 85
+Imu3DMGX3Parser: Unknown command byte 3f
+Imu3DMGX3Parser: Too many consecutive errors ( 10 ) - clearing buffer to resync
+Imu3DMGX3Parser: Checksum mismatch! Expected 0 got 8ff7
+Imu3DMGX3Parser: Unknown command byte bd
+Imu3DMGX3Parser: Unknown command byte 8e
+Imu3DMGX3Parser: Unknown command byte e9
+Imu3DMGX3Parser: Unknown command byte 86
+Imu3DMGX3Parser: Unknown command byte bc
+Imu3DMGX3Parser: Unknown command byte 64
 Imu3DMGX3Parser: Unknown command byte 24
+Imu3DMGX3Parser: Unknown command byte 67
+Imu3DMGX3Parser: Unknown command byte 3f
+Imu3DMGX3Parser: Too many consecutive errors ( 10 ) - clearing buffer to resync
+Imu3DMGX3Parser: Checksum mismatch! Expected 0 got 8ff7
+Imu3DMGX3Parser: Unknown command byte ae
+Imu3DMGX3Parser: Unknown command byte 73
+Imu3DMGX3Parser: Unknown command byte fe
+Imu3DMGX3Parser: Unknown command byte bb
+Imu3DMGX3Parser: Unknown command byte f1
+Imu3DMGX3Parser: Unknown command byte ff
+Imu3DMGX3Parser: Unknown command byte 60
+Imu3DMGX3Parser: Unknown command byte 80
+Imu3DMGX3Parser: Unknown command byte 87
+Imu3DMGX3Parser: Too many consecutive errors ( 10 ) - clearing buffer to resync
+Imu3DMGX3Parser: Checksum mismatch! Expected 0 got 8ff7
+Imu3DMGX3Parser: Unknown command byte 63
+Imu3DMGX3Parser: Unknown command byte 86
+Imu3DMGX3Parser: Unknown command byte ba
+Imu3DMGX3Parser: Unknown command byte c6
+Imu3DMGX3Parser: Unknown command byte 74
+Imu3DMGX3Parser: Unknown command byte 4a
+Imu3DMGX3Parser: Unknown command byte 3a
+Imu3DMGX3Parser: Unknown command byte 7a
+Imu3DMGX3Parser: Unknown command byte 5d
+Imu3DMGX3Parser: Too many consecutive errors ( 10 ) - clearing buffer to resync
+Imu3DMGX3Parser: Checksum mismatch! Expected 0 got 8ff7
+Imu3DMGX3Parser: Checksum mismatch! Expected d1f got 9fcf
+Imu3DMGX3Parser: Unknown command byte bd
