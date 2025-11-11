@@ -172,12 +172,14 @@ Rectangle {
                             StatusRow { label: "Torque:"; value: viewModel ? viewModel.actuatorTorqueText : "N/A" }
 
                             Text {
-                                text: viewModel && viewModel.actuatorMotorOff ? "⚠ MOTOR OFF" :
-                                      viewModel && viewModel.actuatorFault ? "⚠ FAULT" : "✓ OK"
+                                text: viewModel ? viewModel.actuatorStatusText : "N/A"
                                 font.pixelSize: 11
                                 font.bold: true
                                 font.family: "Segoe UI"
-                                color: (viewModel && (viewModel.actuatorMotorOff || viewModel.actuatorFault)) ? "#FF6B6B" : accentColor
+                                color: {
+                                    if (!viewModel || !viewModel.actuatorConnected) return "#808080"
+                                    return viewModel.actuatorFault ? "#FF6B6B" : accentColor
+                                }
                                 topPadding: 2
                             }
                         }
