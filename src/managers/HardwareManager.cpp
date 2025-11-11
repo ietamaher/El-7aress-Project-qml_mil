@@ -346,7 +346,7 @@ void HardwareManager::createDevices()
     // Pass IMU configuration (sampling rate, tilt threshold)
     QJsonObject imuConfig;
     imuConfig["samplingRateHz"] = imuConf.samplingRateHz;
-    imuConfig["tiltWarningThreshold"] = imuConf.tiltWarningThreshold;
+    //imuConfig["tiltWarningThreshold"] = imuConf.;
     m_gyroDevice->setProperty("config", imuConfig);
 
     // Joystick (SDL2 - no transport needed)
