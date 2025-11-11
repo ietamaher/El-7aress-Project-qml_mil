@@ -190,8 +190,9 @@ void NightCameraControlDevice::onCommunicationWatchdogTimeout() {
 
 void NightCameraControlDevice::readFpaTemperature() {
     // 0x20 READ_TEMP_SENSOR
-    // Argument: 0x0002 = request temperature in Celsius × 10
-    sendCommand(0x20, QByteArray::fromHex("0002"));
+    // Argument: 0x0000 = get temperature (TAU2 firmware returns Celsius × 10)
+    // Note: Some TAU2 variants reject 0x0002 (Celsius mode) with error 0x03 "Data Out of Range"
+    sendCommand(0x20, QByteArray::fromHex("0000"));
 }
 
 void NightCameraControlDevice::setPanTilt(qint16 tilt, qint16 pan) {
