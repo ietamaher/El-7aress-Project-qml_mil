@@ -318,7 +318,12 @@ void SystemStatusViewModel::updateDayCamera(bool connected, bool isActive, float
         emit dayCamFovTextChanged();
     }
 
-    QString newZoom = QString::number(zoom);
+    // Convert raw zoom position (0-16384) to zoom multiplier (1x-30x)
+    // Camera has 30X optical zoom: 0 = 1x (wide), 16384 = 30x (tele)
+    const double MAX_ZOOM = 16384.0;
+    const double ZOOM_RANGE = 29.0;  // 30x - 1x = 29x range
+    double zoomMultiplier = 1.0 + (zoom / MAX_ZOOM) * ZOOM_RANGE;
+    QString newZoom = QString::number(zoomMultiplier, 'f', 1) + "x";
     if (m_dayCamZoomText != newZoom) {
         m_dayCamZoomText = newZoom;
         emit dayCamZoomTextChanged();

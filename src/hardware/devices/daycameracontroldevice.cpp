@@ -181,7 +181,9 @@ void DayCameraControlDevice::getCameraStatus() {
 }
 
 void DayCameraControlDevice::checkCameraStatus() {
-    // Send stop command (0x00, 0x00) to keep communication alive
+    // Query zoom position to sync camera state
+    getCameraStatus();  // Pelco-D: 0x00, 0xA7 - Get zoom position
+    // Also send stop command to keep communication alive
     zoomStop();
 }
 
