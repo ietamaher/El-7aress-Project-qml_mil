@@ -138,29 +138,61 @@ def test_status_request(ser):
         print("  ✗ No response received")
     return None
 
-def test_read_temperature(ser):
-    """Test 0x20 READ_TEMP_SENSOR"""
-    print("\n🌡️  Test 2: READ_TEMP_SENSOR (0x20)")
-    # Argument: 0x0002 = request temperature in Celsius × 10
-    cmd = build_tau2_command(FN_READ_TEMP_SENSOR, b'\x00\x02')
-    print(f"  TX: {format_hex(cmd)}")
-    ser.write(cmd)
-    time.sleep(0.2)
+def test_read_temperature(ser, mode=None):
+    """Test 0x20 READ_TEMP_SENSOR with different modes"""
 
-    response = ser.read(100)
-    if response:
-        print(f"  RX: {format_hex(response)}")
-        parsed = parse_tau2_response(response)
-        if parsed and len(parsed['payload']) >= 2:
-            # Temperature is signed 16-bit value in Celsius × 10
-            temp_raw = struct.unpack('>h', parsed['payload'][:2])[0]
-            temp_celsius = temp_raw / 10.0
-            print(f"  ✓ FPA Temperature: {temp_celsius}°C (raw: {temp_raw})")
-            return temp_celsius
+    # Try different modes
+    test_modes = [
+        (b'', "GET (no argument)"),
+        (b'\x00\x00', "Mode 0x0000 (disabled/get)"),
+        (b'\x00\x01', "Mode 0x0001 (Fahrenheit)"),
+        (b'\x00\x02', "Mode 0x0002 (Celsius)")
+    ]
+
+    if mode is not None:
+        test_modes = [test_modes[mode]]
+
+    for arg, desc in test_modes:
+        print(f"\n🌡️  Test: READ_TEMP_SENSOR (0x20) - {desc}")
+        cmd = build_tau2_command(FN_READ_TEMP_SENSOR, arg)
+        print(f"  TX: {format_hex(cmd)}")
+        ser.write(cmd)
+        time.sleep(0.2)
+
+        response = ser.read(100)
+        if response:
+            print(f"  RX: {format_hex(response)}")
+            parsed = parse_tau2_response(response)
+            if parsed:
+                if parsed['status'] != 0x00:
+                    error_msgs = {
+                        0x01: "Camera Busy",
+                        0x02: "Not Ready",
+                        0x03: "Data Out of Range",
+                        0x04: "Checksum Error",
+                        0x05: "Undefined Process",
+                        0x06: "Undefined Function",
+                        0x07: "Timeout",
+                        0x09: "Byte Count Mismatch",
+                        0x0A: "Feature Not Enabled"
+                    }
+                    error_msg = error_msgs.get(parsed['status'], f"Unknown Error 0x{parsed['status']:02X}")
+                    print(f"  ✗ TAU2 Error: {error_msg} (0x{parsed['status']:02X})")
+                    continue
+
+                if len(parsed['payload']) >= 2:
+                    # Temperature is signed 16-bit value
+                    temp_raw = struct.unpack('>h', parsed['payload'][:2])[0]
+                    temp_celsius = temp_raw / 10.0
+                    print(f"  ✓ SUCCESS! FPA Temperature: {temp_celsius}°C (raw: {temp_raw})")
+                    return temp_celsius
+                else:
+                    print(f"  ⚠ Response OK but no payload (len={len(parsed['payload'])})")
+            else:
+                print("  ✗ Failed to parse response")
         else:
-            print("  ✗ Failed to parse temperature")
-    else:
-        print("  ✗ No response received")
+            print("  ✗ No response received")
+
     return None
 
 def test_do_ffc(ser):
