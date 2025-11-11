@@ -70,6 +70,13 @@ bool ServoActuatorDevice::initialize() {
     // Start communication watchdog - will fire if we don't receive data
     m_communicationWatchdog->start();
 
+    // Emit initial disconnected state (device starts disconnected until proven otherwise)
+    auto initialData = data();
+    if (!initialData->isConnected) {
+        emit actuatorDataChanged(*initialData);
+        qDebug() << m_identifier << "Initial state: disconnected (waiting for communication)";
+    }
+
     return true;
 }
 
