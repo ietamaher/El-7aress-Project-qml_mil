@@ -38,6 +38,8 @@ public:
     Q_INVOKABLE void getCameraStatus();
     Q_INVOKABLE void readFpaTemperature();
     Q_INVOKABLE void setPanTilt(qint16 tilt, qint16 pan);
+    Q_INVOKABLE void getVideoMode();       // Query current zoom mode
+    Q_INVOKABLE void getVideoLUT();        // Query current LUT
 
 signals:
     void nightCameraDataChanged(const NightCameraData& data);

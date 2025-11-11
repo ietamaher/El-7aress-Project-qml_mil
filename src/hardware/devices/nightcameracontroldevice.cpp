@@ -99,6 +99,22 @@ void NightCameraControlDevice::processMessage(const Message& message) {
                      << "(" << (newData->fpaTemperature / 10.0) << "°C)";
         }
 
+        // Update video mode/zoom if received (from 0x0F VIDEO_MODE response)
+        if (partial.digitalZoomLevel != 0) {
+            newData->digitalZoomEnabled = partial.digitalZoomEnabled;
+            newData->digitalZoomLevel = partial.digitalZoomLevel;
+            newData->currentHFOV = partial.currentHFOV;
+            qDebug() << m_identifier << "Zoom updated:" << newData->digitalZoomLevel << "x";
+        }
+
+        // Update LUT if received (from 0x10 VIDEO_LUT response)
+        // Note: videoMode is used for both video mode and LUT in the data structure
+        if (partial.videoMode != 0) {
+            newData->videoMode = partial.videoMode;
+            newData->lut = static_cast<quint8>(partial.videoMode);
+            qDebug() << m_identifier << "LUT updated:" << newData->videoMode;
+        }
+
         // Update pan/tilt if received (from 0x70 PAN_AND_TILT response)
         if (partial.panPosition != 0 || partial.tiltPosition != 0) {
             newData->panPosition = partial.panPosition;
@@ -160,6 +176,8 @@ void NightCameraControlDevice::getCameraStatus() {
 void NightCameraControlDevice::checkCameraStatus() {
     getCameraStatus();
     readFpaTemperature();
+    getVideoMode();
+    getVideoLUT();
 }
 
 void NightCameraControlDevice::resetCommunicationWatchdog() {
@@ -216,4 +234,16 @@ void NightCameraControlDevice::setPanTilt(qint16 tilt, qint16 pan) {
 
     sendCommand(0x70, panTiltArg);
     qDebug() << m_identifier << "Set pan/tilt: tilt =" << tilt << ", pan =" << pan;
+}
+
+void NightCameraControlDevice::getVideoMode() {
+    // 0x0F VIDEO_MODE - Send with no argument to query current mode
+    // Response: 0x0000 = Normal (1X), 0x0004 = Zoom (2X)
+    sendCommand(0x0F, QByteArray());
+}
+
+void NightCameraControlDevice::getVideoLUT() {
+    // 0x10 VIDEO_LUT - Send with no argument to query current LUT
+    // Response: 0x0000 = White hot, 0x0001 = Black hot, etc.
+    sendCommand(0x10, QByteArray());
 }

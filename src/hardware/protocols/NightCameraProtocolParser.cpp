@@ -82,6 +82,20 @@ MessagePtr NightCameraProtocolParser::parsePacket(const QByteArray& packet) {
     } else if (functionCode == 0x0C) {
         // DO_FFC response - FFC completed
         data.ffcInProgress = false;
+    } else if (functionCode == 0x0F && payloadData.size() >= 2) {
+        // VIDEO_MODE response (0x0000=Normal 1X, 0x0004=Zoom 2X)
+        quint16 videoMode = (static_cast<quint16>(static_cast<quint8>(payloadData[0])) << 8) |
+                            static_cast<quint16>(static_cast<quint8>(payloadData[1]));
+        data.digitalZoomEnabled = (videoMode == 0x0004);
+        data.digitalZoomLevel = data.digitalZoomEnabled ? 2 : 1;
+        data.currentHFOV = data.digitalZoomEnabled ? 5.2 : 10.4;
+        qDebug() << "TAU2 Parser: Video mode received:" << Qt::hex << videoMode
+                 << "(Zoom:" << data.digitalZoomLevel << "x)";
+    } else if (functionCode == 0x10 && payloadData.size() >= 2) {
+        // VIDEO_LUT response (0x0000=White hot, 0x0001=Black hot, etc.)
+        data.videoMode = (static_cast<quint16>(static_cast<quint8>(payloadData[0])) << 8) |
+                         static_cast<quint16>(static_cast<quint8>(payloadData[1]));
+        qDebug() << "TAU2 Parser: LUT received:" << data.videoMode;
     } else if (functionCode == 0x20 && payloadData.size() >= 2) {
         // READ_TEMP_SENSOR response - Temperature in Celsius × 10
         data.fpaTemperature = (static_cast<qint16>(static_cast<quint8>(payloadData[0])) << 8) |
