@@ -706,7 +706,7 @@ void SystemStateModel::onNightCameraDataChanged(const NightCameraData &nightData
     newData.nightZoomPosition = nightData.digitalZoomLevel;
     newData.nightCurrentHFOV = nightData.currentHFOV;
     newData.nightCameraConnected = nightData.isConnected;
-    newData.nightCameraError = nightData.errorState;
+    newData.nightCameraError = (nightData.errorState != 0x00);  // Convert errorState byte to boolean
     newData.nightCameraStatus = nightData.cameraStatus;
     newData.nightDigitalZoomLevel = nightData.digitalZoomLevel;
     newData.nightFfcInProgress = nightData.ffcInProgress;
