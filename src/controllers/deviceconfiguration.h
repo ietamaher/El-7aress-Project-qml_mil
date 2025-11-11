@@ -21,6 +21,7 @@ public:
         QString port;
         int baudRate = 115200;
         int samplingRateHz = 100;  // 3DM-GX3-25 sampling rate (50-1000Hz)
+        double tiltWarningThreshold = 30.0;  // Tilt warning threshold in degrees
         // Note: No slaveId - serial binary protocol, not Modbus
     };
 

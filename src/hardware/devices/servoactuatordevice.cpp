@@ -66,6 +66,10 @@ bool ServoActuatorDevice::initialize() {
 
     setState(DeviceState::Online);
     m_statusCheckTimer->start(STATUS_CHECK_INTERVAL_MS);
+
+    // Start communication watchdog - will fire if we don't receive data
+    m_communicationWatchdog->start();
+
     return true;
 }
 

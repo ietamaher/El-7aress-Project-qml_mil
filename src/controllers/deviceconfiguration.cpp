@@ -109,6 +109,7 @@ bool DeviceConfiguration::loadFromFile(const QString& filePath)
         m_imu.port = imu["port"].toString();
         m_imu.baudRate = imu["baudRate"].toInt(m_imu.baudRate);
         m_imu.samplingRateHz = imu["samplingRateHz"].toInt(m_imu.samplingRateHz);
+        m_imu.tiltWarningThreshold = imu["tiltWarningThreshold"].toDouble(m_imu.tiltWarningThreshold);
     }
 
     // Parse LRF

@@ -57,7 +57,10 @@ bool ImuDevice::initialize() {
 
     // Get poll interval from config (default 10ms = 100Hz)
     QJsonObject config = property("config").toJsonObject();
-    m_pollIntervalMs = 1000 / config["samplingRateHz"].toInt(100);
+    int samplingRateHz = config["samplingRateHz"].toInt(100);
+    m_pollIntervalMs = 1000 / samplingRateHz;
+    qDebug() << m_identifier << "Config received: samplingRateHz =" << samplingRateHz
+             << "Hz, pollInterval =" << m_pollIntervalMs << "ms";
 
     // Step 1: Capture gyro bias (device must be stationary!)
     qWarning() << m_identifier << "**IMPORTANT**: Device must be stationary for gyro bias capture!";
