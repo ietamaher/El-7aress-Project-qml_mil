@@ -96,10 +96,12 @@ CameraVideoStreamDevice::CameraVideoStreamDevice(int cameraIndex,
     m_isLacActiveForReticle(false),
     
     // YoloInference Engine (last member)
+    // CUDA is always enabled for GPU acceleration
+    // Inference runs only on day camera (controlled by runtime check at line 614)
     m_inference("/home/rapit/yolov8s.onnx",
                 cv::Size(640, 640),
                 "", // classes.txt path
-                false), // use CUDA
+                true), // use CUDA for GPU acceleration
     
     // Frame counter
     m_frameCount(0)
@@ -609,7 +611,8 @@ bool CameraVideoStreamDevice::processFrame(GstBuffer *buffer)
         std::vector<YoloDetection> detections;
         bool detection_this_frame = m_detectionEnabled.load(std::memory_order_relaxed);
 
-        if (detection_this_frame) {
+        // Only run detection on day camera (camera 0), not night camera (camera 1)
+        if (detection_this_frame && m_cameraIndex == 0) {
             // The YoloInference class expects a BGR cv::Mat by default (due to blobFromImage swapRB=true)
             // Or it might handle BGRA if you modify it. Let's assume BGR for now.
             if (cvFrameBGRA.channels() == 4) {
