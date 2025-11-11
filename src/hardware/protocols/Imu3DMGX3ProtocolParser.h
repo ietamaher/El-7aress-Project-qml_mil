@@ -169,6 +169,10 @@ private:
     // Temperature cache (updated periodically from 0xD1 queries)
     double m_lastTemperature = 25.0;  // Average of all sensor temps
 
+    // Error tracking for parser resilience
+    int m_consecutiveErrors = 0;
+    static constexpr int MAX_CONSECUTIVE_ERRORS = 10;
+
     // Expected packet sizes for different response packets
     static constexpr int PACKET_SIZE_0xCF = 31;  // Euler Angles + Rates
     static constexpr int PACKET_SIZE_0xCD = 19;  // Gyro Bias response (3 floats + timer)

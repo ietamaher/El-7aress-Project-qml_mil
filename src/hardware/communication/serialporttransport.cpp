@@ -27,6 +27,10 @@ bool SerialPortTransport::open(const QJsonObject& config) {
         return false;
     }
 
+    // CRITICAL FIX: Flush serial buffers to eliminate stale data from previous runs
+    // or device boot-up sequences that cause parser desynchronization
+    m_port.clear(QSerialPort::AllDirections);
+
     connect(&m_port, &QSerialPort::readyRead, this, &SerialPortTransport::onReadyRead);
     connect(&m_port, &QSerialPort::errorOccurred, this, &SerialPortTransport::onError);
 

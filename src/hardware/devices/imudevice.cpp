@@ -13,7 +13,8 @@ ImuDevice::ImuDevice(const QString& identifier, QObject* parent)
 {
     connect(m_pollTimer, &QTimer::timeout, this, &ImuDevice::pollTimerTimeout);
 
-    m_communicationWatchdog->setSingleShot(false);
+    // FIXED: Changed from false to true - watchdog should be single-shot
+    m_communicationWatchdog->setSingleShot(true);
     m_communicationWatchdog->setInterval(COMMUNICATION_TIMEOUT_MS);
     connect(m_communicationWatchdog, &QTimer::timeout,
             this, &ImuDevice::onCommunicationWatchdogTimeout);
@@ -161,10 +162,26 @@ void ImuDevice::processMessage(const Message& message) {
         setConnectionState(true);
         resetCommunicationWatchdog();
 
-        // Update with new data
+        // Check if data actually changed before emitting signal
+        auto currentData = data();
         auto newData = std::make_shared<ImuData>(dataMsg->data());
+
+        // Compare with threshold (IMU data changes frequently, so emit more often)
+        // But still avoid emitting identical data (reduces QML signal overhead)
+        bool dataChanged = (
+            std::abs(newData->rollDeg - currentData->rollDeg) > 0.01 ||
+            std::abs(newData->pitchDeg - currentData->pitchDeg) > 0.01 ||
+            std::abs(newData->yawDeg - currentData->yawDeg) > 0.01 ||
+            std::abs(newData->angRateX_dps - currentData->angRateX_dps) > 0.1 ||
+            std::abs(newData->angRateY_dps - currentData->angRateY_dps) > 0.1 ||
+            std::abs(newData->angRateZ_dps - currentData->angRateZ_dps) > 0.1
+        );
+
         updateData(newData);
-        emit imuDataChanged(*newData);
+
+        if (dataChanged) {
+            emit imuDataChanged(*newData);
+        }
     }
 }
 

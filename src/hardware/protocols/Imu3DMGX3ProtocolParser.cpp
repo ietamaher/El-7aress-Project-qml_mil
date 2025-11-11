@@ -42,6 +42,17 @@ std::vector<MessagePtr> Imu3DMGX3ProtocolParser::parse(const QByteArray& rawData
             default:
                 // Unknown command - try to find next valid command byte
                 qWarning() << "Imu3DMGX3Parser: Unknown command byte" << Qt::hex << command;
+
+                // Track consecutive errors - if too many, clear buffer to force resync
+                m_consecutiveErrors++;
+                if (m_consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                    qWarning() << "Imu3DMGX3Parser: Too many consecutive errors ("
+                               << m_consecutiveErrors << ") - clearing buffer to resync";
+                    m_buffer.clear();
+                    m_consecutiveErrors = 0;
+                    break;
+                }
+
                 m_buffer.remove(0, 1); // Discard invalid byte
                 continue;
         }
@@ -63,8 +74,21 @@ std::vector<MessagePtr> Imu3DMGX3ProtocolParser::parse(const QByteArray& rawData
         if (receivedChecksum != calculatedChecksum) {
             qWarning() << "Imu3DMGX3Parser: Checksum mismatch! Expected"
                        << Qt::hex << calculatedChecksum << "got" << receivedChecksum;
+
+            // Track consecutive errors - if too many, clear buffer to force resync
+            m_consecutiveErrors++;
+            if (m_consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                qWarning() << "Imu3DMGX3Parser: Too many consecutive errors ("
+                           << m_consecutiveErrors << ") - clearing buffer to resync";
+                m_buffer.clear();
+                m_consecutiveErrors = 0;
+                break;
+            }
             continue; // Discard corrupted packet
         }
+
+        // Valid packet received - reset error counter
+        m_consecutiveErrors = 0;
 
         // Parse packet based on command
         MessagePtr msg = nullptr;
