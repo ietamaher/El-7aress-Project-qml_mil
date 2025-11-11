@@ -86,6 +86,8 @@ MessagePtr NightCameraProtocolParser::parsePacket(const QByteArray& packet) {
         // READ_TEMP_SENSOR response - Temperature in Celsius × 10
         data.fpaTemperature = (static_cast<qint16>(static_cast<quint8>(payloadData[0])) << 8) |
                               static_cast<qint16>(static_cast<quint8>(payloadData[1]));
+        qDebug() << "TAU2 Parser: Temperature received:" << data.fpaTemperature
+                 << "(" << (data.fpaTemperature / 10.0) << "°C)";
     } else if (functionCode == 0x70 && payloadData.size() >= 4) {
         // PAN_AND_TILT response
         data.tiltPosition = (static_cast<qint16>(static_cast<quint8>(payloadData[0])) << 8) |

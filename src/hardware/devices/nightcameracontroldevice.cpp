@@ -92,6 +92,21 @@ void NightCameraControlDevice::processMessage(const Message& message) {
             newData->ffcInProgress = false;
         }
 
+        // Update temperature if received (from 0x20 READ_TEMP_SENSOR response)
+        if (partial.fpaTemperature != 0) {
+            newData->fpaTemperature = partial.fpaTemperature;
+            qDebug() << m_identifier << "Temperature updated:" << newData->fpaTemperature
+                     << "(" << (newData->fpaTemperature / 10.0) << "°C)";
+        }
+
+        // Update pan/tilt if received (from 0x70 PAN_AND_TILT response)
+        if (partial.panPosition != 0 || partial.tiltPosition != 0) {
+            newData->panPosition = partial.panPosition;
+            newData->tiltPosition = partial.tiltPosition;
+            qDebug() << m_identifier << "Pan/Tilt updated: pan=" << newData->panPosition
+                     << "tilt=" << newData->tiltPosition;
+        }
+
         updateData(newData);
         emit nightCameraDataChanged(*newData);
     }
