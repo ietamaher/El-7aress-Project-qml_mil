@@ -110,34 +110,34 @@ void OsdController::checkForCriticalErrors(const SystemStateData& data)
 
     // Priority 1: Critical device disconnections
     if (!data.imuConnected) {
-        showErrorMessage("IMU DISCONNECTED - Platform stabilization unavailable");
+        //showErrorMessage("IMU DISCONNECTED - Platform stabilization unavailable");
         return;
     }
 
     if (!data.azServoConnected) {
-        showErrorMessage("AZIMUTH SERVO DISCONNECTED - Cannot slew horizontally");
+        //showErrorMessage("AZIMUTH SERVO DISCONNECTED - Cannot slew horizontally");
         return;
     }
 
     if (!data.elServoConnected) {
-        showErrorMessage("ELEVATION SERVO DISCONNECTED - Cannot slew vertically");
+        //showErrorMessage("ELEVATION SERVO DISCONNECTED - Cannot slew vertically");
         return;
     }
 
     // Priority 2: Critical device faults
     if (data.azFault) {
-        showErrorMessage("AZIMUTH SERVO FAULT - Check motor and driver");
+        //showErrorMessage("AZIMUTH SERVO FAULT - Check motor and driver");
         return;
     }
 
     if (data.elFault) {
-        showErrorMessage("ELEVATION SERVO FAULT - Check motor and driver");
+        //showErrorMessage("ELEVATION SERVO FAULT - Check motor and driver");
         return;
     }
 
     // Priority 3: LRF critical errors
     if (data.lrfConnected && data.lrfFault) {
-        showErrorMessage("LASER RANGEFINDER FAULT - Ranging unavailable");
+        //showErrorMessage("LASER RANGEFINDER FAULT - Ranging unavailable");
         return;
     }
 

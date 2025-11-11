@@ -63,7 +63,7 @@ bool LRFDevice::initialize() {
     qDebug() << "LRF initialized successfully";
 
     setState(DeviceState::Online);
-    m_statusCheckTimer->start(5000); // Check status every 5 seconds
+    m_statusCheckTimer->start(3000); // Check status every 5 seconds
     m_communicationWatchdog->start();
     sendSelfCheck(); // Initial status check
     return true;
@@ -181,6 +181,7 @@ void LRFDevice::resetCommunicationWatchdog() {
 
 void LRFDevice::checkLrfStatus() {
     sendSelfCheck();
+    queryTemperature();
 }
 
 void LRFDevice::setConnectionState(bool connected) {

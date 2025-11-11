@@ -1,0 +1,59 @@
+Imu3DMGX3Parser: Checksum mismatch! Expected 10c8 got e9c
+Imu3DMGX3Parser: Checksum mismatch! Expected f01 got df7
+Imu3DMGX3Parser: Checksum mismatch! Expected e44 got 8fc
+"servoActuator" Timeout waiting for response to: "VL"
+[Gimbal] New Gyro Bias - X: -0.00345905 Y: 0.0132402 Z: 0.0146537
+Imu3DMGX3Parser: Checksum mismatch! Expected d72 got 69cf
+Imu3DMGX3Parser: Unknown command byte bd
+Imu3DMGX3Parser: Unknown command byte 4e
+Imu3DMGX3Parser: Unknown command byte 84
+Imu3DMGX3Parser: Unknown command byte 13
+Imu3DMGX3Parser: Unknown command byte 3c
+Imu3DMGX3Parser: Unknown command byte e5
+Imu3DMGX3Parser: Unknown command byte 23
+Imu3DMGX3Parser: Unknown command byte 4c
+Imu3DMGX3Parser: Unknown command byte 3f
+Imu3DMGX3Parser: Unknown command byte bc
+Imu3DMGX3Parser: Unknown command byte d3
+Imu3DMGX3Parser: Unknown command byte a3
+Imu3DMGX3Parser: Unknown command byte bb
+Imu3DMGX3Parser: Unknown command byte 2d
+Imu3DMGX3Parser: Unknown command byte dd
+Imu3DMGX3Parser: Unknown command byte f1
+Imu3DMGX3Parser: Unknown command byte 39
+Imu3DMGX3Parser: Unknown command byte 68
+Imu3DMGX3Parser: Unknown command byte 23
+Imu3DMGX3Parser: Unknown command byte 60
+Imu3DMGX3Parser: Unknown command byte 3b
+Imu3DMGX3Parser: Unknown command byte 61
+"plc42" Communication timeout - no data received for 3000 ms
+"imu" Communication timeout - no data received for 3000 ms
+"imu" disconnected
+Imu3DMGX3Parser: Checksum mismatch! Expected 898 got 3fbc
+Imu3DMGX3Parser: Unknown command byte a4
+Imu3DMGX3Parser: Unknown command byte fc
+Imu3DMGX3Parser: Unknown command byte ba
+Imu3DMGX3Parser: Unknown command byte c
+Imu3DMGX3Parser: Unknown command byte 2a
+Imu3DMGX3Parser: Unknown command byte 78
+Imu3DMGX3Parser: Unknown command byte 38
+Imu3DMGX3Parser: Unknown command byte bb
+Imu3DMGX3Parser: Unknown command byte a1
+Imu3DMGX3Parser: Unknown command byte 40
+Imu3DMGX3Parser: Unknown command byte ba
+Imu3DMGX3Parser: Unknown command byte 90
+Imu3DMGX3Parser: Unknown command byte 9e
+Imu3DMGX3Parser: Unknown command byte 38
+Imu3DMGX3Parser: Unknown command byte a
+Imu3DMGX3Parser: Unknown command byte 74
+Imu3DMGX3Parser: Unknown command byte 52
+Imu3DMGX3Parser: Unknown command byte a
+Imu3DMGX3Parser: Unknown command byte e
+Imu3DMGX3Parser: Unknown command byte 8
+"imu" connected
+Imu3DMGX3Parser: Checksum mismatch! Expected f0e got f02
+Imu3DMGX3Parser: Unknown command byte ef
+Imu3DMGX3Parser: Unknown command byte 0
+Imu3DMGX3Parser: Unknown command byte 35
+Imu3DMGX3Parser: Unknown command byte 1
+Imu3DMGX3Parser: Unknown command byte 24

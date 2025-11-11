@@ -24,7 +24,7 @@
       "controlPort": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if00"
     },
     "nightCamera": {
-      "devicePath": "/dev/video2",
+      "devicePath": "/dev/video1",
       "controlPort": "/dev/serial/by-id/usb-WCH.CN_USB_Quad_Serial_BCD9DCABCD-if02"
     }
   },
@@ -68,13 +68,13 @@
   },
   "imu": {
     "comment": "3DM-GX3-25 MicroStrain AHRS - Serial Binary Protocol",
-    "port": "/dev/serial/by-id/usb-WCH2",
+    "port": "/dev/ttyUSB2",
     "baudRate": 115200,
-    "samplingRateHz": 100,
+    "samplingRateHz": 40,
     "tiltWarningThreshold": 30.0
   },
   "lrf": {
-    "port": "/dev/serial/by-id/usb-WCH1",
+    "port": "/dev/ttyUSB1",
     "baudRate": 115200,
     "minRange": 50.0,
     "maxRange": 4000.0
@@ -124,7 +124,7 @@
     }
   },
   "actuator": {
-    "port": "/dev/serial/by-id/usb-WCH0",
+    "port": "/dev/ttyUSB0",
     "baudRate": 115200
   },
   "radar": {

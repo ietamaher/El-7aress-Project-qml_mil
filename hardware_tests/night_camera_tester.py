@@ -65,7 +65,7 @@ def main():
     # Load configuration
     config = load_config()
     SERIAL_PORT = config['controlPort']
-    BAUD_RATE = 921600  # Boson typical baud rate
+    BAUD_RATE = 57600  # Boson typical baud rate
 
     print("=" * 70)
     print("  NIGHT CAMERA TESTER - FLIR Boson 640 Thermal Camera")
