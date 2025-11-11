@@ -18,6 +18,12 @@ private slots:
 private:
     SystemStateModel* m_systemStateModel;
     Plc21Device* m_plc21Device;
+
+    // Cache LED states to prevent flooding PLC21 with redundant writes
+    bool m_cachedGunArmed = false;
+    bool m_cachedStationEnabled = false;
+    bool m_cachedStationInput1 = false;
+    bool m_cachedPanelBacklight = false;
 };
 
 #endif // LEDCONTROLLER_H
