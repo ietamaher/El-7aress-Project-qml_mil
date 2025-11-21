@@ -211,7 +211,7 @@ void JoystickDevice::emitEventSignals(const SDL_Event& event)
     switch (event.type) {
         case SDL_JOYAXISMOTION:
             emit axisMoved(event.jaxis.axis, 
-                          static_cast<float>(event.jaxis.value) / 32768.0f);
+                          static_cast<float>(event.jaxis.value)); // / 32768.0f);
             break;
 
         case SDL_JOYBUTTONDOWN:
